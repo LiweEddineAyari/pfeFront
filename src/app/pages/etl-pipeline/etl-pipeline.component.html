@@ -3,15 +3,15 @@
   <!-- Outer Slide Container -->
   <div class="card-base bg-white dark:bg-[#111C44] shadow-card-light dark:shadow-card-dark rounded-[20px] overflow-hidden relative" >
     
-    <!-- Inner Sliding Row (900% width for 9 panels) -->
-    <div class="flex w-[900%] items-stretch" 
+    <!-- Inner Sliding Row (1100% width for 11 panels) -->
+    <div class="flex w-[1100%] items-stretch" 
          [style.transform]="getSliderTransform()"
          [style.transition]="'transform 0.55s cubic-bezier(0.77,0,0.18,1)'">
       
       <!-- ============================================== -->
-      <!-- PANEL 1: INTRO (11.1111% of parent flex width) -->
+      <!-- PANEL 1: INTRO (9.0909% of parent flex width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] flex flex-col pt-16 pb-16 px-12">
+      <div class="w-[9.0909%] flex flex-col pt-16 pb-16 px-12">
         <div class="mb-16 text-center z-10">
           <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">ETL Pipeline — How it works</h2>
           <p class="text-text-secondary text-[18px] max-w-4xl mx-auto leading-relaxed dark:text-[#a3aed1]">
@@ -56,9 +56,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 2: UPLOAD FORM (11.1111% width) -->
+      <!-- PANEL 2: UPLOAD FORM (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] flex flex-col pt-12 pb-12 px-12 md:px-20 h-[800px]">
+      <div class="w-[9.0909%] flex flex-col pt-12 pb-12 px-12 md:px-20 h-[800px]">
         
         <!-- Form Header -->
         <div class="flex justify-between items-start mb-8 flex-shrink-0">
@@ -261,9 +261,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 3: FIELD MAPPING (11.1111% width) -->
+      <!-- PANEL 3: FIELD MAPPING (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] bg-transparent">
+      <div class="w-[9.0909%] h-[800px] bg-transparent">
         <app-field-mapping 
           [fileColumns]="fileColumns"
           [fileType]="mappingFileType"
@@ -273,9 +273,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 4: LOADING (11.1111% width) -->
+      <!-- PANEL 4: LOADING (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] flex flex-col justify-center items-center bg-transparent">
+      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
         <!-- Center Animation Area -->
         <div class="flex flex-col items-center justify-center p-12 w-full h-full">
           
@@ -297,9 +297,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 5: RESULT (11.1111% width) -->
+      <!-- PANEL 5: RESULT (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] flex flex-col overflow-hidden bg-transparent">
+      <div class="w-[9.0909%] h-[800px] flex flex-col overflow-hidden bg-transparent">
         
         <!-- SUCCESS STATE -->
         <div *ngIf="uploadResult && !uploadError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
@@ -341,9 +341,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 6: QUALITY LOADING (11.1111% width) -->
+      <!-- PANEL 6: QUALITY LOADING (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] flex flex-col justify-center items-center bg-transparent">
+      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
         <div class="flex flex-col items-center justify-center p-12 w-full h-full">
           <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
@@ -358,9 +358,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 7: QUALITY RESULT (11.1111% width) -->
+      <!-- PANEL 7: QUALITY RESULT (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] flex flex-col overflow-hidden bg-transparent border-l-0">
+      <div class="w-[9.0909%] h-[800px] flex flex-col overflow-hidden bg-transparent border-l-0">
         
         <!-- SUCCESS STATE -->
         <div *ngIf="!qualityError" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
@@ -486,8 +486,15 @@
                   <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Null issues</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.nullCheckCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.nullCheckCount === 0}">{{ qualityComptaResult.nullCheckCount }}</span>
-                    <button *ngIf="qualityComptaResult.nullCheckCount > 0" (click)="downloadComptaField('nullCheckCount')" title="Download report for Null issues" class="text-[#01b574] opacity-70 hover:opacity-100 cursor-pointer p-1">
-                      <lucide-icon name="download" [size]="13"></lucide-icon>
+                    <button
+                      *ngIf="qualityComptaResult.nullCheckCount > 0"
+                      (click)="downloadComptaField('nullCheckCount')"
+                      [disabled]="downloadingFields.has('nullCheckCount')"
+                      title="Download null issues as Excel"
+                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
+                      [class.opacity-70]="!downloadingFields.has('nullCheckCount')">
+                      <div *ngIf="downloadingFields.has('nullCheckCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
+                      <lucide-icon *ngIf="!downloadingFields.has('nullCheckCount')" name="download" [size]="13"></lucide-icon>
                     </button>
                   </div>
                 </div>
@@ -495,8 +502,15 @@
                   <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Duplicate issues</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.duplicateCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.duplicateCount === 0}">{{ qualityComptaResult.duplicateCount }}</span>
-                    <button *ngIf="qualityComptaResult.duplicateCount > 0" (click)="downloadComptaField('duplicateCount')" title="Download report for Duplicate issues" class="text-[#01b574] opacity-70 hover:opacity-100 cursor-pointer p-1">
-                      <lucide-icon name="download" [size]="13"></lucide-icon>
+                    <button
+                      *ngIf="qualityComptaResult.duplicateCount > 0"
+                      (click)="downloadComptaField('duplicateCount')"
+                      [disabled]="downloadingFields.has('duplicateCount')"
+                      title="Download duplicate issues as Excel"
+                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
+                      [class.opacity-70]="!downloadingFields.has('duplicateCount')">
+                      <div *ngIf="downloadingFields.has('duplicateCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
+                      <lucide-icon *ngIf="!downloadingFields.has('duplicateCount')" name="download" [size]="13"></lucide-icon>
                     </button>
                   </div>
                 </div>
@@ -504,8 +518,15 @@
                   <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Type issues</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.typeCheckCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.typeCheckCount === 0}">{{ qualityComptaResult.typeCheckCount }}</span>
-                    <button *ngIf="qualityComptaResult.typeCheckCount > 0" (click)="downloadComptaField('typeCheckCount')" title="Download report for Type issues" class="text-[#01b574] opacity-70 hover:opacity-100 cursor-pointer p-1">
-                      <lucide-icon name="download" [size]="13"></lucide-icon>
+                    <button
+                      *ngIf="qualityComptaResult.typeCheckCount > 0"
+                      (click)="downloadComptaField('typeCheckCount')"
+                      [disabled]="downloadingFields.has('typeCheckCount')"
+                      title="Download type issues as Excel"
+                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
+                      [class.opacity-70]="!downloadingFields.has('typeCheckCount')">
+                      <div *ngIf="downloadingFields.has('typeCheckCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
+                      <lucide-icon *ngIf="!downloadingFields.has('typeCheckCount')" name="download" [size]="13"></lucide-icon>
                     </button>
                   </div>
                 </div>
@@ -517,8 +538,15 @@
                   <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Contrat relations</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.contratRelationCheck > 0, 'text-gray-900 dark:text-white': qualityComptaResult.contratRelationCheck === 0}">{{ qualityComptaResult.contratRelationCheck }}</span>
-                    <button *ngIf="qualityComptaResult.contratRelationCheck > 0" (click)="downloadComptaField('contratRelationCheck')" title="Download report for Contrat relations" class="text-[#01b574] opacity-70 hover:opacity-100 cursor-pointer p-1">
-                      <lucide-icon name="download" [size]="13"></lucide-icon>
+                    <button
+                      *ngIf="qualityComptaResult.contratRelationCheck > 0"
+                      (click)="downloadComptaField('contratRelationCheck')"
+                      [disabled]="downloadingFields.has('contratRelationCheck')"
+                      title="Download contrat relation issues as Excel"
+                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
+                      [class.opacity-70]="!downloadingFields.has('contratRelationCheck')">
+                      <div *ngIf="downloadingFields.has('contratRelationCheck')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
+                      <lucide-icon *ngIf="!downloadingFields.has('contratRelationCheck')" name="download" [size]="13"></lucide-icon>
                     </button>
                   </div>
                 </div>
@@ -526,8 +554,15 @@
                   <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Tiers relations</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.tiersRelationCheck > 0, 'text-gray-900 dark:text-white': qualityComptaResult.tiersRelationCheck === 0}">{{ qualityComptaResult.tiersRelationCheck }}</span>
-                    <button *ngIf="qualityComptaResult.tiersRelationCheck > 0" (click)="downloadComptaField('tiersRelationCheck')" title="Download report for Tiers relations" class="text-[#01b574] opacity-70 hover:opacity-100 cursor-pointer p-1">
-                      <lucide-icon name="download" [size]="13"></lucide-icon>
+                    <button
+                      *ngIf="qualityComptaResult.tiersRelationCheck > 0"
+                      (click)="downloadComptaField('tiersRelationCheck')"
+                      [disabled]="downloadingFields.has('tiersRelationCheck')"
+                      title="Download tiers relation issues as Excel"
+                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
+                      [class.opacity-70]="!downloadingFields.has('tiersRelationCheck')">
+                      <div *ngIf="downloadingFields.has('tiersRelationCheck')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
+                      <lucide-icon *ngIf="!downloadingFields.has('tiersRelationCheck')" name="download" [size]="13"></lucide-icon>
                     </button>
                   </div>
                 </div>
@@ -558,7 +593,7 @@
               Continue to Transform
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
             </button>
-            <button *ngIf="mappingFileType === 'COMPTA'" (click)="setStep('intro')" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
+            <button *ngIf="mappingFileType === 'COMPTA'" (click)="runDatamart()" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
               Continue to Datamart
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
             </button>
@@ -589,9 +624,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 8: TRANSFORM LOADING (11.1111% width) -->
+      <!-- PANEL 8: TRANSFORM LOADING (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] flex flex-col justify-center items-center bg-transparent">
+      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
         <div class="flex flex-col items-center justify-center p-12 w-full h-full">
           <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div> 
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
@@ -606,9 +641,9 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- PANEL 9: TRANSFORM RESULT (11.1111% width) -->
+      <!-- PANEL 9: TRANSFORM RESULT (9.0909% width) -->
       <!-- ============================================== -->
-      <div class="w-[11.1111%] h-[800px] flex flex-col bg-transparent overflow-hidden">
+      <div class="w-[9.0909%] h-[800px] flex flex-col bg-transparent overflow-hidden">
         
         <!-- SUCCESS STATE -->
         <div *ngIf="transformResult && !transformError" class="flex flex-col items-center justify-center h-full px-16 text-center">
@@ -629,7 +664,7 @@
             <span class="text-[11px] font-bold text-[#01b574] uppercase tracking-wider">{{ mappingFileType }}</span>
           </div>
 
-          <button (click)="setStep('intro')" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-[280px]">
+          <button (click)="runDatamart()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-[280px]">
             Continue to Datamart
             <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
           </button>
@@ -651,6 +686,187 @@
               Back
             </button>
             <button (click)="runTransform()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
+              <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PANEL 10: DATAMART LOADING (9.0909% width) -->
+      <!-- ============================================== -->
+      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
+        <div class="flex flex-col items-center justify-center p-12 w-full h-full">
+          <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ mappingFileType }}</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Datamart</span>
+          </div>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Loading datamart</h3>
+          <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
+            {{ datamartLoadingMessage }}
+          </p>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PANEL 11: DATAMART RESULT (9.0909% width) -->
+      <!-- ============================================== -->
+      <div class="w-[9.0909%] h-[800px] flex flex-col bg-transparent overflow-hidden">
+
+        <!-- SUCCESS STATE -->
+        <div *ngIf="!datamartError && (datamartTiersResult || datamartContratResult || datamartComptaResult)" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
+          <div class="px-12 pt-10 pb-6 flex flex-shrink-0 justify-between items-start">
+            <div class="flex flex-col gap-1">
+              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Datamart Complete</h2>
+              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Step 4 of 4 — Pipeline finished</p>
+              <div class="flex items-center gap-2 mt-2">
+                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
+                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
+                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
+                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
+              </div>
+            </div>
+            <div class="flex flex-col items-center gap-1.5 focus-in-expand">
+              <div class="w-10 h-10 rounded-full bg-[#01b574]/10 border border-[#01b574]/30 flex items-center justify-center">
+                <lucide-icon name="check-circle-2" [size]="22" class="text-[#01b574]"></lucide-icon>
+              </div>
+              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">DONE</span>
+            </div>
+          </div>
+
+          <div class="px-12 flex flex-col flex-1 overflow-y-auto mb-4 min-h-0 form-scroll-y gap-4">
+            <div class="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/8 rounded-2xl overflow-hidden shadow-sm">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.03] flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-[#01b574]/10 flex items-center justify-center">
+                    <lucide-icon [name]="mappingFileType === 'TIERS' ? 'users' : (mappingFileType === 'CONTRAT' ? 'file-text' : 'calculator')" [size]="18" class="text-[#01b574]"></lucide-icon>
+                  </div>
+                  <span class="text-[16px] font-bold text-text-primary">{{ mappingFileType }}</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#01b574] bg-[#01b574]/10 border border-[#01b574]/20 px-2 py-0.5 rounded-md ml-1">{{ mappingFileType }}</span>
+                </div>
+                <span class="text-[12px] font-mono text-gray-500 dark:text-white/40">{{ mappingFileType === 'TIERS' ? 'dim_client' : (mappingFileType === 'CONTRAT' ? 'dim_contrat + sub-dims' : 'fact_balance + sub-dims') }}</span>
+              </div>
+
+              <div *ngIf="datamartTiersResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Client rows loaded</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartTiersResult.dimClientRows > 0, 'text-gray-900 dark:text-white': datamartTiersResult.dimClientRows === 0}">{{ datamartTiersResult.dimClientRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Agent eco sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimAgentecoRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimAgentecoRows ?? 0) === 0}">{{ (datamartTiersResult.subDimAgentecoRows ?? 0) | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Douteux sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimDouteuxRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimDouteuxRows ?? 0) === 0}">{{ (datamartTiersResult.subDimDouteuxRows ?? 0) | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Residence sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimResidenceRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimResidenceRows ?? 0) === 0}">{{ (datamartTiersResult.subDimResidenceRows ?? 0) | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Grp affaire sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimGrpaffaireRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimGrpaffaireRows ?? 0) === 0}">{{ (datamartTiersResult.subDimGrpaffaireRows ?? 0) | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Section activite sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimSectionactiviteRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimSectionactiviteRows ?? 0) === 0}">{{ (datamartTiersResult.subDimSectionactiviteRows ?? 0) | number }}</div>
+                </div>
+              </div>
+
+              <div *ngIf="datamartContratResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Contrat rows</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.dimContratRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.dimContratRows === 0}">{{ datamartContratResult.dimContratRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Agence sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimAgenceRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimAgenceRows === 0}">{{ datamartContratResult.subDimAgenceRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Devise sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimDeviseRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimDeviseRows === 0}">{{ datamartContratResult.subDimDeviseRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Objet finance</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimObjetfinanceRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimObjetfinanceRows === 0}">{{ datamartContratResult.subDimObjetfinanceRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Type contrat</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimTypcontratRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimTypcontratRows === 0}">{{ datamartContratResult.subDimTypcontratRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Date sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimDateRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimDateRows === 0}">{{ datamartContratResult.subDimDateRows | number }}</div>
+                </div>
+              </div>
+
+              <div *ngIf="datamartComptaResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Fact balance rows</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.factBalanceRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.factBalanceRows === 0}">{{ datamartComptaResult.factBalanceRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Agence sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimAgenceRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimAgenceRows === 0}">{{ datamartComptaResult.subDimAgenceRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Devise sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimDeviseRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimDeviseRows === 0}">{{ datamartComptaResult.subDimDeviseRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Chapitre sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimChapitreRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimChapitreRows === 0}">{{ datamartComptaResult.subDimChapitreRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Compte sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimCompteRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimCompteRows === 0}">{{ datamartComptaResult.subDimCompteRows | number }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Date sub-dim</div>
+                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimDateRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimDateRows === 0}">{{ datamartComptaResult.subDimDateRows | number }}</div>
+                </div>
+              </div>
+
+              <div class="px-6 pb-5">
+                <div class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                  <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
+                  <span class="text-[#01b574] text-[13px] font-bold">Pipeline complete — data is ready in the datamart</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-12 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto backdrop-blur-sm z-10 w-full">
+            <button (click)="mappingFileType === 'COMPTA' ? setStep('quality-result') : setStep('transform-result')" class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors">
+              <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+              Back
+            </button>
+            <button (click)="resetPipeline(); setStep('intro')" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
+              <lucide-icon name="refresh-ccw" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+              Start New Pipeline
+            </button>
+          </div>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div *ngIf="datamartError" class="flex flex-col items-center justify-center h-full px-16 text-center">
+          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex flex-shrink-0 items-center justify-center text-red-500 mb-6 relative">
+            <div class="absolute inset-0 rounded-full border-2 border-red-500/20 animate-ping" style="animation-duration: 2s;"></div>
+            <lucide-icon name="x-circle" [size]="44" [strokeWidth]="3"></lucide-icon>
+          </div>
+
+          <h2 class="text-[28px] font-bold text-text-primary mb-3">Datamart Failed</h2>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(datamartError) }}</p>
+
+          <div class="flex flex-col gap-3 w-[280px]">
+            <button (click)="mappingFileType === 'COMPTA' ? setStep('quality-result') : setStep('transform-result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
+              <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
+              Back
+            </button>
+            <button (click)="runDatamart()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
               <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
               Retry
             </button>

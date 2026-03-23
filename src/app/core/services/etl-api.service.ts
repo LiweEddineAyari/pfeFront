@@ -1,6 +1,4 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, NgZone } from '@angular/core';
 
 export interface ProcessResult {
   status:        string;        // "COMPLETED" or "ERROR"
@@ -61,23 +59,50 @@ export interface QualityComptaResult {
   totalIssues: number
 }
 
+export interface QualityListResponse {
+  status: string
+  rule: string
+  count: number
+  rows: Record<string, any>[]
+}
+
 export interface TransformResult {
   status:          string;
   rowsTransformed: number;
   message?:        string;
 }
 
-export interface DatamartResult {
-  status:              string;
-  dimClientRows?:      number;
-  dimContratRows?:     number;
-  factBalanceRows?:    number;
-  subDimAgenceRows?:   number;
-  subDimDeviseRows?:   number;
-  subDimChapitreRows?: number;
-  subDimCompteRows?:   number;
-  subDimDateRows?:     number;
-  [key: string]:       any;
+export interface DatamartContratResult {
+  status: string
+  subDimAgenceRows: number
+  subDimDeviseRows: number
+  subDimObjetfinanceRows: number
+  subDimTypcontratRows: number
+  subDimDateRows: number
+  dimContratRows: number
+  message?: string
+}
+
+export interface DatamartComptaResult {
+  status: string
+  subDimAgenceRows: number
+  subDimDeviseRows: number
+  subDimChapitreRows: number
+  subDimCompteRows: number
+  subDimDateRows: number
+  factBalanceRows: number
+  message?: string
+}
+
+export interface DatamartTiersResult {
+  status: string
+  dimClientRows: number
+  subDimAgentecoRows?: number
+  subDimDouteuxRows?: number
+  subDimResidenceRows?: number
+  subDimGrpaffaireRows?: number
+  subDimSectionactiviteRows?: number
+  message?: string
 }
 
 @Injectable({ providedIn: 'root' })
@@ -86,7 +111,54 @@ export class EtlApiService {
   private readonly BASE = '/api/etl';
   private readonly TIMEOUT_MS = 10 * 60 * 1000;  // 10 minutes
 
-  constructor(private http: HttpClient) {}
+  constructor(private zone: NgZone) {}
+
+  private runOutsideZone<T>(work: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.zone.runOutsideAngular(() => {
+        work()
+          .then(value => this.zone.run(() => resolve(value)))
+          .catch(err => this.zone.run(() => reject(err)));
+      });
+    });
+  }
+
+  private fetchOutsideZone(url: string, options: RequestInit): Promise<Response> {
+    return this.runOutsideZone(() => fetch(url, options));
+  }
+
+  private async fetchJson<T>(
+    url: string,
+    options: RequestInit = {},
+    timeoutMs = 10 * 60 * 1000
+  ): Promise<T> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      return await this.runOutsideZone(async () => {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || `Server error: ${response.status}`);
+        }
+
+        return data as T;
+      });
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        throw new Error(`Request timed out after ${Math.round(timeoutMs / 60000)} minutes.`);
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 
   /**
    * Build FormData for the ETL process endpoint.
@@ -129,25 +201,27 @@ export class EtlApiService {
     const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT_MS);
 
     try {
-      const response = await fetch(`${this.BASE}/process`, {
-        method: 'POST',
-        body: fd,
-        signal: controller.signal
+      return await this.runOutsideZone(async () => {
+        const response = await fetch(`${this.BASE}/process`, {
+          method: 'POST',
+          body: fd,
+          signal: controller.signal
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || `Server error: ${response.status}`);
+        }
+
+        return data as ProcessResult;
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Server error: ${response.status}`);
-      }
-
-      return data as ProcessResult;
 
     } catch (err: any) {
       if (err.name === 'AbortError') {
         throw new Error(
           'Upload timed out after 10 minutes. ' +
-          'The file may be too large — try splitting it into smaller chunks.');
+          'Try splitting the file into smaller chunks.');
       }
       throw err;
     } finally {
@@ -158,127 +232,116 @@ export class EtlApiService {
   // ── Quality endpoints ──────────────────────────
 
   async qualityTiers(): Promise<QualityTiersResult> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-    try {
-      const response = await fetch(`${this.BASE}/quality/tiers`, {
-        method: 'POST',
-        signal: controller.signal
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
-      return data as QualityTiersResult;
-    } catch (err: any) {
-      if (err.name === 'AbortError') throw new Error('Quality check timed out after 5 minutes.');
-      throw err;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    return this.fetchJson<QualityTiersResult>(
+      `${this.BASE}/quality/tiers`,
+      { method: 'POST' },
+      5 * 60 * 1000
+    );
   }
 
   async qualityContrat(): Promise<QualityContratResult> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-    try {
-      const response = await fetch(`${this.BASE}/quality/contrat`, {
-        method: 'POST',
-        signal: controller.signal
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
-      return data as QualityContratResult;
-    } catch (err: any) {
-      if (err.name === 'AbortError') throw new Error('Quality check timed out after 5 minutes.');
-      throw err;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    return this.fetchJson<QualityContratResult>(
+      `${this.BASE}/quality/contrat`,
+      { method: 'POST' },
+      5 * 60 * 1000
+    );
   }
 
   async qualityCompta(): Promise<QualityComptaResult> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-    try {
-      const response = await fetch(`${this.BASE}/quality/compta`, {
-        method: 'POST',
-        signal: controller.signal
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
-      return data as QualityComptaResult;
-    } catch (err: any) {
-      if (err.name === 'AbortError') throw new Error('Quality check timed out after 5 minutes.');
-      throw err;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    return this.fetchJson<QualityComptaResult>(
+      `${this.BASE}/quality/compta`,
+      { method: 'POST' },
+      5 * 60 * 1000
+    );
+  }
+
+  async fetchComptaNullCheckList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/compta/null-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchComptaDuplicateList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/compta/duplicate/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchComptaTypeCheckList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/compta/type-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchComptaContratRelationList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/compta/contrat-relation-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchComptaTiersRelationList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/compta/tiers-relation-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
   }
 
   // ── Transform endpoints ────────────────────────
 
   async transformTiers(): Promise<TransformResult> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-    try {
-      const response = await fetch(`${this.BASE}/transform/tiers`, {
-        method: 'POST',
-        signal: controller.signal
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
-      return data as TransformResult;
-    } catch (err: any) {
-      if (err.name === 'AbortError') throw new Error('Transform timed out after 5 minutes.');
-      throw err;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    return this.fetchJson<TransformResult>(
+      `${this.BASE}/transform/tiers`,
+      { method: 'POST' },
+      5 * 60 * 1000
+    );
   }
 
   async transformContrat(): Promise<TransformResult> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-    try {
-      const response = await fetch(`${this.BASE}/transform/contrat`, {
-        method: 'POST',
-        signal: controller.signal
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
-      return data as TransformResult;
-    } catch (err: any) {
-      if (err.name === 'AbortError') throw new Error('Transform timed out after 5 minutes.');
-      throw err;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    return this.fetchJson<TransformResult>(
+      `${this.BASE}/transform/contrat`,
+      { method: 'POST' },
+      5 * 60 * 1000
+    );
   }
 
   // ── Datamart endpoints ─────────────────────────
 
-  async datamartTiers(): Promise<DatamartResult> {
-    return firstValueFrom(
-      this.http.post<DatamartResult>(
-        `${this.BASE}/datamart/tiers`, {}));
+  async datamartTiers(): Promise<DatamartTiersResult> {
+    return this.fetchJson<DatamartTiersResult>(
+      `${this.BASE}/datamart/tiers`,
+      { method: 'POST' },
+      10 * 60 * 1000
+    );
   }
 
-  async datamartContrat(): Promise<DatamartResult> {
-    return firstValueFrom(
-      this.http.post<DatamartResult>(
-        `${this.BASE}/datamart/contrat`, {}));
+  async datamartContrat(): Promise<DatamartContratResult> {
+    return this.fetchJson<DatamartContratResult>(
+      `${this.BASE}/datamart/contrat`,
+      { method: 'POST' },
+      10 * 60 * 1000
+    );
   }
 
-  async datamartCompta(): Promise<DatamartResult> {
-    return firstValueFrom(
-      this.http.post<DatamartResult>(
-        `${this.BASE}/datamart/compta`, {}));
+  async datamartCompta(): Promise<DatamartComptaResult> {
+    return this.fetchJson<DatamartComptaResult>(
+      `${this.BASE}/datamart/compta`,
+      { method: 'POST' },
+      10 * 60 * 1000
+    );
   }
 
   // ── Health ─────────────────────────────────────
 
   async health(): Promise<{ status: string }> {
-    return firstValueFrom(
-      this.http.get<{ status: string }>(
-        `${this.BASE}/health`));
+    return this.fetchJson<{ status: string }>(`${this.BASE}/health`);
   }
 } 

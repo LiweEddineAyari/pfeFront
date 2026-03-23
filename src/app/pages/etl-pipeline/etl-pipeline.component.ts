@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { FieldMappingComponent } from '../../shared/components/field-mapping/field-mapping.component';
 import { ColumnExtractorService, ExtractionResult } from '../../core/services/column-extractor.service';
-import { EtlApiService, ProcessResult, QualityTiersResult, QualityContratResult, QualityComptaResult, TransformResult } from '../../core/services/etl-api.service';
+import { exportToExcel } from '../../core/utils/excel-export.util';
+import { DatamartComptaResult, DatamartContratResult, DatamartTiersResult, EtlApiService, ProcessResult, QualityTiersResult, QualityContratResult, QualityComptaResult, QualityListResponse, TransformResult } from '../../core/services/etl-api.service';
 
 @Component({
   selector: 'app-etl-pipeline',
@@ -17,7 +18,7 @@ import { EtlApiService, ProcessResult, QualityTiersResult, QualityContratResult,
 export class EtlPipelineComponent {
   @ViewChild(FieldMappingComponent) fieldMappingComponent!: FieldMappingComponent;
 
-  step: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result' = 'intro';
+  step: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result' | 'datamart-loading' | 'datamart-result' = 'intro';
   
   isDragging = false;
   selectedFile: File | null = null;
@@ -30,6 +31,8 @@ export class EtlPipelineComponent {
   // Upload state
   uploadResult: ProcessResult | null = null;
   uploadError: string | null = null;
+  isUploading = false;
+  private uploadRequestSeq = 0;
 
   // Quality state
   qualityTiersResult: QualityTiersResult | null = null;
@@ -38,11 +41,19 @@ export class EtlPipelineComponent {
   qualityError: string | null = null;
   qualityLoading = false;
   qualityLoadingMessage = '';
+  downloadingFields = new Set<string>();
 
   // Transform state
   transformResult: TransformResult | null = null;
   transformError: string | null = null;
   transformLoadingMessage = '';
+
+  // Datamart state
+  datamartTiersResult: DatamartTiersResult | null = null;
+  datamartContratResult: DatamartContratResult | null = null;
+  datamartComptaResult: DatamartComptaResult | null = null;
+  datamartError: string | null = null;
+  datamartLoadingMessage = '';
 
   get canContinueToMapping(): boolean {
     if (!this.selectedFile || this.isExtracting) return false;
@@ -65,6 +76,15 @@ export class EtlPipelineComponent {
     'Almost done, please wait...'
   ];
   transformMsgInterval: any;
+
+  datamartMessages = [
+    'Loading dimension tables...',
+    'Populating fact tables...',
+    'Building datamart structure...',
+    'Linking dimensions...',
+    'Almost done, please wait...'
+  ];
+  datamartMsgInterval: any;
 
   startLoadingMessages() {
     this.currentLoadingMessage = this.loadingMessages[0];
@@ -114,6 +134,23 @@ export class EtlPipelineComponent {
     if (this.transformMsgInterval) {
       clearInterval(this.transformMsgInterval);
       this.transformMsgInterval = null;
+    }
+  }
+
+  startDatamartMessages() {
+    this.datamartLoadingMessage = this.datamartMessages[0];
+    let msgIndex = 0;
+    this.datamartMsgInterval = setInterval(() => {
+      msgIndex = (msgIndex + 1) % this.datamartMessages.length;
+      this.datamartLoadingMessage = this.datamartMessages[msgIndex];
+      this.cdr.markForCheck();
+    }, 5000);
+  }
+
+  stopDatamartMessages() {
+    if (this.datamartMsgInterval) {
+      clearInterval(this.datamartMsgInterval);
+      this.datamartMsgInterval = null;
     }
   }
 
@@ -174,6 +211,35 @@ export class EtlPipelineComponent {
     }
   }
 
+  async runDatamart(): Promise<void> {
+    this.datamartTiersResult = null;
+    this.datamartContratResult = null;
+    this.datamartComptaResult = null;
+    this.datamartError = null;
+    this.setStep('datamart-loading');
+    this.startDatamartMessages();
+
+    try {
+      const type = this.mappingFileType;
+
+      if (type === 'TIERS') {
+        this.datamartTiersResult = await this.etlApi.datamartTiers();
+      } else if (type === 'CONTRAT') {
+        this.datamartContratResult = await this.etlApi.datamartContrat();
+      } else if (type === 'COMPTA') {
+        this.datamartComptaResult = await this.etlApi.datamartCompta();
+      }
+
+      this.setStep('datamart-result');
+    } catch (err: any) {
+      this.datamartError = err.message ?? 'Datamart load failed';
+      this.setStep('datamart-result');
+    } finally {
+      this.stopDatamartMessages();
+      this.cdr.markForCheck();
+    }
+  }
+
   downloadComptaReport(): void {
     if (!this.qualityComptaResult) return;
     const r = this.qualityComptaResult;
@@ -197,30 +263,59 @@ export class EtlPipelineComponent {
     URL.revokeObjectURL(url);
   }
 
-  downloadComptaField(field: keyof QualityComptaResult): void {
-    if (!this.qualityComptaResult) return;
-    
-    // In a real app this would call an API, but for now we just dump a quick stub CSV
-    const val = this.qualityComptaResult[field];
-    
-    const labelMap: Record<string, string> = {
-      nullCheckCount: 'null-issues',
-      duplicateCount: 'duplicate-issues',
-      typeCheckCount: 'type-issues',
-      contratRelationCheck: 'contrat-relations',
-      tiersRelationCheck: 'tiers-relations',
+  async downloadComptaField(field: keyof QualityComptaResult): Promise<void> {
+    if (this.downloadingFields.has(field as string)) return;
+    this.downloadingFields.add(field as string);
+    this.cdr.markForCheck();
+
+    const fieldToEndpoint: Partial<Record<keyof QualityComptaResult, {
+      fetch: () => Promise<QualityListResponse>;
+      filename: string;
+    }>> = {
+      nullCheckCount: {
+        fetch: () => this.etlApi.fetchComptaNullCheckList(),
+        filename: 'compta-null-issues'
+      },
+      duplicateCount: {
+        fetch: () => this.etlApi.fetchComptaDuplicateList(),
+        filename: 'compta-duplicate-issues'
+      },
+      typeCheckCount: {
+        fetch: () => this.etlApi.fetchComptaTypeCheckList(),
+        filename: 'compta-type-issues'
+      },
+      contratRelationCheck: {
+        fetch: () => this.etlApi.fetchComptaContratRelationList(),
+        filename: 'compta-contrat-relations'
+      },
+      tiersRelationCheck: {
+        fetch: () => this.etlApi.fetchComptaTiersRelationList(),
+        filename: 'compta-tiers-relations'
+      }
     };
 
-    const fileNameFragment = labelMap[field as string] || String(field).toLowerCase();
-    const csv = `Entity,Issue Type,Count\nCOMPTA,` + fileNameFragment + `,${val}\n`;
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `compta-${fileNameFragment}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const config = fieldToEndpoint[field];
+    if (!config) {
+      this.downloadingFields.delete(field as string);
+      this.cdr.markForCheck();
+      return;
+    }
+
+    try {
+      const result = await config.fetch();
+
+      if (!result.rows || result.rows.length === 0) {
+        console.warn('No rows returned for', field);
+        return;
+      }
+
+      exportToExcel(result.rows, config.filename);
+    } catch (err: any) {
+      console.error('Download failed for', field, err);
+    } finally {
+      this.downloadingFields.delete(field as string);
+      this.cdr.markForCheck();
+    }
   }
 
   get mappingFileType(): 'TIERS' | 'CONTRAT' | 'COMPTA' {
@@ -322,7 +417,7 @@ export class EtlPipelineComponent {
     private etlApi: EtlApiService
   ) {}
 
-  setStep(newStep: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result') {
+  setStep(newStep: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result' | 'datamart-loading' | 'datamart-result') {
     if (newStep === 'mapping' && this.fieldMappingComponent) {
       this.fieldMappingComponent.resetMappings();
     }
@@ -401,17 +496,16 @@ export class EtlPipelineComponent {
   }
 
   async onMappingComplete(mappings: Record<string, string>) {
-    if (!this.selectedFile) return;
+    if (!this.selectedFile || this.isUploading) return;
+    const requestSeq = ++this.uploadRequestSeq;
+    this.isUploading = true;
 
     // Set loading state
-    this.step = 'loading';
+    this.setStep('loading');
     this.uploadError = null;
     this.uploadResult = null;
     this.startLoadingMessages();
     this.cdr.markForCheck();
-
-    // Give Angular one CD cycle to render loading panel
-    await new Promise(resolve => setTimeout(resolve, 80));
 
     try {
       // Build dateBal only for COMPTA with valid date
@@ -429,21 +523,30 @@ export class EtlPipelineComponent {
         dateBal
       });
 
-      // Success
-      this.stopLoadingMessages();
-
-      await new Promise(resolve => setTimeout(resolve, 400));
+      if (requestSeq !== this.uploadRequestSeq) return;
 
       this.uploadResult = result;
       console.log('Upload result:', result);
-      this.step = 'result';
-      this.cdr.markForCheck();
+      this.stopLoadingMessages();
+      this.setStep('result');
+      this.cdr.detectChanges();
 
     } catch (err: any) {
-      this.stopLoadingMessages();
+      if (requestSeq !== this.uploadRequestSeq) return;
       this.uploadError = err.message || 'An unknown error occurred';
-      this.step = 'result';
-      this.cdr.markForCheck();
+      this.stopLoadingMessages();
+      this.setStep('result');
+      this.cdr.detectChanges();
+    } finally {
+      if (requestSeq === this.uploadRequestSeq) {
+        this.stopLoadingMessages();
+        // Hard fail-safe: never leave UI stuck in loading after upload settles.
+        if (this.step === 'loading' && (this.uploadResult || this.uploadError)) {
+          this.setStep('result');
+        }
+        this.isUploading = false;
+        this.cdr.markForCheck();
+      }
     }
   }
 
@@ -507,14 +610,16 @@ export class EtlPipelineComponent {
   getSliderTransform(): string {
     switch (this.step) {
       case 'intro':             return 'translateX(0%)';
-      case 'form':              return 'translateX(-11.1111%)';
-      case 'mapping':           return 'translateX(-22.2222%)';
-      case 'loading':           return 'translateX(-33.3333%)';
-      case 'result':            return 'translateX(-44.4444%)';
-      case 'quality-loading':   return 'translateX(-55.5555%)';
-      case 'quality-result':    return 'translateX(-66.6666%)';
-      case 'transform-loading': return 'translateX(-77.7777%)';
-      case 'transform-result':  return 'translateX(-88.8888%)';
+      case 'form':              return 'translateX(-9.0909%)';
+      case 'mapping':           return 'translateX(-18.1818%)';
+      case 'loading':           return 'translateX(-27.2727%)';
+      case 'result':            return 'translateX(-36.3636%)';
+      case 'quality-loading':   return 'translateX(-45.4545%)';
+      case 'quality-result':    return 'translateX(-54.5454%)';
+      case 'transform-loading': return 'translateX(-63.6363%)';
+      case 'transform-result':  return 'translateX(-72.7272%)';
+      case 'datamart-loading':  return 'translateX(-81.8181%)';
+      case 'datamart-result':   return 'translateX(-90.9090%)';
       default:                  return 'translateX(0%)';
     }
   }
@@ -562,7 +667,22 @@ export class EtlPipelineComponent {
     this.extractionError = null;
     this.uploadResult = null;
     this.uploadError = null;
+    this.isUploading = false;
+    this.qualityTiersResult = null;
+    this.qualityContratResult = null;
+    this.qualityComptaResult = null;
+    this.qualityError = null;
+    this.transformResult = null;
+    this.transformError = null;
+    this.datamartTiersResult = null;
+    this.datamartContratResult = null;
+    this.datamartComptaResult = null;
+    this.datamartError = null;
+    this.downloadingFields.clear();
     this.stopLoadingMessages();
+    this.stopQualityMessages();
+    this.stopTransformMessages();
+    this.stopDatamartMessages();
     this.dd = '';
     this.mm = '';
     this.yyyy = '';
@@ -573,6 +693,7 @@ export class EtlPipelineComponent {
   retryUpload(): void {
     this.uploadError = null;
     this.uploadResult = null;
+    this.isUploading = false;
     this.stopLoadingMessages();
     this.setStep('mapping');
     this.cdr.markForCheck();
