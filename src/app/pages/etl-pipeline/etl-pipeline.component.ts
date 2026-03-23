@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { FieldMappingComponent } from '../../shared/components/field-mapping/field-mapping.component';
 import { ColumnExtractorService, ExtractionResult } from '../../core/services/column-extractor.service';
-import { EtlApiService, ProcessResult } from '../../core/services/etl-api.service';
+import { EtlApiService, ProcessResult, QualityTiersResult, QualityContratResult, QualityComptaResult, TransformResult } from '../../core/services/etl-api.service';
 
 @Component({
   selector: 'app-etl-pipeline',
@@ -17,7 +17,7 @@ import { EtlApiService, ProcessResult } from '../../core/services/etl-api.servic
 export class EtlPipelineComponent {
   @ViewChild(FieldMappingComponent) fieldMappingComponent!: FieldMappingComponent;
 
-  step: 'intro' | 'form' | 'mapping' | 'loading' | 'result' = 'intro';
+  step: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result' = 'intro';
   
   isDragging = false;
   selectedFile: File | null = null;
@@ -31,6 +31,19 @@ export class EtlPipelineComponent {
   uploadResult: ProcessResult | null = null;
   uploadError: string | null = null;
 
+  // Quality state
+  qualityTiersResult: QualityTiersResult | null = null;
+  qualityContratResult: QualityContratResult | null = null;
+  qualityComptaResult: QualityComptaResult | null = null;
+  qualityError: string | null = null;
+  qualityLoading = false;
+  qualityLoadingMessage = '';
+
+  // Transform state
+  transformResult: TransformResult | null = null;
+  transformError: string | null = null;
+  transformLoadingMessage = '';
+
   get canContinueToMapping(): boolean {
     if (!this.selectedFile || this.isExtracting) return false;
     if (!this.isSqlFile() && this.fileType === 'COMPTA' && !this.isDateValid) return false;
@@ -40,6 +53,18 @@ export class EtlPipelineComponent {
   loadingMessages = ['Please wait...', 'Reading your file...', 'Loading rows...', 'Mapping columns...', 'Processing data...', 'This may take a moment...'];
   currentLoadingMessage = this.loadingMessages[0];
   msgInterval: any;
+
+  qualityMessages = ['Running null checks...', 'Detecting duplicates...', 'Validating data types...', 'Checking referential integrity...', 'Cleaning staging tables...', 'Almost done, please wait...'];
+  qualityMsgInterval: any;
+
+  transformMessages = [
+    'Applying business rules...',
+    'Normalizing data fields...',
+    'Enriching staging records...',
+    'Running transformations...',
+    'Almost done, please wait...'
+  ];
+  transformMsgInterval: any;
 
   startLoadingMessages() {
     this.currentLoadingMessage = this.loadingMessages[0];
@@ -56,6 +81,146 @@ export class EtlPipelineComponent {
       clearInterval(this.msgInterval);
       this.msgInterval = null;
     }
+  }
+
+  startQualityMessages() {
+    this.qualityLoadingMessage = this.qualityMessages[0];
+    let msgIndex = 0;
+    this.qualityMsgInterval = setInterval(() => {
+      msgIndex = (msgIndex + 1) % this.qualityMessages.length;
+      this.qualityLoadingMessage = this.qualityMessages[msgIndex];
+      this.cdr.markForCheck();
+    }, 5000);
+  }
+
+  stopQualityMessages() {
+    if (this.qualityMsgInterval) {
+      clearInterval(this.qualityMsgInterval);
+      this.qualityMsgInterval = null;
+    }
+  }
+
+  startTransformMessages() {
+    this.transformLoadingMessage = this.transformMessages[0];
+    let msgIndex = 0;
+    this.transformMsgInterval = setInterval(() => {
+      msgIndex = (msgIndex + 1) % this.transformMessages.length;
+      this.transformLoadingMessage = this.transformMessages[msgIndex];
+      this.cdr.markForCheck();
+    }, 5000);
+  }
+
+  stopTransformMessages() {
+    if (this.transformMsgInterval) {
+      clearInterval(this.transformMsgInterval);
+      this.transformMsgInterval = null;
+    }
+  }
+
+  async runQuality(): Promise<void> {
+    this.qualityTiersResult   = null;
+    this.qualityContratResult = null;
+    this.qualityComptaResult  = null;
+    this.qualityError         = null;
+    this.qualityLoading       = true;
+    this.setStep('quality-loading');
+
+    this.startQualityMessages();
+
+    try {
+      const type = this.mappingFileType;
+
+      if (type === 'TIERS') {
+        this.qualityTiersResult = await this.etlApi.qualityTiers();
+      } else if (type === 'CONTRAT') {
+        this.qualityContratResult = await this.etlApi.qualityContrat();
+      } else if (type === 'COMPTA') {
+        this.qualityComptaResult = await this.etlApi.qualityCompta();
+      }
+
+      this.setStep('quality-result');
+    } catch (err: any) {
+      this.qualityError = err.message ?? 'Quality check failed';
+      this.setStep('quality-result');
+    } finally {
+      this.stopQualityMessages();
+      this.qualityLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  async runTransform(): Promise<void> {
+    this.transformResult = null;
+    this.transformError = null;
+    this.setStep('transform-loading');
+    this.startTransformMessages();
+
+    try {
+      const type = this.mappingFileType;
+
+      if (type === 'TIERS') {
+        this.transformResult = await this.etlApi.transformTiers();
+      } else if (type === 'CONTRAT') {
+        this.transformResult = await this.etlApi.transformContrat();
+      }
+
+      this.setStep('transform-result');
+    } catch (err: any) {
+      this.transformError = err.message ?? 'Transform failed';
+      this.setStep('transform-result');
+    } finally {
+      this.stopTransformMessages();
+      this.cdr.markForCheck();
+    }
+  }
+
+  downloadComptaReport(): void {
+    if (!this.qualityComptaResult) return;
+    const r = this.qualityComptaResult;
+    const rows = [
+      ['Check', 'Count'],
+      ['Null issues', r.nullCheckCount],
+      ['Duplicate issues', r.duplicateCount],
+      ['Type issues', r.typeCheckCount],
+      ['Contrat relation issues', r.contratRelationCheck],
+      ['Tiers relation issues', r.tiersRelationCheck],
+      ['Balance sum', r.balanceSum],
+      ['Total issues', r.totalIssues],
+    ];
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'compta-quality-report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  downloadComptaField(field: keyof QualityComptaResult): void {
+    if (!this.qualityComptaResult) return;
+    
+    // In a real app this would call an API, but for now we just dump a quick stub CSV
+    const val = this.qualityComptaResult[field];
+    
+    const labelMap: Record<string, string> = {
+      nullCheckCount: 'null-issues',
+      duplicateCount: 'duplicate-issues',
+      typeCheckCount: 'type-issues',
+      contratRelationCheck: 'contrat-relations',
+      tiersRelationCheck: 'tiers-relations',
+    };
+
+    const fileNameFragment = labelMap[field as string] || String(field).toLowerCase();
+    const csv = `Entity,Issue Type,Count\nCOMPTA,` + fileNameFragment + `,${val}\n`;
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `compta-${fileNameFragment}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   get mappingFileType(): 'TIERS' | 'CONTRAT' | 'COMPTA' {
@@ -157,7 +322,7 @@ export class EtlPipelineComponent {
     private etlApi: EtlApiService
   ) {}
 
-  setStep(newStep: 'intro' | 'form' | 'mapping' | 'loading' | 'result') {
+  setStep(newStep: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result') {
     if (newStep === 'mapping' && this.fieldMappingComponent) {
       this.fieldMappingComponent.resetMappings();
     }
@@ -341,12 +506,16 @@ export class EtlPipelineComponent {
 
   getSliderTransform(): string {
     switch (this.step) {
-      case 'intro':   return 'translateX(0%)';
-      case 'form':    return 'translateX(-20%)';
-      case 'mapping': return 'translateX(-40%)';
-      case 'loading': return 'translateX(-60%)';
-      case 'result':  return 'translateX(-80%)';
-      default:        return 'translateX(0%)';
+      case 'intro':             return 'translateX(0%)';
+      case 'form':              return 'translateX(-11.1111%)';
+      case 'mapping':           return 'translateX(-22.2222%)';
+      case 'loading':           return 'translateX(-33.3333%)';
+      case 'result':            return 'translateX(-44.4444%)';
+      case 'quality-loading':   return 'translateX(-55.5555%)';
+      case 'quality-result':    return 'translateX(-66.6666%)';
+      case 'transform-loading': return 'translateX(-77.7777%)';
+      case 'transform-result':  return 'translateX(-88.8888%)';
+      default:                  return 'translateX(0%)';
     }
   }
 

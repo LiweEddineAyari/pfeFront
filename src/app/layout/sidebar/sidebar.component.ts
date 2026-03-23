@@ -150,9 +150,6 @@ export class SidebarComponent {
   navItems: NavItem[] = [
     { label: 'Dashboards', icon: 'home', active: true, path: '/' },
     { label: 'ETL Pipeline', icon: 'server', active: false, path: '/etl-pipeline' },
-    { label: 'NFTs', icon: 'shopping-cart', active: false, path: '/nfts' },
-    { label: 'Main Pages', icon: 'layout-grid', active: false, path: '/main' },
-    { label: 'Authentication', icon: 'lock', active: false, path: '/auth' },
   ];
 
   setActive(item: NavItem): void {

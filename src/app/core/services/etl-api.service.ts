@@ -34,9 +34,37 @@ export interface QualityResult {
   totalIssues?:        number;
 }
 
+export interface QualityTiersResult {
+  status: string
+  nullCheckDeleted: number
+  duplicateDeleted: number
+  typeCheckDeleted: number
+  totalDeleted: number
+}
+
+export interface QualityContratResult {
+  status: string
+  nullCheckDeleted: number
+  duplicateDeleted: number
+  typeCheckDeleted: number
+  totalDeleted: number
+}
+
+export interface QualityComptaResult {
+  status: string
+  nullCheckCount: number
+  duplicateCount: number
+  typeCheckCount: number
+  balanceSum: number
+  contratRelationCheck: number
+  tiersRelationCheck: number
+  totalIssues: number
+}
+
 export interface TransformResult {
   status:          string;
   rowsTransformed: number;
+  message?:        string;
 }
 
 export interface DatamartResult {
@@ -129,36 +157,101 @@ export class EtlApiService {
 
   // ── Quality endpoints ──────────────────────────
 
-  async qualityTiers(): Promise<QualityResult> {
-    return firstValueFrom(
-      this.http.post<QualityResult>(
-        `${this.BASE}/quality/tiers`, {}));
+  async qualityTiers(): Promise<QualityTiersResult> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+    try {
+      const response = await fetch(`${this.BASE}/quality/tiers`, {
+        method: 'POST',
+        signal: controller.signal
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
+      return data as QualityTiersResult;
+    } catch (err: any) {
+      if (err.name === 'AbortError') throw new Error('Quality check timed out after 5 minutes.');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
-  async qualityContrat(): Promise<QualityResult> {
-    return firstValueFrom(
-      this.http.post<QualityResult>(
-        `${this.BASE}/quality/contrat`, {}));
+  async qualityContrat(): Promise<QualityContratResult> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+    try {
+      const response = await fetch(`${this.BASE}/quality/contrat`, {
+        method: 'POST',
+        signal: controller.signal
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
+      return data as QualityContratResult;
+    } catch (err: any) {
+      if (err.name === 'AbortError') throw new Error('Quality check timed out after 5 minutes.');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
-  async qualityCompta(): Promise<QualityResult> {
-    return firstValueFrom(
-      this.http.post<QualityResult>(
-        `${this.BASE}/quality/compta`, {}));
+  async qualityCompta(): Promise<QualityComptaResult> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+    try {
+      const response = await fetch(`${this.BASE}/quality/compta`, {
+        method: 'POST',
+        signal: controller.signal
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
+      return data as QualityComptaResult;
+    } catch (err: any) {
+      if (err.name === 'AbortError') throw new Error('Quality check timed out after 5 minutes.');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   // ── Transform endpoints ────────────────────────
 
   async transformTiers(): Promise<TransformResult> {
-    return firstValueFrom(
-      this.http.post<TransformResult>(
-        `${this.BASE}/transform/tiers`, {}));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+    try {
+      const response = await fetch(`${this.BASE}/transform/tiers`, {
+        method: 'POST',
+        signal: controller.signal
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
+      return data as TransformResult;
+    } catch (err: any) {
+      if (err.name === 'AbortError') throw new Error('Transform timed out after 5 minutes.');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   async transformContrat(): Promise<TransformResult> {
-    return firstValueFrom(
-      this.http.post<TransformResult>(
-        `${this.BASE}/transform/contrat`, {}));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+    try {
+      const response = await fetch(`${this.BASE}/transform/contrat`, {
+        method: 'POST',
+        signal: controller.signal
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Server error: ${response.status}`);
+      return data as TransformResult;
+    } catch (err: any) {
+      if (err.name === 'AbortError') throw new Error('Transform timed out after 5 minutes.');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   // ── Datamart endpoints ─────────────────────────
