@@ -1,0 +1,111 @@
+<div class="w-full h-full flex flex-col gap-6 bg-card rounded-[20px] p-6 shadow-sm overflow-hidden">
+  
+  <!-- Your Card Header -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-[18px] font-[800] text-[#1b2559] dark:text-white">Your Card</h2>
+    <button class="w-8 h-8 rounded-full bg-[#01b574] flex items-center justify-center hover:bg-[#019d65] transition-colors shadow-sm">
+      <lucide-icon name="plus" [size]="18" class="text-white" [strokeWidth]="3"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Virtual Card (Glassy) -->
+  <div class="w-full aspect-[1.58] rounded-[22px] p-6 pt-5 relative overflow-hidden shadow-lg transition-transform duration-200 hover:-translate-y-1 block"
+       style="background: linear-gradient(0deg, #01965F 0%, #01F79C 100%);">
+    
+    <div class="flex items-start justify-between relative z-10 mb-8">
+      <p class="text-[22px] font-black text-white italic tracking-tight leading-none mt-1">Glassy.</p>
+      <!-- Mastercard-style logo -->
+      <div class="flex relative w-10 h-7 opacity-90">
+        <div class="absolute right-0 w-7 h-7 rounded-full bg-white/40 z-0"></div>
+        <div class="absolute right-[14px] w-7 h-7 rounded-full bg-white/60 z-10"></div>
+      </div>
+    </div>
+
+    <div class="relative z-10 mt-auto">
+      <p class="text-[20px] font-bold text-white tracking-[0.12em] mb-4 drop-shadow-sm">
+        7812 XXXX XXXX XXXX
+      </p>
+      
+      <div class="flex items-center gap-10">
+        <div>
+          <p class="text-[9px] text-white/80 font-medium mb-0.5">VALID THRU</p>
+          <p class="text-[13px] font-bold text-white tracking-wide">05/24</p>
+        </div>
+        <div>
+          <p class="text-[9px] text-white/80 font-medium mb-0.5">CVV</p>
+          <p class="text-[13px] font-bold text-white tracking-wide">09X</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination dots -->
+  <div class="flex items-center justify-center gap-2 -mt-2 mb-1">
+    <div class="w-[7px] h-[7px] rounded-full bg-[#01b574]"></div>
+    <div class="w-[7px] h-[7px] rounded-full bg-[#e2e8f0] dark:bg-white/10"></div>
+    <div class="w-[7px] h-[7px] rounded-full bg-[#e2e8f0] dark:bg-white/10"></div>
+  </div>
+
+  <!-- Security Note Card -->
+  <div class="w-full bg-[#f4f7fe] dark:bg-[#1b2559] rounded-[20px] p-5 border border-transparent flex gap-4 items-center">
+    <div class="w-10 h-10 flex items-center justify-center shrink-0">
+       <lucide-icon name="refresh-ccw" [size]="24" class="text-[#01b574]" [strokeWidth]="2.5"></lucide-icon>
+    </div>
+    <div>
+      <p class="text-[14px] font-[800] text-[#1b2559] dark:text-white mb-1 leading-tight">Use for added security online</p>
+      <p class="text-[12px] text-[#a3aed0] dark:text-white/60 font-medium leading-relaxed pr-2">The card number is refreshed automatically after each use. Each number can be used only once.</p>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="flex items-center justify-between px-2 py-1">
+    <button class="flex flex-col items-center gap-2 group">
+      <div class="w-14 h-14 bg-[#e6fffa] dark:bg-[#1b2559] rounded-full flex items-center justify-center text-[#01b574] group-hover:-translate-y-1 transition-all duration-200 shadow-sm">
+        <lucide-icon name="refresh-cw" [size]="24" [strokeWidth]="2.5"></lucide-icon>
+      </div>
+      <span class="text-[13px] font-[700] text-[#1b2559] dark:text-white mt-1">Transfer</span>
+    </button>
+    <button class="flex flex-col items-center gap-2 group">
+      <div class="w-14 h-14 bg-[#fffaf0] dark:bg-[#1b2559] rounded-full flex items-center justify-center text-[#ffb547] transition-all duration-200 group-hover:-translate-y-1 shadow-sm">
+        <lucide-icon name="plus" [size]="24" [strokeWidth]="2.5"></lucide-icon>
+      </div>
+      <span class="text-[13px] font-[700] text-[#1b2559] dark:text-white mt-1">Top Up</span>
+    </button>
+    <button class="flex flex-col items-center gap-2 group">
+      <div class="w-14 h-14 bg-[#f0fff4] dark:bg-[#1b2559] rounded-full flex items-center justify-center text-[#01b574] transition-all duration-200 group-hover:-translate-y-1 shadow-sm">
+        <lucide-icon name="dollar-sign" [size]="24" [strokeWidth]="2.5"></lucide-icon>
+      </div>
+      <span class="text-[13px] font-[700] text-[#1b2559] dark:text-white mt-1">Pay Bills</span>
+    </button>
+    <button class="flex flex-col items-center gap-2 group">
+      <div class="w-14 h-14 bg-[#fff5f5] dark:bg-[#1b2559] rounded-full flex items-center justify-center text-[#e53e3e] transition-all duration-200 group-hover:-translate-y-1 shadow-sm">
+        <lucide-icon name="more-horizontal" [size]="24" [strokeWidth]="2.5"></lucide-icon>
+      </div>
+      <span class="text-[13px] font-[700] text-[#1b2559] dark:text-white mt-1">More</span>
+    </button>
+  </div>
+
+  <!-- Your Transactions -->
+  <div class="flex-1 min-h-0 flex flex-col mt-2">
+    <h2 class="text-[18px] font-[800] text-[#1b2559] dark:text-white mb-5">Your transactions</h2>
+    <div class="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+      <ng-container *ngIf="creditTransactions$ | async as transactions">
+        <div *ngFor="let t of transactions; trackBy: trackById"
+             class="flex items-center gap-4 py-3 group cursor-pointer hover:bg-page dark:hover:bg-white/5 rounded-2xl px-2 transition-all duration-200">
+          <div class="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"
+               [ngClass]="t.iconBg">
+            <lucide-icon [name]="t.icon" [size]="18" [strokeWidth]="2.5" [ngClass]="t.iconColor"></lucide-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[15px] font-[800] text-[#1b2559] dark:text-white truncate">{{ t.title }}</p>
+            <p class="text-[12px] text-[#a3aed0] dark:text-white/60 font-medium mt-0.5 truncate">{{ t.date }}</p>
+          </div>
+          <p class="text-[16px] font-[800] text-[#1b2559] dark:text-white shrink-0">
+            {{ t.amount < 0 ? '-$' + (-t.amount).toFixed(2) : '$' + t.amount.toFixed(2) }}
+          </p>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+</div>

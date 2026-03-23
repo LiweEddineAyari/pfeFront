@@ -1,0 +1,154 @@
+<div class="flex flex-col h-full bg-transparent">
+  
+  <!-- TOP BAR -->
+  <div class="px-12 pt-10 pb-6 bg-transparent text-[#1b2559] dark:text-white flex-shrink-0 z-20">
+    <div class="flex justify-between items-start mb-6 w-full">
+      <div>
+        <h2 class="text-[22px] font-bold mb-1">Field Mapping</h2>
+        <p class="text-[14px] text-gray-500 dark:text-white/50 font-medium">Step 2 of 4 — Map your file columns to database fields</p>
+        <div class="flex items-center gap-2 mt-4">
+          <div class="h-2 rounded-[4px] bg-[#01b574] w-3 transition-all duration-300"></div>
+          <div class="h-2 rounded-[4px] bg-[#01b574] w-6 transition-all duration-300"></div>
+          <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
+          <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
+        </div>
+      </div>
+      <button (click)="back.emit()"
+              class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group">
+        <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
+        Back
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between mt-2">
+      <div class="flex gap-2">
+         <div class="border rounded-[8px] px-5 py-2 text-[12px] font-bold tracking-wider"
+              [ngClass]="fileType === 'TIERS' ? 'bg-[#01b574] border-[#01b574] text-white' : 'border-gray-200/20 text-gray-500/30 dark:text-white/20'"
+              style="cursor: default; pointer-events: none;">
+            TIERS
+         </div>
+         <div class="border rounded-[8px] px-5 py-2 text-[12px] font-bold tracking-wider"
+              [ngClass]="fileType === 'CONTRAT' ? 'bg-[#01b574] border-[#01b574] text-white' : 'border-gray-200/20 text-gray-500/30 dark:text-white/20'"
+              style="cursor: default; pointer-events: none;">
+            CONTRAT
+         </div>
+         <div class="border rounded-[8px] px-5 py-2 text-[12px] font-bold tracking-wider"
+              [ngClass]="fileType === 'COMPTA' ? 'bg-[#01b574] border-[#01b574] text-white' : 'border-gray-200/20 text-gray-500/30 dark:text-white/20'"
+              style="cursor: default; pointer-events: none;">
+            COMPTA
+         </div>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <div class="bg-[#01b574]/10 border border-[#01b574]/20 text-[#01b574] rounded-[6px] px-3 py-1.5 text-[12px] font-bold">
+           {{ targetFields.length - unmappedCount }} / {{ targetFields.length }} matched
+        </div>
+        <button (click)="autoMatch()" class="bg-transparent border border-[#01b574]/50 text-[#01b574] rounded-[8px] px-5 py-2 text-[13px] font-medium hover:bg-[#01b574]/10 transition-all">
+          Auto-match
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SCROLLABLE AREA -->
+  <div class="flex-1 overflow-y-auto relative px-12 pt-8 pb-20 bg-transparent">
+     <!-- mapping grid -->
+     <div class="grid grid-cols-[minmax(0,1fr)_80px_minmax(0,1fr)] gap-0 items-start relative w-full h-full" #canvasContainer>
+       
+       <!-- SVG Canvas -->
+       <svg style="position:absolute; top:0; left:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:0;">
+         <defs>
+           <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+             <path d="M2 1L8 5L2 9" fill="none" stroke="#01b574" stroke-width="1.8" stroke-linecap="round" />
+           </marker>
+         </defs>
+
+         <ng-container *ngFor="let arrow of arrows">
+           <g (mouseenter)="hoveredArrow = arrow.targetField"
+              (mouseleave)="hoveredArrow = null"
+              style="pointer-events: all; cursor: pointer;"
+              (click)="removeMapping(arrow.targetField)">
+             
+             <!-- Drawing path -->
+             <path [attr.d]="arrowPath(arrow)"
+                   fill="none" stroke="#01b574"
+                   [attr.stroke-width]="hoveredArrow === arrow.targetField ? 2.5 : 2"
+                   [attr.stroke-opacity]="hoveredArrow === arrow.targetField ? 1 : 0.85"
+                   stroke-linecap="round"
+                   marker-end="url(#arrowhead)"
+                   style="transition: stroke-width .15s, stroke-opacity .15s; pointer-events: stroke;"></path>
+
+             <!-- Invisible fat hit area -->
+             <path [attr.d]="arrowPath(arrow)"
+                   fill="none" stroke="transparent"
+                   stroke-width="16"
+                   style="cursor:pointer;"></path>
+
+             <!-- Endpoint dots -->
+             <circle [attr.cx]="arrow.x1" [attr.cy]="arrow.y1" r="3.5" fill="#01b574" />
+             <circle [attr.cx]="arrow.x2" [attr.cy]="arrow.y2" r="3.5" fill="#01b574" />
+
+             <!-- × delete button (visible on hover) -->
+             <g *ngIf="hoveredArrow === arrow.targetField"
+                [attr.transform]="'translate(' + midX(arrow) + ',' + midY(arrow) + ')'">
+               <circle r="10" fill="#e53e3e" />
+               <line x1="-4" y1="-4" x2="4" y2="4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+               <line x1="4" y1="-4" x2="-4" y2="4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+             </g>
+           </g>
+         </ng-container>
+       </svg>
+
+       <!-- Left Column (Source) -->
+       <div class="flex flex-col z-10">
+         <p class="font-semibold text-gray-400 dark:text-white/25 uppercase tracking-[0.8px] mb-3 pl-1" style="font-size: 11px;">YOUR FILE COLUMNS</p>
+         <div *ngFor="let col of fileColumns" 
+              [id]="'source-' + col"
+              class="field-pill group"
+              [class.is-selected]="selectedSource === col"
+              [class.is-mapped]="isSourceMapped(col)"
+              (click)="onSourceClick(col)">
+            <span class="truncate pr-4 text-[13px] font-bold font-mono">{{ col }}</span>
+            <div class="pill-dot"></div>
+         </div>
+       </div>
+
+       <!-- Center Gap (80px) -->
+       <div></div>
+
+       <!-- Right Column (Target) -->
+       <div class="flex flex-col z-10">
+         <p class="font-semibold text-gray-400 dark:text-white/25 uppercase tracking-[0.8px] mb-3 pr-1 text-right" style="font-size: 11px;">DATABASE FIELDS</p>
+         <div *ngFor="let tgt of targetFields" 
+              [id]="'target-' + tgt"
+              class="field-pill flex-row-reverse"
+              [class.is-mapped]="isTargetMapped(tgt)"
+              [class.target-hoverable]="selectedSource && !isTargetMapped(tgt)"
+              (click)="onTargetClick(tgt)">
+            <span class="truncate pl-4 text-[13px] font-bold flex-1 text-right font-mono">{{ tgt }}</span>
+            <div class="pill-dot"></div>
+         </div>
+       </div>
+
+     </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="flex items-center justify-between px-10 py-5 bg-transparent flex-shrink-0 z-20">
+     <div class="flex items-center gap-6">
+        <button (click)="resetMappings()" class="bg-transparent text-gray-500 dark:text-white/60 px-2 py-2 text-[13px] font-medium hover:text-gray-900 dark:hover:text-white transition-all underline underline-offset-4 decoration-dashed decoration-gray-300 dark:decoration-white/20">
+          Reset mappings
+        </button>
+        <div *ngIf="unmappedCount > 0" class="flex items-center gap-2 text-amber-500 text-[13px] font-bold">
+          <lucide-icon name="alert-triangle" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+          {{ unmappedCount }} field(s) unmapped
+        </div>
+     </div>
+
+     <button (click)="onContinue()" class="flex items-center gap-2.5 bg-[#01b574] text-white px-8 py-3.5 rounded-[14px] text-[15px] font-bold hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group">
+       Continue to Loading
+       <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+     </button>
+  </div>
+
+</div>

@@ -1,1 +1,336 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow-x: hidden;
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-light-bg text-gray-800 transition-colors duration-300;
+  }
+
+  html.dark body {
+    @apply bg-dark-bg text-white;
+  }
+}
+
+@layer components {
+  .card-base {
+    @apply rounded-3xl p-6 transition-all duration-300;
+  }
+
+  .card-light {
+    @apply bg-white shadow-card-light;
+  }
+
+  .card-dark {
+    @apply bg-dark-card shadow-card-dark;
+  }
+
+  /* TOPBAR GLASSMORPHISM */
+  .topbar {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px) saturate(40%);
+    border-radius: 20px;
+    height: 108px;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topbar-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .topbar-icon:hover {
+    background: rgba(1, 181, 116, 0.08);
+    color: #01b574;
+  }
+
+  .topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50px;
+    padding: 10px 20px;
+    min-width: 220px;
+    backdrop-filter: blur(8px);
+  }
+
+  .topbar-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .topbar-search input::placeholder {
+    color: var(--color-muted);
+  }
+
+  .topbar-search svg {
+    color: var(--color-muted);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .topbar-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #1b2559;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(27, 37, 89, 0.3);
+  }
+
+  .topbar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .topbar-breadcrumb {
+    font-size: 14px;
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .topbar-breadcrumb span {
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  .topbar-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+}
+
+:root {
+  --bg-page: #f4f7fe;
+  --bg-card: #ffffff;
+  --color-primary: #01b574;
+  --color-dark: #1b2559;
+  --color-muted: #a3aed0;
+  --color-border: #e9edf7;
+  --shadow-card: 0 4px 24px rgba(112, 144, 176, 0.10);
+  --radius-card: 20px;
+  --sidebar-w-expanded: 280px;
+  --sidebar-w-collapsed: 64px;
+  --topbar-h: 64px;
+  --gap: 16px;
+
+  --text-primary: #1b2559;
+  --text-secondary: #a3aed0;
+  --icon-color: #a3aed0;
+  --chart-green: #01b574;
+  --chart-blue: #63b3ed;
+  --chart-bar: #01b574;
+}
+
+html.dark {
+  --bg-page: #0b1437;
+  --bg-card: #111c44;
+  --color-primary: #01b574;
+  --color-dark: #ffffff;
+  --color-muted: #a3aed0;
+  --color-border: #1f2b5c;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+
+  --text-primary: #ffffff;
+  --text-secondary: #a3aed0;
+  --icon-color: #ffffff;
+  --chart-green: #01b574;
+  --chart-blue: #63b3ed;
+  --chart-bar: #01b574;
+}
+
+html.dark .topbar {
+  background: rgba(17, 28, 68, 0.72);
+}
+
+html.dark .topbar-search {
+  background: rgba(11, 20, 55, 0.6);
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chart.js canvas responsive fix */
+canvas {
+  max-width: 100% !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  display: block;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+}
+
+/* Credit Balance Wave — CSS-only theme transition */
+.credit-wave path {
+  stroke: white;
+  stroke-width: 2.5;
+  stroke-opacity: 0.60;
+  transition: stroke-opacity 0.3s ease, stroke-width 0.3s ease;
+}
+
+html.dark .credit-wave path {
+  stroke-width: 2;
+  stroke-opacity: 0.45;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE LAYOUT
+   ═══════════════════════════════════════════ */
+
+/* Sidebar base: hidden off-screen on mobile */
+.sidebar-aside {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--color-border);
+  transition: transform 0.3s ease, width 0.25s ease;
+  z-index: 200;
+  box-shadow: var(--shadow-card);
+  margin: 16px 0 16px 16px;
+  border-radius: 20px;
+  width: var(--sidebar-w-expanded);
+  transform: translateX(calc(-100% - 32px));
+}
+
+.sidebar-aside.sidebar-open {
+  transform: translateX(0);
+}
+
+/* Backdrop */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+  transition: opacity 0.3s ease;
+}
+
+/* Main content: full width on mobile */
+.main-content {
+  flex: 1;
+  margin-left: 0;
+  width: 100%;
+}
+
+/* ── Desktop (≥ 1024px / lg) ── */
+@media (min-width: 1024px) {
+  .sidebar-aside {
+    transform: translateX(0) !important;
+    /* always visible on desktop */
+  }
+
+  .sidebar-aside.sidebar-expanded {
+    width: var(--sidebar-w-expanded);
+  }
+
+  .sidebar-aside.sidebar-collapsed {
+    width: var(--sidebar-w-collapsed);
+  }
+
+  .main-content.main-sidebar-expanded {
+    margin-left: calc(var(--sidebar-w-expanded) + 16px);
+    width: calc(100% - var(--sidebar-w-expanded) - 16px);
+  }
+
+  .main-content.main-sidebar-collapsed {
+    margin-left: calc(var(--sidebar-w-collapsed) + 16px);
+    width: calc(100% - var(--sidebar-w-collapsed) - 16px);
+  }
+}
+
+/* ── Small screen topbar adjustments ── */
+@media (max-width: 767px) {
+  .topbar {
+    height: 60px;
+    padding: 0 14px;
+    border-radius: 16px;
+  }
+
+  .topbar-title {
+    font-size: 22px !important;
+  }
+
+  .topbar-breadcrumb {
+    font-size: 12px !important;
+  }
+
+  .topbar-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}

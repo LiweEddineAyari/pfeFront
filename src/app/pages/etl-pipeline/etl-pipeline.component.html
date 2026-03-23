@@ -1,0 +1,345 @@
+<div class="p-6 max-w-[1800px] mx-auto">
+  
+  <!-- Outer Slide Container -->
+  <div class="card-base bg-white dark:bg-[#111C44] shadow-card-light dark:shadow-card-dark rounded-[20px] overflow-hidden relative" >
+    
+    <!-- Inner Sliding Row (500% width for 5 panels) -->
+    <div class="flex w-[500%] items-stretch" 
+         [style.transform]="getSliderTransform()"
+         [style.transition]="'transform 0.55s cubic-bezier(0.77,0,0.18,1)'">
+      
+      <!-- ============================================== -->
+      <!-- PANEL 1: INTRO (20% of parent flex width)      -->
+      <!-- ============================================== -->
+      <div class="w-1/5 flex flex-col pt-16 pb-16 px-12">
+        <div class="mb-16 text-center z-10">
+          <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">ETL Pipeline — How it works</h2>
+          <p class="text-text-secondary text-[18px] max-w-4xl mx-auto leading-relaxed dark:text-[#a3aed1]">
+            Upload your source data and let the pipeline handle extraction, quality checks, transformation, and datamart loading automatically.
+          </p>
+        </div>
+
+        <div class="relative w-full max-w-[1400px] mx-auto mt-6 px-4 sm:px-12">
+          <!-- Animated SVG Arrows Layer -->
+          <svg class="absolute top-[-46px] left-0 w-full h-[180px] pointer-events-none z-0 hidden md:block overflow-visible"
+               preserveAspectRatio="none" viewBox="0 0 1000 180">
+            <path class="flow-arrow arrow-1" d="M 125,90 Q 250,0 375,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <path class="flow-arrow arrow-2" d="M 375,90 Q 500,180 625,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <path class="flow-arrow arrow-3" d="M 625,90 Q 750,0 875,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+          </svg>
+
+          <!-- Step Nodes -->
+          <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-0">
+            <div *ngFor="let step of steps; let i = index" class="flex flex-col items-center">
+              
+              <div class="w-[88px] h-[88px] rounded-full flex items-center justify-center mb-6 transition-all duration-300 relative z-10 shadow-[0_8px_24px_rgba(112,144,176,0.15)] dark:shadow-[0_0_40px_rgba(255,255,255,0.06)]"
+                   [ngClass]="i === steps.length - 1 ? 'bg-[#01b574] text-white' : 'bg-[#f0faf5] text-[#01b574] dark:bg-[#1b2559] dark:text-white'">
+                <lucide-icon [name]="step.icon" [size]="40" [strokeWidth]="2.5"></lucide-icon>
+              </div>
+              
+              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">{{ step.stepLabel }}</span>
+              <h3 class="text-[19px] font-bold text-text-primary mb-3 text-center">{{ step.title }}</h3>
+              <p class="text-[14px] text-text-secondary text-center max-w-[240px] leading-relaxed dark:text-[#8f9bba]">
+                {{ step.description }}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Intro Footer Start Button Area (No separator, free floating) -->
+        <div class="mt-20 flex justify-center relative z-10">
+          <button (click)="setStep('form')" class="flex items-center gap-2.5 bg-brand-primary text-white px-10 py-3.5 rounded-[14px] font-bold text-[16px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group">
+            <lucide-icon name="play" [size]="20" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+            Start Pipeline
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PANEL 2: UPLOAD FORM (20% width)               -->
+      <!-- ============================================== -->
+      <div class="w-1/5 flex flex-col pt-12 pb-12 px-12 md:px-20 h-[800px]">
+        
+        <!-- Form Header -->
+        <div class="flex justify-between items-start mb-8 flex-shrink-0">
+          <div>
+            <h2 class="text-[22px] font-bold text-text-primary mb-1">Upload & Extract</h2>
+            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Step 1 of 4 — Configure your data source</p>
+            
+            <!-- Progress Dots -->
+            <div class="flex items-center gap-2 mt-4">
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-6 transition-all duration-300"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
+            </div>
+          </div>
+          
+          <button (click)="setStep('intro')"
+            class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group">
+            <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
+            Back
+          </button>
+        </div>
+
+        <!-- Form Body (2-Column Grid) -->
+        <div class="flex-1 overflow-y-auto pr-4 form-scroll-y">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start h-full mt-2">
+            
+            <!-- COLUMN 1: Configuration -->
+            <div class="flex flex-col">
+              
+              <!-- Segmented Pill Selector -->
+              <div class="flex flex-col mb-6" *ngIf="!isSqlFile()">
+                <label class="form-label">Data type</label>
+                <div class="segmented-control">
+                  <button type="button" class="segment-btn" [class.active]="fileType === 'TIERS'" (click)="fileType = 'TIERS'">TIERS</button>
+                  <button type="button" class="segment-btn" [class.active]="fileType === 'CONTRAT'" (click)="fileType = 'CONTRAT'">CONTRAT</button>
+                  <button type="button" class="segment-btn" [class.active]="fileType === 'COMPTA'" (click)="fileType = 'COMPTA'">COMPTA</button>
+                </div>
+              </div>
+
+              <!-- Balance Date Conditional -->
+              <div class="flex flex-col date-row-appear" *ngIf="!isSqlFile() && fileType === 'COMPTA'">
+                <label class="form-label">Balance Date</label>
+                <div class="flex items-center gap-2">
+                  <input #ddInput id="dd" type="text" maxlength="2" placeholder="DD" 
+                         [ngModel]="dd" (input)="onDdInput($event, mmInput)" (keydown.backspace)="onBackspace($event, null)"
+                         class="segment-input w-[52px]" [class.invalid]="isDdInvalid" />
+                  <span class="text-gray-400 dark:text-white/30 text-[18px]">/</span>
+                  <input #mmInput id="mm" type="text" maxlength="2" placeholder="MM"
+                         [ngModel]="mm" (input)="onMmInput($event, yyyyInput)" (keydown.backspace)="onBackspace($event, ddInput)"
+                         class="segment-input w-[52px]" [class.invalid]="isMmInvalid" />
+                  <span class="text-gray-400 dark:text-white/30 text-[18px]">/</span>
+                  <input #yyyyInput id="yyyy" type="text" maxlength="4" placeholder="YYYY"
+                         [ngModel]="yyyy" (input)="onYyyyInput($event)" (keydown.backspace)="onBackspace($event, mmInput)"
+                         class="segment-input w-[76px]" />
+                  <lucide-icon *ngIf="isDateValid" name="check-circle-2" [size]="16" class="text-[#01b574] ml-2"></lucide-icon>
+                </div>
+                <div class="mt-1.5 text-[11px] text-[#a3aed0] dark:text-white/30 leading-snug">
+                  The balance date defines the accounting period cutoff for this COMPTA import.
+                </div>
+              </div>
+
+              <!-- SQL Notification -->
+              <div *ngIf="isSqlFile()" class="sql-info-card date-row-appear mb-6">
+                 <div class="flex items-center gap-3 mb-2">
+                   <lucide-icon name="check" [size]="16" class="text-[#01b574]"></lucide-icon>
+                   <span class="font-bold">SQL file detected</span>
+                 </div>
+                 <div class="mb-3 opacity-80">Type is auto-configured</div>
+                 <div class="opacity-80">File: {{ selectedFile?.name }}</div>
+                 <div class="opacity-80">Type: SQL (auto)</div>
+              </div>
+
+            </div>
+
+            <!-- COLUMN 2: File Picker Drop Zone -->
+            <div class="flex flex-col max-h-[400px] h-full ">
+               <div class="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer drop-zone group relative overflow-hidden"
+                    [class.is-dragging]="isDragging"
+                    [class.has-file]="selectedFile"
+                    [class.has-error]="extractionError"
+                    (dragover)="onDragOver($event)"
+                    (dragleave)="onDragLeave($event)"
+                    (drop)="onDrop($event)"
+                    (click)="triggerFileInput()">
+                 
+                 <input type="file" #fileInput class="hidden" accept=".xlsx,.xls,.json,.sql" (change)="onFileChange($event)">
+                 
+                 <lucide-icon name="cloud-upload" [size]="56" [strokeWidth]="2.5" 
+                              class="mx-auto mb-6 transition-colors text-brand-primary dark:text-white group-hover:dark:text-[#01b574] group-hover:text-[#01b574]">
+                 </lucide-icon>
+                 
+                 <p class="text-[18px] font-bold mb-2 text-text-primary dark:text-white relative z-10">
+                   Drop your files here
+                 </p>
+                 <p class="text-[15px] font-medium text-[#01b574] mb-3 relative z-10">
+                   or click to browse
+                 </p>
+                 <p class="text-[13px] text-text-secondary dark:text-[#8f9bba] font-medium px-4 relative z-10">
+                   .xlsx, .xls, .json and .sql files are allowed via this portal.
+                 </p>
+                 
+                 <div *ngIf="selectedFile && !extractionError && !extractionResult" class="absolute w-full bottom-0 left-0 pt-6 pb-6 bg-[#01b574]/10 border-t border-[#01b574]/20 text-center animate-fade-in-up">
+                   <div class="flex items-center justify-center gap-2 text-[#01b574] font-bold text-[14px]">
+                     <lucide-icon name="check-circle-2" [size]="18"></lucide-icon>
+                     {{ selectedFile.name }}
+                   </div>
+                 </div>
+                 
+               </div>
+
+               <!-- ============================================== -->
+               <!-- EXTRACTION FEEDBACK UI (Errors & Success)      -->
+               <!-- ============================================== -->
+               
+               <!-- Error Banner -->
+               <div *ngIf="extractionError" class="animate-slide-down mt-4 flex items-start gap-3 bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-500/25 border rounded-xl p-4">
+                 <div class="error-icon-circle shrink-0 w-8 h-8 rounded-full bg-red-100/50 dark:bg-red-500/10 flex items-center justify-center">
+                   <lucide-icon name="x-circle" [size]="18" class="text-red-600 dark:text-red-400"></lucide-icon>
+                 </div>
+                 <div class="flex-1 min-w-0">
+                   <p class="error-title text-[14px] font-bold text-red-700 dark:text-red-300 mb-1">{{ getErrorTitle(extractionError.status) }}</p>
+                   <p class="error-msg text-[13px] text-red-900/70 dark:text-white/60 leading-relaxed">{{ extractionError.errorMessage }}</p>
+                   
+                   <!-- Raw Preview inside error -->
+                   <div *ngIf="extractionError.rawPreview" class="code-preview mt-2.5 bg-black/5 dark:bg-black/30 rounded-lg p-2.5">
+                     <p class="code-label text-[10px] font-bold uppercase text-red-900/50 dark:text-white/40 mb-1.5 tracking-wider">File preview:</p>
+                     <code class="block font-mono text-[11px] text-red-900/80 dark:text-white/50 whitespace-pre-wrap break-all max-h-[80px] overflow-hidden">{{ extractionError.rawPreview }}</code>
+                   </div>
+
+                   <p class="error-hint mt-2 text-[12px] text-red-900/60 dark:text-white/40 italic">{{ getErrorHint(extractionError.status) }}</p>
+                 </div>
+                 <button (click)="clearError()" class="shrink-0 text-red-400 hover:text-red-600 dark:text-red-500/60 dark:hover:text-red-400 transition-colors ml-auto p-1">
+                   <lucide-icon name="x" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+                 </button>
+               </div>
+
+               <!-- Success State: Column Preview Chip Row -->
+               <div *ngIf="extractionResult?.status === 'success'" class="column-preview-section animate-fade-in-up mt-4 p-[14px] px-4 rounded-xl border border-green-200/50 bg-green-50/50 dark:border-green-500/20 dark:bg-green-900/10">
+                 <!-- Header row -->
+                 <div class="flex items-center justify-between mb-3">
+                   <div class="flex items-center gap-2">
+                     <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
+                     <span class="preview-label text-[13px] font-bold text-[#01b574]">
+                       {{ extractionResult?.columns?.length }} columns detected
+                     </span>
+                     <span class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
+                       from {{ extractionResult?.rowCount }} rows
+                     </span>
+                   </div>
+                   <span class="file-type-badge text-[10px] font-extrabold tracking-[0.8px] px-2 py-0.5 rounded-md bg-[#01b574]/10 text-[#01b574] border border-[#01b574]/20 uppercase">
+                     {{ extractionResult?.fileType }}
+                   </span>
+                 </div>
+             
+                 <!-- Column chips -->
+                 <div class="chips-wrap flex flex-wrap gap-[6px] mt-2.5">
+                   <div *ngFor="let col of extractionResult?.columns?.slice(0, 12)" 
+                        class="col-chip text-[12px] font-medium font-mono py-1 px-2.5 rounded-md bg-gray-100 border border-gray-200 text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white/80 whitespace-nowrap">
+                     {{ col }}
+                   </div>
+                   <div *ngIf="(extractionResult?.columns?.length || 0) > 12" 
+                        class="col-chip overflow-chip text-[12px] font-bold py-1 px-2.5 rounded-md bg-[#01b574]/10 border border-[#01b574]/20 text-[#01b574] whitespace-nowrap">
+                     +{{ (extractionResult?.columns?.length || 0) - 12 }} more
+                   </div>
+                 </div>
+               </div>
+
+               <!-- Warning Banner (Column Mismatch) -->
+               <div *ngIf="columnCountWarning" class="animate-slide-down mt-3 flex items-start gap-2.5 bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-500/25 border rounded-xl p-3 px-4">
+                 <lucide-icon name="alert-triangle" [size]="16" class="text-amber-500 shrink-0 mt-0.5"></lucide-icon>
+                 <p class="text-[12px] text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed">{{ columnCountWarning }}</p>
+               </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Footer Submit Button Area -->
+        <div class="mt-8 flex justify-end flex-shrink-0 pt-6">
+          <button (click)="onContinueToMapping()" class="flex items-center gap-2.5 bg-brand-primary text-white px-8 py-3.5 rounded-[14px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group"
+                  [disabled]="!canContinueToMapping"
+                  [ngClass]="{'opacity-50 cursor-not-allowed shadow-none': !canContinueToMapping}">
+            
+            <ng-container *ngIf="!isExtracting">
+              Continue to Mapping
+              <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+            </ng-container>
+            
+            <ng-container *ngIf="isExtracting">
+              <div class="spinner-sm"></div>
+              Analyzing file...
+            </ng-container>
+            
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PANEL 3: FIELD MAPPING (20% width)             -->
+      <!-- ============================================== -->
+      <div class="w-1/5 h-[800px] bg-transparent">
+        <app-field-mapping 
+          [fileColumns]="fileColumns"
+          [fileType]="mappingFileType"
+          (back)="onMappingBack()"
+          (complete)="onMappingComplete($event)">
+        </app-field-mapping>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PANEL 4: LOADING (20% width)                   -->
+      <!-- ============================================== -->
+      <div class="w-1/5 h-[800px] flex flex-col justify-center items-center bg-transparent">
+        <!-- Center Animation Area -->
+        <div class="flex flex-col items-center justify-center p-12 w-full h-full">
+          
+          <!-- Green Spinner -->
+          <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
+
+          <!-- Badge -->
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ fileType }}</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">{{ selectedFile?.name }}</span>
+          </div>
+
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Processing your file</h3>
+          <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
+            {{ currentLoadingMessage }}
+          </p>
+
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- PANEL 5: RESULT (20% width)                    -->
+      <!-- ============================================== -->
+      <div class="w-1/5 h-[800px] flex flex-col overflow-hidden bg-transparent">
+        
+        <!-- SUCCESS STATE -->
+        <div *ngIf="uploadResult && !uploadError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
+          
+          <div class="w-24 h-24 rounded-full bg-[#01b574] flex items-center justify-center mb-6 animate-fade-in-scale shadow-[0_0_40px_rgba(1,181,116,0.25)]">
+            <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
+          </div>
+          <h3 class="text-[28px] font-bold text-text-primary mb-2">Upload Complete!</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10">{{ uploadResult.rowCount | number }} rows loaded successfully</p>
+          
+          <button (click)="setStep('intro')" class="flex items-center justify-center gap-2 bg-[#01b574] text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] mb-4 w-[280px]">
+            Continue to Quality
+            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
+          </button>
+
+          
+        </div>
+
+        <!-- ERROR STATE -->
+        <div *ngIf="uploadError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
+          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
+            <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
+          </div>
+          <h3 class="text-[28px] font-bold text-text-primary mb-3">Upload Failed</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(uploadError) }}</p>
+          
+          <div class="flex flex-col gap-3 w-[280px]">
+            <button (click)="setStep('mapping')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
+              <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
+              Back to Mapping
+            </button>
+            <button (click)="retryUpload()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
+              <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
+              Retry
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

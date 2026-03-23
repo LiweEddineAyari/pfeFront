@@ -1,0 +1,96 @@
+/* field-mapping.component.css */
+
+.field-pill {
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: rgba(0, 0, 0, 0.03);
+  color: #1b2559;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+:host-context(.dark) .field-pill {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
+}
+
+.pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+}
+:host-context(.dark) .pill-dot {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.field-pill:hover {
+  background: #fdfdfd;
+}
+:host-context(.dark) .field-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* State: selected (source pill) */
+.field-pill.is-selected {
+  border-color: #01b574;
+  background: rgba(1, 181, 116, 0.06);
+  box-shadow: 0 0 0 2px rgba(1, 181, 116, 0.15);
+}
+:host-context(.dark) .field-pill.is-selected {
+  background: rgba(1, 181, 116, 0.08);
+  box-shadow: 0 0 0 2px rgba(1, 181, 116, 0.2);
+}
+.field-pill.is-selected .pill-dot {
+  background: #01b574;
+}
+
+/* State: mapped (either pill) */
+.field-pill.is-mapped {
+  border-color: rgba(1, 181, 116, 0.35);
+  background: rgba(1, 181, 116, 0.10);
+  color: #1b2559;
+}
+:host-context(.dark) .field-pill.is-mapped {
+  border-color: rgba(1, 181, 116, 0.35);
+  background: rgba(1, 181, 116, 0.10);
+  color: #ffffff;
+}
+.field-pill.is-mapped .pill-dot {
+  background: #01b574;
+}
+
+/* State: hover (target when source selected) */
+.field-pill.target-hoverable:hover {
+  background: rgba(1, 181, 116, 0.12);
+  border-color: rgba(1, 181, 116, 0.5);
+  cursor: crosshair;
+}
+:host-context(.dark) .field-pill.target-hoverable:hover {
+  background: rgba(1, 181, 116, 0.12);
+  border-color: rgba(1, 181, 116, 0.5);
+  cursor: crosshair;
+}
+.field-pill.target-hoverable:hover .pill-dot {
+  background: #01b574;
+  animation: subtlePulse 1.5s infinite;
+}
+
+@keyframes subtlePulse {
+  0% { box-shadow: 0 0 0 0 rgba(1, 181, 116, 0.4); }
+  70% { box-shadow: 0 0 0 4px rgba(1, 181, 116, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(1, 181, 116, 0); }
+}
+
+@keyframes dashIn {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
+}

@@ -1,0 +1,180 @@
+<div class="flex gap-4 lg:gap-5 w-full h-full xl:max-w-none flex-col xl:flex-row">
+  <!-- MAIN AREA (Columns 1 & 2) -->
+  <div class="flex-1 min-w-0 grid gap-5 grid-cols-1 lg:grid-cols-[2fr_1fr]">
+    <!-- COLUMN 1 (~70% of Main Area) -->
+    <div class="flex flex-col gap-4 min-w-0">
+      <!-- Revenue Chart Card -->
+      <div class="w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px] h-auto sm:h-[415px]" @fadeInUp>
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <p class="text-[34px] font-[800] text-text-primary leading-none">$37.5K</p>
+                <p class="text-brand-green font-bold text-[13px] flex items-center gap-0.5">
+                  <lucide-icon name="arrow-up" [size]="14" [strokeWidth]="3"></lucide-icon>
+                  +2.45%
+                </p>
+              </div>
+              <p class="text-[13px] text-text-secondary font-medium">Overall Revenue</p>
+            </div>
+            <div class="flex items-center">
+              <button class="flex items-center gap-1.5 text-[14px] font-bold text-text-secondary hover:text-text-primary transition-colors bg-transparent px-2 py-2 rounded-xl"
+                      aria-label="Select time period">
+                Monthly
+                <lucide-icon name="chevron-down" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+              </button>
+            </div>
+          </div>
+          <div class="flex-1 min-h-[0px] -mx-2 mt-2" *ngIf="revenueConfig$ | async as config">
+            <canvas baseChart class="!w-full !h-full"
+              [datasets]="config.datasets"
+              [labels]="config.labels"
+              [options]="config.options || revenueOptions"
+              type="line"
+            ></canvas>
+          </div>
+      </div>
+      <!-- BOTTOM ROW in Column 1: Daily Traffic & Project Status -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:h-[380px]">
+        <!-- Daily Traffic Card -->
+        <div class="h-auto sm:h-[430px] w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px]" @fadeInUp>
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Daily Traffic</p>
+            <p class="text-[#01b574] font-bold text-[13px] flex items-center gap-0.5">
+              <lucide-icon name="arrow-up" [size]="14" [strokeWidth]="3"></lucide-icon>
+              +2.45%
+            </p>
+          </div>
+          <div class="mb-5 flex items-baseline gap-1.5">
+            <span class="text-[34px] font-[800] text-[#1b2559] dark:text-white leading-none" id="traffic-counter">{{ trafficCount }}</span>
+            <span class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Visitors</span>
+          </div>
+          <div class="flex-1 min-h-[0px]" *ngIf="trafficConfig$ | async as config">
+            <canvas baseChart class="!w-full !h-full"
+              [datasets]="config.datasets"
+              [labels]="config.labels"
+              [options]="config.options || trafficOptions"
+              type="bar"
+            ></canvas>
+          </div>
+        </div>
+        <!-- Project Status Card -->
+        <div class="h-auto sm:h-[430px] w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px]" @fadeInUp>
+          <div class="flex items-center justify-between mb-5">
+            <p class="text-[18px] font-extrabold text-[#1b2559] dark:text-white">Project Status</p>
+            <button class="w-[34px] h-[34px] rounded-xl bg-page dark:bg-page/10 text-[#01b574] flex justify-center items-center hover:bg-page/80 transition-colors" aria-label="More options">
+              <lucide-icon name="more-horizontal" [size]="18" [strokeWidth]="3"></lucide-icon>
+            </button>
+          </div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full border border-border-color bg-page flex items-center justify-center shadow-sm shrink-0">
+                <lucide-icon name="shopping-basket" [size]="20" [strokeWidth]="2.5" class="text-brand-primary"></lucide-icon>
+              </div>
+              <div>
+                <p class="text-[16px] font-bold text-text-primary">eCommerce</p>
+                <p class="text-[13px] text-text-secondary font-medium mt-0.5">UI Design</p>
+              </div>
+            </div>
+            <p class="text-[20px] font-extrabold text-text-primary shrink-0">71<span class="text-[14px] font-normal">%</span></p>
+          </div>
+          <div class="flex-1 min-h-[0px] -mx-1" *ngIf="projectConfig$ | async as config">
+            <canvas baseChart class="!w-full !h-full"
+              [datasets]="config.datasets"
+              [labels]="config.labels"
+              [options]="config.options || projectOptions"
+              type="line"
+            ></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- COLUMN 2 (~30% of Main Area) -->
+    <div class="flex flex-col gap-5 min-w-0">
+      <!-- Unified Credit Balance & Recent Transactions Card -->
+      <div class="w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-5 py-5 shadow-[var(--shadow-card)] flex flex-col gap-4 h-auto sm:h-[415px]" @fadeInUp>
+        <!-- Inner Credit Balance Card -->
+        <div class="w-full bg-[#00412a] dark:bg-[#111c44] rounded-[20px] p-6 flex flex-col relative overflow-hidden transition-all duration-300">
+          <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          <div class="flex items-center justify-between mb-2 relative z-10">
+            <span class="text-[14px] font-[500] text-white/65">Credit Balance</span>
+            <button class="text-white/70 hover:text-white transition-colors" aria-label="More options">
+              <lucide-icon name="more-horizontal" [size]="20" [strokeWidth]="3"></lucide-icon>
+            </button>
+          </div>
+          
+          <p class="text-[34px] font-[800] text-white leading-none mb-6 relative z-10 tracking-tighter">$3942.58</p>
+          
+          <!-- Compact Squiggle Wave SVG (CSS-only theme transition) -->
+          <svg class="credit-wave" width="80" height="32" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+               style="position:absolute; bottom:12px; right:14px; pointer-events:none; user-select:none;">
+            <path d="M4 18 C10 8, 16 8, 22 16 C28 24, 34 24, 40 16 C46 8, 52 8, 58 16 C64 24, 70 24, 76 18"
+                  stroke="white" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+        <!-- Recent Section -->
+        <div class="flex flex-col flex-1 min-h-[0px]">
+          <p class="text-[16px] text-text-secondary font-bold mb-4 px-1">Recent</p>
+          <div class="space-y-1 overflow-y-auto pr-1 custom-scrollbar">
+            <ng-container *ngIf="creditTransactions$ | async as transactions">
+              <div *ngFor="let t of transactions; trackBy: trackById"
+                   class="flex items-center gap-4 py-3 px-2 hover:bg-page rounded-2xl transition-all duration-200 group cursor-pointer">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 border border-transparent transition-transform group-hover:scale-110"
+                     [ngClass]="t.iconBg">
+                  <lucide-icon [name]="t.icon" [size]="20" [strokeWidth]="2.5" [ngClass]="t.iconColor"></lucide-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[15px] font-[800] text-text-primary truncate">{{ t.title }}</p>
+                  <p class="text-[13px] text-text-secondary font-bold mt-0.5 truncate">{{ t.date }}</p>
+                </div>
+                <p class="text-[16px] font-[800] text-text-primary whitespace-nowrap">
+                  -${{ getAbsAmount(t.amount) }}
+                </p>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <!-- Profit Estimation Card (Vertical centered layout) -->
+      <div class="w-full bg-card flex flex-col items-center justify-between rounded-[var(--radius-card)] p-4 sm:p-[22px] shadow-[var(--shadow-card)] border border-transparent h-auto sm:h-[415px]" @fadeInUp>
+        
+        <!-- Header Text -->
+        <div class="text-center">
+          <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white mb-1 tracking-tight">Profit Estimation</p>
+          <p class="text-[13px] text-[#a3aed0] dark:text-[#a3aed0] font-medium leading-[1.5]">Discover your profit, and learn<br>more about your business</p>
+        </div>
+        
+        <!-- Centered Donut -->
+        <div class="relative flex justify-center items-center">
+          <app-progress-ring
+            [percent]="66"
+            [size]="135"
+            [strokeWidth]="14"
+            color="#01b574"
+            [trackColor]="(themeService.isDark$ | async) ? 'rgba(255,255,255,0.05)' : '#f4f7fe'"
+          ></app-progress-ring>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+             <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-medium mb-0.5 tracking-wide">Conversion</p>
+             <p class="text-[26px] font-[800] text-[#1b2559] dark:text-white leading-none">66%</p>
+          </div>
+        </div>
+
+        <!-- Horizontal Stats Row below donut (Floating Pill) -->
+        <div class="w-full bg-white dark:bg-transparent rounded-[20px] py-[15px] px-2 flex items-center shadow-[0_12px_24px_rgba(112,144,176,0.12)] border border-transparent dark:border-white/10 dark:shadow-none">
+          <div class="flex-1 text-center flex flex-col justify-center">
+            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Est. Sales</p>
+            <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white leading-none">{{ salesCount }}</p>
+          </div>
+          <div class="w-[1px] h-9 bg-[#e2e8f0] dark:bg-white/10 mx-2"></div>
+          <div class="flex-1 text-center flex flex-col justify-center">
+            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Est. Profit</p>
+            <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white leading-none">${{ profitCount | number:'1.3-3' }}</p>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  <!-- COLUMN 3 (~28% of total width) -->
+  <app-right-panel class="shrink-0 w-full xl:w-[350px] 2xl:w-[380px]" />
+</div>
