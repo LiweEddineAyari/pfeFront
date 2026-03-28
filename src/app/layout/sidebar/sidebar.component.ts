@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { filter } from 'rxjs';
 import { LayoutService } from '../../core/services/layout.service';
 
 interface NavItem {
@@ -14,7 +15,8 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside *ngIf="{ collapsed: layoutService.isSidebarCollapsed$ | async } as state"
       class="w-full h-full flex flex-col bg-card transition-all duration-250 ease-out relative"
@@ -77,14 +79,14 @@ interface NavItem {
         <ul class="flex flex-col gap-1">
           <li *ngFor="let item of navItems; trackBy: trackByLabel">
             
-            <a href="javascript:void(0)"
-               class="flex items-center rounded-xl transition-all duration-200 cursor-pointer overflow-hidden p-3"
+            <a [routerLink]="item.path"
+               class="flex items-center rounded-xl transition-all duration-200 cursor-pointer overflow-hidden p-3 relative"
                [ngClass]="{
                  'text-text-primary bg-page': item.active && !state.collapsed,
                  'text-text-secondary hover:bg-page': !item.active || state.collapsed,
                  'justify-center': state.collapsed
                }"
-               (click)="setActive(item)">
+               (click)="handleNavClick()">
                
                <!-- Active Indicator Pill for Collapsed State -->
                <div *ngIf="item.active && state.collapsed"
@@ -148,14 +150,36 @@ export class SidebarComponent {
   router = inject(Router);
 
   navItems: NavItem[] = [
-    { label: 'Dashboards', icon: 'home', active: true, path: '/' },
+    { label: 'Dashboards', icon: 'home', active: false, path: '/' },
     { label: 'ETL Pipeline', icon: 'server', active: false, path: '/etl-pipeline' },
+    { label: 'Datamart', icon: 'database', active: false, path: '/datamart' },
   ];
 
-  setActive(item: NavItem): void {
-    this.navItems.forEach(i => i.active = false);
-    item.active = true;
-    this.router.navigate([item.path]);
+  constructor() {
+    this.updateActiveState(this.router.url);
+
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => this.updateActiveState(event.urlAfterRedirects));
+  }
+
+  handleNavClick(): void {
+    this.layoutService.closeMobileMenu();
+  }
+
+  private updateActiveState(url: string): void {
+    const normalizedUrl = this.normalizeUrl(url);
+
+    this.navItems.forEach((item) => {
+      item.active = normalizedUrl === this.normalizeUrl(item.path);
+    });
+  }
+
+  private normalizeUrl(url: string): string {
+    const [pathname] = url.split('?');
+    const normalizedPath = pathname.replace(/\/+$/, '');
+
+    return normalizedPath === '' ? '/' : normalizedPath;
   }
 
   trackByLabel(_: number, item: NavItem): string {

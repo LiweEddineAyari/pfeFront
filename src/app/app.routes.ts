@@ -20,6 +20,13 @@ export const routes: Routes = [
             (m) => m.EtlPipelineComponent
           ),
       },
+      {
+        path: 'datamart',
+        loadComponent: () =>
+          import('./pages/datamart/datamart.component').then(
+            (m) => m.DatamartComponent
+          ),
+      },
     ],
   },
 ];

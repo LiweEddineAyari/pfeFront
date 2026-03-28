@@ -1,0 +1,87 @@
+<div class="datamart-canvas-shell">
+  <section class="schema-canvas">
+    <vflow
+      #vflow
+      [view]="'auto'"
+      [nodes]="nodes()"
+      [edges]="edges()"
+      [background]="flowBackground"
+      [minZoom]="0.25"
+      [maxZoom]="3.0"
+      (nodesChanges.position)="onNodePositionChanges($event)"
+    >
+      <ng-template nodeHtml let-ctx>
+        <article
+          class="schema-node"
+          (mouseenter)="setHoveredTable(ctx.data().name)"
+          (mouseleave)="setHoveredTable(null)"
+          (click)="setSelectedTable(ctx.data().name)"
+        >
+          @for (h of getHandles(ctx.data().name); track h.id) {
+            <handle
+              [type]="h.type"
+              [position]="h.position"
+              [id]="h.id"
+              [style]="getHandleStyle(h)"
+            ></handle>
+          }
+          
+          <div class="schema-node-header">
+            <div class="schema-node-title-group">
+              <div class="schema-node-icon-wrap">
+                <lucide-icon [img]="getTableIcon(ctx.data().type)" class="schema-node-icon"></lucide-icon>
+              </div>
+              <div class="schema-node-name">{{ ctx.data().name }}</div>
+            </div>
+            <div class="schema-node-header-actions">
+              <span class="schema-node-badge">
+                {{ ctx.data().type === 'sub_dim' ? 'SUB_DIM' : ctx.data().type.toUpperCase() }}
+              </span>
+              <button
+                type="button"
+                class="schema-node-open-btn"
+                title="Open table details"
+                aria-label="Open table details"
+                (click)="$event.stopPropagation(); openTablePage(ctx.data().name)"
+              >
+                <lucide-icon [img]="icons.ChevronRight" class="schema-node-open-icon"></lucide-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="schema-node-body">
+            @for (column of ctx.data().columns; track column.name) {
+              <app-schema-column-row
+                [columnName]="column.name"
+                [columnType]="column.type"
+                [dataType]="getColumnDataType(column)"
+              ></app-schema-column-row>
+            }
+          </div>
+        </article>
+      </ng-template>
+
+      <ng-template edge let-ctx>
+        <svg:path
+          [attr.d]="ctx.path()"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          [attr.stroke]="getEdgeStroke(ctx.edge)"
+          [attr.stroke-width]="getEdgeWidth(ctx.edge)"
+          [attr.stroke-dasharray]="getEdgeDasharray(ctx.edge)"
+          [attr.opacity]="getEdgeOpacity(ctx.edge)"
+          [attr.filter]="getEdgeFilter(ctx.edge)"
+        />
+      </ng-template>
+    </vflow>
+  </section>
+
+  <div class="canvas-hint">
+    <span>Scroll to zoom</span>
+    <span class="hint-divider">·</span>
+    <span>Drag to pan</span>
+    <span class="hint-divider">·</span>
+    <span>Read-only schema map</span>
+  </div>
+</div>

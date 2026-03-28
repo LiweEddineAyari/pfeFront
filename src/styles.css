@@ -258,7 +258,7 @@ html.dark .credit-wave path {
   background: var(--bg-card);
   border: 1px solid var(--color-border);
   transition: transform 0.3s ease, width 0.25s ease;
-  z-index: 200;
+  z-index: 360;
   box-shadow: var(--shadow-card);
   margin: 16px 0 16px 16px;
   border-radius: 20px;
@@ -275,13 +275,18 @@ html.dark .credit-wave path {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 199;
+  z-index: 350;
   transition: opacity 0.3s ease;
 }
 
 /* Main content: full width on mobile */
 .main-content {
   flex: 1;
+  margin-left: 0;
+  width: 100%;
+}
+
+.main-content.main-datamart-fullscreen {
   margin-left: 0;
   width: 100%;
 }

@@ -33,7 +33,7 @@ import { combineLatest, map, Observable } from 'rxjs';
             [class.main-sidebar-expanded]="!(layoutService.isSidebarCollapsed$ | async)"
             [class.main-sidebar-collapsed]="(layoutService.isSidebarCollapsed$ | async)">
         
-        <div class="sticky top-4 z-[100] mx-3 sm:mx-[20px] mb-6 flex">
+        <div class="sticky top-4 z-[340] mx-3 sm:mx-[20px] mb-6 flex">
            <app-topbar class="w-full flex-1"></app-topbar>
         </div>
         
