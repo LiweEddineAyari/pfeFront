@@ -145,7 +145,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             data: data1,
             borderColor: this.getThemeColor('--chart-green'),
             fill: false,
-            label: 'Revenue',
+            label: 'Revenu',
             borderWidth: 4.5,
           },
           {
@@ -225,7 +225,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
               borderColor: this.getThemeColor('--chart-green'),
               backgroundColor: 'transparent',
               fill: false,
-              label: 'Progress',
+              label: 'Progression',
               borderWidth: 2.5,
             },
           ],

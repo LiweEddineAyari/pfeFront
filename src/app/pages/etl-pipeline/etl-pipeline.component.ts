@@ -61,28 +61,28 @@ export class EtlPipelineComponent {
     return true;
   }
 
-  loadingMessages = ['Please wait...', 'Reading your file...', 'Loading rows...', 'Mapping columns...', 'Processing data...', 'This may take a moment...'];
+  loadingMessages = ['Veuillez patienter...', 'Lecture de votre fichier...', 'Chargement des lignes...', 'Mappage des colonnes...', 'Traitement des donnees...', 'Cela peut prendre un instant...'];
   currentLoadingMessage = this.loadingMessages[0];
   msgInterval: any;
 
-  qualityMessages = ['Running null checks...', 'Detecting duplicates...', 'Validating data types...', 'Checking referential integrity...', 'Cleaning staging tables...', 'Almost done, please wait...'];
+  qualityMessages = ['Execution des controles de valeurs nulles...', 'Detection des doublons...', 'Validation des types de donnees...', 'Verification de l\'integrite referentielle...', 'Nettoyage des tables de staging...', 'Presque termine, veuillez patienter...'];
   qualityMsgInterval: any;
 
   transformMessages = [
-    'Applying business rules...',
-    'Normalizing data fields...',
-    'Enriching staging records...',
-    'Running transformations...',
-    'Almost done, please wait...'
+    'Application des regles metier...',
+    'Normalisation des champs de donnees...',
+    'Enrichissement des enregistrements de staging...',
+    'Execution des transformations...',
+    'Presque termine, veuillez patienter...'
   ];
   transformMsgInterval: any;
 
   datamartMessages = [
-    'Loading dimension tables...',
-    'Populating fact tables...',
-    'Building datamart structure...',
-    'Linking dimensions...',
-    'Almost done, please wait...'
+    'Chargement des tables de dimension...',
+    'Alimentation des tables de faits...',
+    'Construction de la structure du datamart...',
+    'Liaison des dimensions...',
+    'Presque termine, veuillez patienter...'
   ];
   datamartMsgInterval: any;
 
@@ -177,7 +177,7 @@ export class EtlPipelineComponent {
 
       this.setStep('quality-result');
     } catch (err: any) {
-      this.qualityError = err.message ?? 'Quality check failed';
+      this.qualityError = err.message ?? 'Echec du controle qualite';
       this.setStep('quality-result');
     } finally {
       this.stopQualityMessages();
@@ -203,7 +203,7 @@ export class EtlPipelineComponent {
 
       this.setStep('transform-result');
     } catch (err: any) {
-      this.transformError = err.message ?? 'Transform failed';
+      this.transformError = err.message ?? 'Echec de la transformation';
       this.setStep('transform-result');
     } finally {
       this.stopTransformMessages();
@@ -232,7 +232,7 @@ export class EtlPipelineComponent {
 
       this.setStep('datamart-result');
     } catch (err: any) {
-      this.datamartError = err.message ?? 'Datamart load failed';
+      this.datamartError = err.message ?? 'Echec du chargement du datamart';
       this.setStep('datamart-result');
     } finally {
       this.stopDatamartMessages();
@@ -244,14 +244,14 @@ export class EtlPipelineComponent {
     if (!this.qualityComptaResult) return;
     const r = this.qualityComptaResult;
     const rows = [
-      ['Check', 'Count'],
-      ['Null issues', r.nullCheckCount],
-      ['Duplicate issues', r.duplicateCount],
-      ['Type issues', r.typeCheckCount],
-      ['Contrat relation issues', r.contratRelationCheck],
-      ['Tiers relation issues', r.tiersRelationCheck],
-      ['Balance sum', r.balanceSum],
-      ['Total issues', r.totalIssues],
+      ['Controle', 'Nombre'],
+      ['Problemes de valeurs nulles', r.nullCheckCount],
+      ['Problemes de doublons', r.duplicateCount],
+      ['Problemes de type', r.typeCheckCount],
+      ['Problemes de relation contrat', r.contratRelationCheck],
+      ['Problemes de relation tiers', r.tiersRelationCheck],
+      ['Somme balance', r.balanceSum],
+      ['Total des problemes', r.totalIssues],
     ];
     const csv = rows.map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -305,13 +305,13 @@ export class EtlPipelineComponent {
       const result = await config.fetch();
 
       if (!result.rows || result.rows.length === 0) {
-        console.warn('No rows returned for', field);
+        console.warn('Aucune ligne retournee pour', field);
         return;
       }
 
       exportToExcel(result.rows, config.filename);
     } catch (err: any) {
-      console.error('Download failed for', field, err);
+      console.error('Echec du telechargement pour', field, err);
     } finally {
       this.downloadingFields.delete(field as string);
       this.cdr.markForCheck();
@@ -383,31 +383,31 @@ export class EtlPipelineComponent {
   steps = [
     {
       key:         'upload',
-      title:       'Upload & Mapping',
+      title:       'Televersement et mapping',
       icon:        'file-up',          // lucide
-      description: 'Upload your source file (Excel, JSON or SQL), select the data type and map your file columns to the database target fields.',
-      stepLabel:   'Step 1 of 4'
+      description: 'Televersez votre fichier source (Excel, JSON ou SQL), selectionnez le type de donnees et mappez les colonnes du fichier vers les champs cibles de la base.',
+      stepLabel:   'Etape 1 sur 4'
     },
     {
       key:         'staging',
-      title:       'Load to Staging',
+      title:       'Chargement vers le staging',
       icon:        'database-backup',  // lucide
-      description: 'Validated and mapped data is extracted and loaded into the raw staging tables (stg_tiers_raw, stg_contrat_raw, stg_compta_raw).',
-      stepLabel:   'Step 2 of 4'
+      description: 'Les donnees validees et mappees sont extraites puis chargees dans les tables de staging brutes (stg_tiers_raw, stg_contrat_raw, stg_compta_raw).',
+      stepLabel:   'Etape 2 sur 4'
     },
     {
       key:         'quality',
-      title:       'Quality & Transform',
+      title:       'Qualite et transformation',
       icon:        'shield-check',     // lucide
-      description: 'Null checks, duplicate removal, type validation, referential integrity checks and business rule transformations run on staging data.',
-      stepLabel:   'Step 3 of 4'
+      description: 'Les controles de valeurs nulles, la suppression des doublons, la validation des types, les verifications d\'integrite referentielle et les transformations des regles metier sont executes sur les donnees de staging.',
+      stepLabel:   'Etape 3 sur 4'
     },
     {
       key:         'datamart',
       title:       'Datamart',
       icon:        'layout-dashboard', // lucide
-      description: 'Cleaned, transformed data is loaded into dimension and fact tables: dim_client, dim_contrat, fact_balance and all sub-dims.',
-      stepLabel:   'Step 4 of 4'
+      description: 'Les donnees nettoyees et transformees sont chargees dans les tables de dimension et de faits : dim_client, dim_contrat, fact_balance et toutes les sous-dimensions.',
+      stepLabel:   'Etape 4 sur 4'
     }
   ];
 
@@ -448,23 +448,23 @@ export class EtlPipelineComponent {
 
   getErrorTitle(status: string): string {
     switch (status) {
-      case 'empty': return 'Empty file';
-      case 'no-columns': return 'No columns detected';
-      case 'parse-error': return 'File could not be read';
-      case 'unsupported': return 'Unsupported file format';
-      case 'too-large': return 'File too large';
-      default: return 'Extraction Error';
+      case 'empty': return 'Fichier vide';
+      case 'no-columns': return 'Aucune colonne detectee';
+      case 'parse-error': return 'Le fichier n\'a pas pu etre lu';
+      case 'unsupported': return 'Format de fichier non pris en charge';
+      case 'too-large': return 'Fichier trop volumineux';
+      default: return 'Erreur d\'extraction';
     }
   }
 
   getErrorHint(status: string): string {
     switch (status) {
-      case 'empty': return 'Try uploading a file with data rows.';
-      case 'no-columns': return 'Make sure row 1 contains column headers (Excel) or your JSON contains objects with keys.';
-      case 'parse-error': return 'The file may be corrupted. Try re-exporting it.';
-      case 'unsupported': return 'Use .xlsx, .xls, .json or .sql files only.';
-      case 'too-large': return 'Split the file into smaller chunks under 50MB.';
-      default: return 'Please review the file and try again.';
+      case 'empty': return 'Essayez de televerser un fichier contenant des lignes de donnees.';
+      case 'no-columns': return 'Assurez-vous que la ligne 1 contient les en-tetes de colonnes (Excel) ou que votre JSON contient des objets avec des cles.';
+      case 'parse-error': return 'Le fichier est peut-etre corrompu. Essayez de le re-exporter.';
+      case 'unsupported': return 'Utilisez uniquement des fichiers .xlsx, .xls, .json ou .sql.';
+      case 'too-large': return 'Decoupez le fichier en parties plus petites de moins de 50 Mo.';
+      default: return 'Veuillez verifier le fichier puis reessayer.';
     }
   }
 
@@ -490,7 +490,7 @@ export class EtlPipelineComponent {
     const diff = Math.abs(expected - got);
     
     if (diff > 3) {
-      return `Your file has ${got} columns but ${this.fileType} schema expects ${expected}. Some fields may remain unmapped.`;
+      return `Votre fichier contient ${got} colonnes, mais le schema ${this.fileType} en attend ${expected}. Certains champs peuvent rester non mappes.`;
     }
     return null;
   }
@@ -526,14 +526,14 @@ export class EtlPipelineComponent {
       if (requestSeq !== this.uploadRequestSeq) return;
 
       this.uploadResult = result;
-      console.log('Upload result:', result);
+      console.log('Resultat du televersement :', result);
       this.stopLoadingMessages();
       this.setStep('result');
       this.cdr.detectChanges();
 
     } catch (err: any) {
       if (requestSeq !== this.uploadRequestSeq) return;
-      this.uploadError = err.message || 'An unknown error occurred';
+      this.uploadError = err.message || 'Une erreur inconnue est survenue';
       this.stopLoadingMessages();
       this.setStep('result');
       this.cdr.detectChanges();
@@ -649,13 +649,13 @@ export class EtlPipelineComponent {
 
   getErrorDisplayMessage(err: string): string {
     if (err.toLowerCase().includes('timed out')) {
-      return 'The upload timed out. The file may be too large — try splitting it into smaller chunks.';
+      return 'Le televersement a expire. Le fichier est peut-etre trop volumineux - essayez de le decouper en parties plus petites.';
     }
     if (err.toLowerCase().includes('failed to fetch')) {
-      return 'Could not reach the server. Please check your connection and try again.';
+      return 'Impossible de joindre le serveur. Verifiez votre connexion puis reessayez.';
     }
     if (err.includes('500')) {
-      return 'An internal server error occurred. Please try again or contact support.';
+      return 'Une erreur interne du serveur est survenue. Veuillez reessayer ou contacter le support.';
     }
     return err;
   }

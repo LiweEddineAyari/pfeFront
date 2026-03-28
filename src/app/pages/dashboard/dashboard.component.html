@@ -14,12 +14,12 @@
                   +2.45%
                 </p>
               </div>
-              <p class="text-[13px] text-text-secondary font-medium">Overall Revenue</p>
+              <p class="text-[13px] text-text-secondary font-medium">Revenu global</p>
             </div>
             <div class="flex items-center">
               <button class="flex items-center gap-1.5 text-[14px] font-bold text-text-secondary hover:text-text-primary transition-colors bg-transparent px-2 py-2 rounded-xl"
-                      aria-label="Select time period">
-                Monthly
+                      aria-label="Selectionner la periode">
+                Mensuel
                 <lucide-icon name="chevron-down" [size]="18" [strokeWidth]="2.5"></lucide-icon>
               </button>
             </div>
@@ -38,7 +38,7 @@
         <!-- Daily Traffic Card -->
         <div class="h-auto sm:h-[430px] w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px]" @fadeInUp>
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Daily Traffic</p>
+            <p class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Trafic quotidien</p>
             <p class="text-[#01b574] font-bold text-[13px] flex items-center gap-0.5">
               <lucide-icon name="arrow-up" [size]="14" [strokeWidth]="3"></lucide-icon>
               +2.45%
@@ -46,7 +46,7 @@
           </div>
           <div class="mb-5 flex items-baseline gap-1.5">
             <span class="text-[34px] font-[800] text-[#1b2559] dark:text-white leading-none" id="traffic-counter">{{ trafficCount }}</span>
-            <span class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Visitors</span>
+            <span class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Visiteurs</span>
           </div>
           <div class="flex-1 min-h-[0px]" *ngIf="trafficConfig$ | async as config">
             <canvas baseChart class="!w-full !h-full"
@@ -60,8 +60,8 @@
         <!-- Project Status Card -->
         <div class="h-auto sm:h-[430px] w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px]" @fadeInUp>
           <div class="flex items-center justify-between mb-5">
-            <p class="text-[18px] font-extrabold text-[#1b2559] dark:text-white">Project Status</p>
-            <button class="w-[34px] h-[34px] rounded-xl bg-page dark:bg-page/10 text-[#01b574] flex justify-center items-center hover:bg-page/80 transition-colors" aria-label="More options">
+            <p class="text-[18px] font-extrabold text-[#1b2559] dark:text-white">Statut du projet</p>
+            <button class="w-[34px] h-[34px] rounded-xl bg-page dark:bg-page/10 text-[#01b574] flex justify-center items-center hover:bg-page/80 transition-colors" aria-label="Plus d'options">
               <lucide-icon name="more-horizontal" [size]="18" [strokeWidth]="3"></lucide-icon>
             </button>
           </div>
@@ -72,7 +72,7 @@
               </div>
               <div>
                 <p class="text-[16px] font-bold text-text-primary">eCommerce</p>
-                <p class="text-[13px] text-text-secondary font-medium mt-0.5">UI Design</p>
+                <p class="text-[13px] text-text-secondary font-medium mt-0.5">Conception UI</p>
               </div>
             </div>
             <p class="text-[20px] font-extrabold text-text-primary shrink-0">71<span class="text-[14px] font-normal">%</span></p>
@@ -97,8 +97,8 @@
           <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           
           <div class="flex items-center justify-between mb-2 relative z-10">
-            <span class="text-[14px] font-[500] text-white/65">Credit Balance</span>
-            <button class="text-white/70 hover:text-white transition-colors" aria-label="More options">
+            <span class="text-[14px] font-[500] text-white/65">Solde de credit</span>
+            <button class="text-white/70 hover:text-white transition-colors" aria-label="Plus d'options">
               <lucide-icon name="more-horizontal" [size]="20" [strokeWidth]="3"></lucide-icon>
             </button>
           </div>
@@ -114,7 +114,7 @@
         </div>
         <!-- Recent Section -->
         <div class="flex flex-col flex-1 min-h-[0px]">
-          <p class="text-[16px] text-text-secondary font-bold mb-4 px-1">Recent</p>
+          <p class="text-[16px] text-text-secondary font-bold mb-4 px-1">Recents</p>
           <div class="space-y-1 overflow-y-auto pr-1 custom-scrollbar">
             <ng-container *ngIf="creditTransactions$ | async as transactions">
               <div *ngFor="let t of transactions; trackBy: trackById"
@@ -140,8 +140,8 @@
         
         <!-- Header Text -->
         <div class="text-center">
-          <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white mb-1 tracking-tight">Profit Estimation</p>
-          <p class="text-[13px] text-[#a3aed0] dark:text-[#a3aed0] font-medium leading-[1.5]">Discover your profit, and learn<br>more about your business</p>
+          <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white mb-1 tracking-tight">Estimation du profit</p>
+          <p class="text-[13px] text-[#a3aed0] dark:text-[#a3aed0] font-medium leading-[1.5]">Decouvrez votre profit, et apprenez<br>davantage sur votre activite</p>
         </div>
         
         <!-- Centered Donut -->
@@ -162,12 +162,12 @@
         <!-- Horizontal Stats Row below donut (Floating Pill) -->
         <div class="w-full bg-white dark:bg-transparent rounded-[20px] py-[15px] px-2 flex items-center shadow-[0_12px_24px_rgba(112,144,176,0.12)] border border-transparent dark:border-white/10 dark:shadow-none">
           <div class="flex-1 text-center flex flex-col justify-center">
-            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Est. Sales</p>
+            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Ventes estimees</p>
             <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white leading-none">{{ salesCount }}</p>
           </div>
           <div class="w-[1px] h-9 bg-[#e2e8f0] dark:bg-white/10 mx-2"></div>
           <div class="flex-1 text-center flex flex-col justify-center">
-            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Est. Profit</p>
+            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Profit estime</p>
             <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white leading-none">${{ profitCount | number:'1.3-3' }}</p>
           </div>
         </div>

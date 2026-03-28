@@ -13,9 +13,9 @@
       <!-- ============================================== -->
       <div class="w-[9.0909%] flex flex-col pt-16 pb-16 px-12">
         <div class="mb-16 text-center z-10">
-          <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">ETL Pipeline — How it works</h2>
+          <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">Pipeline ETL - Comment ca marche</h2>
           <p class="text-text-secondary text-[18px] max-w-4xl mx-auto leading-relaxed dark:text-[#a3aed1]">
-            Upload your source data and let the pipeline handle extraction, quality checks, transformation, and datamart loading automatically.
+            Televersez vos donnees source et laissez le pipeline gerer automatiquement l'extraction, les controles qualite, la transformation et le chargement du datamart.
           </p>
         </div>
 
@@ -50,7 +50,7 @@
         <div class="mt-20 flex justify-center relative z-10">
           <button (click)="setStep('form')" class="flex items-center gap-2.5 bg-brand-primary text-white px-10 py-3.5 rounded-[14px] font-bold text-[16px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group">
             <lucide-icon name="play" [size]="20" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
-            Start Pipeline
+            Demarrer le pipeline
           </button>
         </div>
       </div>
@@ -63,8 +63,8 @@
         <!-- Form Header -->
         <div class="flex justify-between items-start mb-8 flex-shrink-0">
           <div>
-            <h2 class="text-[22px] font-bold text-text-primary mb-1">Upload & Extract</h2>
-            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Step 1 of 4 — Configure your data source</p>
+            <h2 class="text-[22px] font-bold text-text-primary mb-1">Televerser et extraire</h2>
+            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 1 sur 4 - Configurez votre source de donnees</p>
             
             <!-- Progress Dots -->
             <div class="flex items-center gap-2 mt-4">
@@ -78,7 +78,7 @@
           <button (click)="setStep('intro')"
             class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group">
             <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
-            Back
+            Retour
           </button>
         </div>
 
@@ -92,7 +92,7 @@
               
               <!-- Segmented Pill Selector -->
               <div class="flex flex-col mb-6" *ngIf="!isSqlFile()">
-                <label class="form-label">Data type</label>
+                <label class="form-label">Type de donnees</label>
                 <div class="segmented-control">
                   <button type="button" class="segment-btn" [class.active]="fileType === 'TIERS'" (click)="fileType = 'TIERS'">TIERS</button>
                   <button type="button" class="segment-btn" [class.active]="fileType === 'CONTRAT'" (click)="fileType = 'CONTRAT'">CONTRAT</button>
@@ -102,7 +102,7 @@
 
               <!-- Balance Date Conditional -->
               <div class="flex flex-col date-row-appear" *ngIf="!isSqlFile() && fileType === 'COMPTA'">
-                <label class="form-label">Balance Date</label>
+                <label class="form-label">Date de balance</label>
                 <div class="flex items-center gap-2">
                   <input #ddInput id="dd" type="text" maxlength="2" placeholder="DD" 
                          [ngModel]="dd" (input)="onDdInput($event, mmInput)" (keydown.backspace)="onBackspace($event, null)"
@@ -118,7 +118,7 @@
                   <lucide-icon *ngIf="isDateValid" name="check-circle-2" [size]="16" class="text-[#01b574] ml-2"></lucide-icon>
                 </div>
                 <div class="mt-1.5 text-[11px] text-[#a3aed0] dark:text-white/30 leading-snug">
-                  The balance date defines the accounting period cutoff for this COMPTA import.
+                  La date de balance definit la date limite de la periode comptable pour cet import COMPTA.
                 </div>
               </div>
 
@@ -126,11 +126,11 @@
               <div *ngIf="isSqlFile()" class="sql-info-card date-row-appear mb-6">
                  <div class="flex items-center gap-3 mb-2">
                    <lucide-icon name="check" [size]="16" class="text-[#01b574]"></lucide-icon>
-                   <span class="font-bold">SQL file detected</span>
+                   <span class="font-bold">Fichier SQL detecte</span>
                  </div>
-                 <div class="mb-3 opacity-80">Type is auto-configured</div>
-                 <div class="opacity-80">File: {{ selectedFile?.name }}</div>
-                 <div class="opacity-80">Type: SQL (auto)</div>
+                 <div class="mb-3 opacity-80">Le type est configure automatiquement</div>
+                 <div class="opacity-80">Fichier : {{ selectedFile?.name }}</div>
+                 <div class="opacity-80">Type : SQL (auto)</div>
               </div>
 
             </div>
@@ -153,13 +153,13 @@
                  </lucide-icon>
                  
                  <p class="text-[18px] font-bold mb-2 text-text-primary dark:text-white relative z-10">
-                   Drop your files here
+                   Deposez vos fichiers ici
                  </p>
                  <p class="text-[15px] font-medium text-[#01b574] mb-3 relative z-10">
-                   or click to browse
+                   ou cliquez pour parcourir
                  </p>
                  <p class="text-[13px] text-text-secondary dark:text-[#8f9bba] font-medium px-4 relative z-10">
-                   .xlsx, .xls, .json and .sql files are allowed via this portal.
+                   Les fichiers .xlsx, .xls, .json et .sql sont autorises via ce portail.
                  </p>
                  
                  <div *ngIf="selectedFile && !extractionError && !extractionResult" class="absolute w-full bottom-0 left-0 pt-6 pb-6 bg-[#01b574]/10 border-t border-[#01b574]/20 text-center animate-fade-in-up">
@@ -186,7 +186,7 @@
                    
                    <!-- Raw Preview inside error -->
                    <div *ngIf="extractionError.rawPreview" class="code-preview mt-2.5 bg-black/5 dark:bg-black/30 rounded-lg p-2.5">
-                     <p class="code-label text-[10px] font-bold uppercase text-red-900/50 dark:text-white/40 mb-1.5 tracking-wider">File preview:</p>
+                     <p class="code-label text-[10px] font-bold uppercase text-red-900/50 dark:text-white/40 mb-1.5 tracking-wider">Apercu du fichier :</p>
                      <code class="block font-mono text-[11px] text-red-900/80 dark:text-white/50 whitespace-pre-wrap break-all max-h-[80px] overflow-hidden">{{ extractionError.rawPreview }}</code>
                    </div>
 
@@ -204,10 +204,10 @@
                    <div class="flex items-center gap-2">
                      <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
                      <span class="preview-label text-[13px] font-bold text-[#01b574]">
-                       {{ extractionResult?.columns?.length }} columns detected
+                       {{ extractionResult?.columns?.length }} colonnes detectees
                      </span>
                      <span class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
-                       from {{ extractionResult?.rowCount }} rows
+                       a partir de {{ extractionResult?.rowCount }} lignes
                      </span>
                    </div>
                    <span class="file-type-badge text-[10px] font-extrabold tracking-[0.8px] px-2 py-0.5 rounded-md bg-[#01b574]/10 text-[#01b574] border border-[#01b574]/20 uppercase">
@@ -223,7 +223,7 @@
                    </div>
                    <div *ngIf="(extractionResult?.columns?.length || 0) > 12" 
                         class="col-chip overflow-chip text-[12px] font-bold py-1 px-2.5 rounded-md bg-[#01b574]/10 border border-[#01b574]/20 text-[#01b574] whitespace-nowrap">
-                     +{{ (extractionResult?.columns?.length || 0) - 12 }} more
+                     +{{ (extractionResult?.columns?.length || 0) - 12 }} de plus
                    </div>
                  </div>
                </div>
@@ -246,13 +246,13 @@
                   [ngClass]="{'opacity-50 cursor-not-allowed shadow-none': !canContinueToMapping}">
             
             <ng-container *ngIf="!isExtracting">
-              Continue to Mapping
+              Continuer vers le mapping
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
             </ng-container>
             
             <ng-container *ngIf="isExtracting">
               <div class="spinner-sm"></div>
-              Analyzing file...
+              Analyse du fichier...
             </ng-container>
             
           </button>
@@ -288,7 +288,7 @@
             <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">{{ selectedFile?.name }}</span>
           </div>
 
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Processing your file</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Traitement de votre fichier</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
             {{ currentLoadingMessage }}
           </p>
@@ -307,11 +307,11 @@
           <div class="w-24 h-24 rounded-full bg-[#01b574] flex items-center justify-center mb-6 animate-fade-in-scale shadow-[0_0_40px_rgba(1,181,116,0.25)]">
             <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
           </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-2">Upload Complete!</h3>
-          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10">{{ uploadResult.rowCount | number }} rows loaded successfully</p>
+          <h3 class="text-[28px] font-bold text-text-primary mb-2">Televersement termine !</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10">{{ uploadResult.rowCount | number }} lignes chargees avec succes</p>
           
           <button (click)="runQuality()" class="flex items-center justify-center gap-2 bg-[#01b574] text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] mb-4 w-[280px]">
-            Continue to Quality
+            Continuer vers la qualite
             <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
           </button>
 
@@ -323,17 +323,17 @@
           <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
             <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
           </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-3">Upload Failed</h3>
+          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec du televersement</h3>
           <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(uploadError) }}</p>
           
           <div class="flex flex-col gap-3 w-[280px]">
             <button (click)="setStep('mapping')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
               <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Back to Mapping
+              Retour au mapping
             </button>
             <button (click)="retryUpload()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
               <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retry
+              Reessayer
             </button>
           </div>
         </div>
@@ -347,10 +347,10 @@
         <div class="flex flex-col items-center justify-center p-12 w-full h-full">
           <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ fileType || 'ALL ENTITIES' }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Quality Check</span>
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ fileType || 'TOUTES LES ENTITES' }}</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Controle qualite</span>
           </div>
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Running quality checks</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Execution des controles qualite</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
             {{ qualityLoadingMessage }}
           </p>
@@ -367,8 +367,8 @@
           
           <div class="px-12 pt-10 pb-6 flex flex-shrink-0 justify-between items-center">
             <div class="flex flex-col gap-1">
-              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Quality Complete</h2>
-              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Step 3 of 4 — Staging data validated</p>
+              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Qualite terminee</h2>
+              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 3 sur 4 - Donnees de staging validees</p>
               <div class="flex items-center gap-2 mt-2">
                 <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
                 <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
@@ -380,7 +380,7 @@
               <div class="w-10 h-10 rounded-full bg-[#01b574]/10 border border-[#01b574]/30 flex items-center justify-center">
                 <lucide-icon name="check-circle-2" [size]="22" class="text-[#01b574]"></lucide-icon>
               </div>
-              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">DONE</span>
+              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">TERMINE</span>
             </div>
           </div>
 
@@ -399,30 +399,30 @@
               </div>
               <div class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Null deleted</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Nuls supprimes</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.nullCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.nullCheckDeleted === 0}">{{ qualityTiersResult.nullCheckDeleted }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Duplicates removed</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Doublons supprimes</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.duplicateDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.duplicateDeleted === 0}">{{ qualityTiersResult.duplicateDeleted }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Type errors</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Erreurs de type</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.typeCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.typeCheckDeleted === 0}">{{ qualityTiersResult.typeCheckDeleted }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total removed</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total supprime</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.totalDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.totalDeleted === 0}">{{ qualityTiersResult.totalDeleted }}</div>
                 </div>
               </div>
               <div class="px-6 pb-5">
                 <div *ngIf="qualityTiersResult.totalDeleted === 0" class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">No issues detected — data is clean</span>
+                  <span class="text-[#01b574] text-[13px] font-bold">Aucun probleme detecte - les donnees sont propres</span>
                 </div>
                 <div *ngIf="qualityTiersResult.totalDeleted > 0" class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="alert-triangle" [size]="14" class="text-amber-500 dark:text-amber-400"></lucide-icon>
-                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityTiersResult.totalDeleted }} rows removed during quality check</span>
+                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityTiersResult.totalDeleted }} lignes supprimees lors du controle qualite</span>
                 </div>
               </div>
             </div>
@@ -441,30 +441,30 @@
               </div>
               <div class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Null deleted</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Nuls supprimes</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.nullCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.nullCheckDeleted === 0}">{{ qualityContratResult.nullCheckDeleted }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Duplicates removed</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Doublons supprimes</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.duplicateDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.duplicateDeleted === 0}">{{ qualityContratResult.duplicateDeleted }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Type errors</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Erreurs de type</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.typeCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.typeCheckDeleted === 0}">{{ qualityContratResult.typeCheckDeleted }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total removed</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total supprime</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.totalDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.totalDeleted === 0}">{{ qualityContratResult.totalDeleted }}</div>
                 </div>
               </div>
               <div class="px-6 pb-5">
                 <div *ngIf="qualityContratResult.totalDeleted === 0" class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">No issues detected — data is clean</span>
+                  <span class="text-[#01b574] text-[13px] font-bold">Aucun probleme detecte - les donnees sont propres</span>
                 </div>
                 <div *ngIf="qualityContratResult.totalDeleted > 0" class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="alert-triangle" [size]="14" class="text-amber-500 dark:text-amber-400"></lucide-icon>
-                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityContratResult.totalDeleted }} rows removed during quality check</span>
+                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityContratResult.totalDeleted }} lignes supprimees lors du controle qualite</span>
                 </div>
               </div>
             </div>
@@ -483,14 +483,14 @@
               </div>
               <div class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Null issues</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Problemes de valeurs nulles</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.nullCheckCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.nullCheckCount === 0}">{{ qualityComptaResult.nullCheckCount }}</span>
                     <button
                       *ngIf="qualityComptaResult.nullCheckCount > 0"
                       (click)="downloadComptaField('nullCheckCount')"
                       [disabled]="downloadingFields.has('nullCheckCount')"
-                      title="Download null issues as Excel"
+                      title="Telecharger les problemes de valeurs nulles au format Excel"
                       class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
                       [class.opacity-70]="!downloadingFields.has('nullCheckCount')">
                       <div *ngIf="downloadingFields.has('nullCheckCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
@@ -499,14 +499,14 @@
                   </div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Duplicate issues</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Problemes de doublons</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.duplicateCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.duplicateCount === 0}">{{ qualityComptaResult.duplicateCount }}</span>
                     <button
                       *ngIf="qualityComptaResult.duplicateCount > 0"
                       (click)="downloadComptaField('duplicateCount')"
                       [disabled]="downloadingFields.has('duplicateCount')"
-                      title="Download duplicate issues as Excel"
+                      title="Telecharger les problemes de doublons au format Excel"
                       class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
                       [class.opacity-70]="!downloadingFields.has('duplicateCount')">
                       <div *ngIf="downloadingFields.has('duplicateCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
@@ -515,14 +515,14 @@
                   </div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Type issues</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Problemes de type</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.typeCheckCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.typeCheckCount === 0}">{{ qualityComptaResult.typeCheckCount }}</span>
                     <button
                       *ngIf="qualityComptaResult.typeCheckCount > 0"
                       (click)="downloadComptaField('typeCheckCount')"
                       [disabled]="downloadingFields.has('typeCheckCount')"
-                      title="Download type issues as Excel"
+                      title="Telecharger les problemes de type au format Excel"
                       class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
                       [class.opacity-70]="!downloadingFields.has('typeCheckCount')">
                       <div *ngIf="downloadingFields.has('typeCheckCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
@@ -531,18 +531,18 @@
                   </div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Balance sum</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Somme balance</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.balanceSum > 0, 'text-gray-900 dark:text-white': qualityComptaResult.balanceSum === 0}">{{ qualityComptaResult.balanceSum }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Contrat relations</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Relations contrat</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.contratRelationCheck > 0, 'text-gray-900 dark:text-white': qualityComptaResult.contratRelationCheck === 0}">{{ qualityComptaResult.contratRelationCheck }}</span>
                     <button
                       *ngIf="qualityComptaResult.contratRelationCheck > 0"
                       (click)="downloadComptaField('contratRelationCheck')"
                       [disabled]="downloadingFields.has('contratRelationCheck')"
-                      title="Download contrat relation issues as Excel"
+                      title="Telecharger les problemes de relation contrat au format Excel"
                       class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
                       [class.opacity-70]="!downloadingFields.has('contratRelationCheck')">
                       <div *ngIf="downloadingFields.has('contratRelationCheck')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
@@ -551,14 +551,14 @@
                   </div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Tiers relations</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Relations tiers</div>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.tiersRelationCheck > 0, 'text-gray-900 dark:text-white': qualityComptaResult.tiersRelationCheck === 0}">{{ qualityComptaResult.tiersRelationCheck }}</span>
                     <button
                       *ngIf="qualityComptaResult.tiersRelationCheck > 0"
                       (click)="downloadComptaField('tiersRelationCheck')"
                       [disabled]="downloadingFields.has('tiersRelationCheck')"
-                      title="Download tiers relation issues as Excel"
+                      title="Telecharger les problemes de relation tiers au format Excel"
                       class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
                       [class.opacity-70]="!downloadingFields.has('tiersRelationCheck')">
                       <div *ngIf="downloadingFields.has('tiersRelationCheck')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
@@ -567,18 +567,18 @@
                   </div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total issues</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total des problemes</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.totalIssues > 0, 'text-gray-900 dark:text-white': qualityComptaResult.totalIssues === 0}">{{ qualityComptaResult.totalIssues }}</div>
                 </div>
               </div>
               <div class="px-6 pb-5">
                 <div *ngIf="qualityComptaResult.totalIssues === 0" class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">No issues detected — data is clean</span>
+                  <span class="text-[#01b574] text-[13px] font-bold">Aucun probleme detecte - les donnees sont propres</span>
                 </div>
                 <div *ngIf="qualityComptaResult.totalIssues > 0" class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="alert-triangle" [size]="14" class="text-amber-500 dark:text-amber-400"></lucide-icon>
-                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityComptaResult.totalIssues }} rows found during quality check</span>
+                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityComptaResult.totalIssues }} lignes trouvees lors du controle qualite</span>
                 </div>
               </div>
             </div>
@@ -587,14 +587,14 @@
           <div class="px-12 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto backdrop-blur-sm z-10 w-full">
             <button (click)="setStep('result')" class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors">
               <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-              Back
+              Retour
             </button>
             <button *ngIf="mappingFileType !== 'COMPTA'" (click)="runTransform()" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
-              Continue to Transform
+              Continuer vers la transformation
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
             </button>
             <button *ngIf="mappingFileType === 'COMPTA'" (click)="runDatamart()" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
-              Continue to Datamart
+              Continuer vers le datamart
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
             </button>
           </div>
@@ -606,17 +606,17 @@
           <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
             <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
           </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-3">Quality Check Failed</h3>
+          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec du controle qualite</h3>
           <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(qualityError) }}</p>
           
           <div class="flex flex-col gap-3 w-[280px]">
             <button (click)="setStep('result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
               <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Back
+              Retour
             </button>
             <button (click)="runQuality()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
               <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retry
+              Reessayer
             </button>
           </div>
         </div>
@@ -631,9 +631,9 @@
           <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div> 
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
             <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ mappingFileType }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Transform</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Transformation</span>
           </div>
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Running transformations</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Execution des transformations</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
             {{ transformLoadingMessage }}
           </p>
@@ -651,11 +651,11 @@
             <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
           </div>
           
-          <h2 class="text-[28px] font-bold text-text-primary mb-2">Transform Complete!</h2>
-          <p class="text-[16px] text-text-secondary dark:text-[#a3aed1] mb-10">{{ transformResult.rowsTransformed | number }} rows transformed successfully</p>
+          <h2 class="text-[28px] font-bold text-text-primary mb-2">Transformation terminee !</h2>
+          <p class="text-[16px] text-text-secondary dark:text-[#a3aed1] mb-10">{{ transformResult.rowsTransformed | number }} lignes transformees avec succes</p>
           
           <div class="w-full max-w-xs mx-auto bg-[#01b574]/06 dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-2xl p-6 mb-4 flex flex-col items-center">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-[#01b574]/70 mb-1">ROWS TRANSFORMED</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#01b574]/70 mb-1">LIGNES TRANSFORMEES</span>
             <span class="text-[30px] font-extrabold text-[#01b574] leading-none">{{ transformResult.rowsTransformed | number }}</span>
           </div>
 
@@ -665,7 +665,7 @@
           </div>
 
           <button (click)="runDatamart()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-[280px]">
-            Continue to Datamart
+            Continuer vers le datamart
             <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
           </button>
         </div>
@@ -677,17 +677,17 @@
             <lucide-icon name="x-circle" [size]="44" [strokeWidth]="3"></lucide-icon>
           </div>
           
-          <h2 class="text-[28px] font-bold text-text-primary mb-3">Transform Failed</h2>
+          <h2 class="text-[28px] font-bold text-text-primary mb-3">Echec de la transformation</h2>
           <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(transformError) }}</p>
 
           <div class="flex flex-col gap-3 w-[280px]">
             <button (click)="setStep('quality-result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
               <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Back
+              Retour
             </button>
             <button (click)="runTransform()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
               <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retry
+              Reessayer
             </button>
           </div>
         </div>
@@ -703,7 +703,7 @@
             <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ mappingFileType }}</span>
             <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Datamart</span>
           </div>
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Loading datamart</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Chargement du datamart</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
             {{ datamartLoadingMessage }}
           </p>
@@ -719,8 +719,8 @@
         <div *ngIf="!datamartError && (datamartTiersResult || datamartContratResult || datamartComptaResult)" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
           <div class="px-12 pt-10 pb-6 flex flex-shrink-0 justify-between items-start">
             <div class="flex flex-col gap-1">
-              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Datamart Complete</h2>
-              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Step 4 of 4 — Pipeline finished</p>
+              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Datamart termine</h2>
+              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 4 sur 4 - Pipeline termine</p>
               <div class="flex items-center gap-2 mt-2">
                 <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
                 <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
@@ -732,7 +732,7 @@
               <div class="w-10 h-10 rounded-full bg-[#01b574]/10 border border-[#01b574]/30 flex items-center justify-center">
                 <lucide-icon name="check-circle-2" [size]="22" class="text-[#01b574]"></lucide-icon>
               </div>
-              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">DONE</span>
+              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">TERMINE</span>
             </div>
           </div>
 
@@ -751,42 +751,42 @@
 
               <div *ngIf="datamartTiersResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Client rows loaded</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Lignes client chargees</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartTiersResult.dimClientRows > 0, 'text-gray-900 dark:text-white': datamartTiersResult.dimClientRows === 0}">{{ datamartTiersResult.dimClientRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Agent eco sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim agent eco</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimAgentecoRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimAgentecoRows ?? 0) === 0}">{{ (datamartTiersResult.subDimAgentecoRows ?? 0) | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Douteux sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim douteux</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimDouteuxRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimDouteuxRows ?? 0) === 0}">{{ (datamartTiersResult.subDimDouteuxRows ?? 0) | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Residence sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim residence</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimResidenceRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimResidenceRows ?? 0) === 0}">{{ (datamartTiersResult.subDimResidenceRows ?? 0) | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Grp affaire sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim grp affaire</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimGrpaffaireRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimGrpaffaireRows ?? 0) === 0}">{{ (datamartTiersResult.subDimGrpaffaireRows ?? 0) | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Section activite sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim section activite</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimSectionactiviteRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimSectionactiviteRows ?? 0) === 0}">{{ (datamartTiersResult.subDimSectionactiviteRows ?? 0) | number }}</div>
                 </div>
               </div>
 
               <div *ngIf="datamartContratResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Contrat rows</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Lignes contrat</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.dimContratRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.dimContratRows === 0}">{{ datamartContratResult.dimContratRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Agence sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim agence</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimAgenceRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimAgenceRows === 0}">{{ datamartContratResult.subDimAgenceRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Devise sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim devise</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimDeviseRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimDeviseRows === 0}">{{ datamartContratResult.subDimDeviseRows | number }}</div>
                 </div>
                 <div>
@@ -798,34 +798,34 @@
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimTypcontratRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimTypcontratRows === 0}">{{ datamartContratResult.subDimTypcontratRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Date sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim date</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimDateRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimDateRows === 0}">{{ datamartContratResult.subDimDateRows | number }}</div>
                 </div>
               </div>
 
               <div *ngIf="datamartComptaResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Fact balance rows</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Lignes fact balance</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.factBalanceRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.factBalanceRows === 0}">{{ datamartComptaResult.factBalanceRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Agence sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim agence</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimAgenceRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimAgenceRows === 0}">{{ datamartComptaResult.subDimAgenceRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Devise sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim devise</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimDeviseRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimDeviseRows === 0}">{{ datamartComptaResult.subDimDeviseRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Chapitre sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim chapitre</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimChapitreRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimChapitreRows === 0}">{{ datamartComptaResult.subDimChapitreRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Compte sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim compte</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimCompteRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimCompteRows === 0}">{{ datamartComptaResult.subDimCompteRows | number }}</div>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Date sub-dim</div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim date</div>
                   <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimDateRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimDateRows === 0}">{{ datamartComptaResult.subDimDateRows | number }}</div>
                 </div>
               </div>
@@ -833,7 +833,7 @@
               <div class="px-6 pb-5">
                 <div class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
                   <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">Pipeline complete — data is ready in the datamart</span>
+                  <span class="text-[#01b574] text-[13px] font-bold">Pipeline termine - les donnees sont pretes dans le datamart</span>
                 </div>
               </div>
             </div>
@@ -842,11 +842,11 @@
           <div class="px-12 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto backdrop-blur-sm z-10 w-full">
             <button (click)="mappingFileType === 'COMPTA' ? setStep('quality-result') : setStep('transform-result')" class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors">
               <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-              Back
+              Retour
             </button>
             <button (click)="resetPipeline(); setStep('intro')" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
               <lucide-icon name="refresh-ccw" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-              Start New Pipeline
+              Demarrer un nouveau pipeline
             </button>
           </div>
         </div>
@@ -858,17 +858,17 @@
             <lucide-icon name="x-circle" [size]="44" [strokeWidth]="3"></lucide-icon>
           </div>
 
-          <h2 class="text-[28px] font-bold text-text-primary mb-3">Datamart Failed</h2>
+          <h2 class="text-[28px] font-bold text-text-primary mb-3">Echec du datamart</h2>
           <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(datamartError) }}</p>
 
           <div class="flex flex-col gap-3 w-[280px]">
             <button (click)="mappingFileType === 'COMPTA' ? setStep('quality-result') : setStep('transform-result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
               <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Back
+              Retour
             </button>
             <button (click)="runDatamart()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
               <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retry
+              Reessayer
             </button>
           </div>
         </div>

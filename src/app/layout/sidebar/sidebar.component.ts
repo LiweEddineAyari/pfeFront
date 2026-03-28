@@ -36,7 +36,7 @@ interface NavItem {
         <button
           class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary transition-all shrink-0 lg:hidden"
           (click)="layoutService.closeMobileMenu()"
-          aria-label="Close menu"
+          aria-label="Fermer le menu"
         >
           <lucide-icon name="x" [size]="22" [strokeWidth]="2.5"></lucide-icon>
         </button>
@@ -47,7 +47,7 @@ interface NavItem {
           [class.relative]="state.collapsed"
           [class.right-auto]="state.collapsed"
           (click)="layoutService.toggleSidebar()"
-          aria-label="Toggle sidebar"
+          aria-label="Basculer la barre laterale"
         >
           <lucide-icon name="menu" [size]="24" [strokeWidth]="2.5" *ngIf="state.collapsed"></lucide-icon>
 <svg *ngIf="!state.collapsed"
@@ -128,7 +128,7 @@ interface NavItem {
           </div>
           <div class="flex-1 min-w-0 overflow-hidden" *ngIf="!state.collapsed">
             <p class="text-[14px] font-bold text-text-primary truncate leading-tight">Adela Parkson</p>
-            <p class="text-[12px] text-text-secondary font-medium truncate mt-0.5">Product Designer</p>
+            <p class="text-[12px] text-text-secondary font-medium truncate mt-0.5">Designer produit</p>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ interface NavItem {
                 [ngClass]="state.collapsed ? 'w-10 h-10 justify-center' : 'w-full p-2.5 gap-3 justify-start px-4'">
           <lucide-icon name="log-out" [size]="20" [strokeWidth]="2.5" class="shrink-0"></lucide-icon>
           <span class="text-[15px] font-bold whitespace-nowrap transition-all duration-200" *ngIf="!state.collapsed">
-            Logout
+            Deconnexion
           </span>
         </button>
 
@@ -150,7 +150,7 @@ export class SidebarComponent {
   router = inject(Router);
 
   navItems: NavItem[] = [
-    { label: 'Dashboards', icon: 'home', active: false, path: '/' },
+    { label: 'Tableau de bord', icon: 'home', active: false, path: '/' },
     { label: 'ETL Pipeline', icon: 'server', active: false, path: '/etl-pipeline' },
     { label: 'Datamart', icon: 'database', active: false, path: '/datamart' },
   ];

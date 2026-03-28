@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NavigationEnd, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { filter } from 'rxjs';
 import { ThemeService } from '../../core/services/theme.service';
 import { LayoutService } from '../../core/services/layout.service';
 
@@ -15,9 +17,9 @@ import { LayoutService } from '../../core/services/layout.service';
       <!-- Left: Breadcrumb + Title -->
       <div class="topbar-left">
         <p class="topbar-breadcrumb">
-          Pages / <span>Main Dashboard</span>
+          Pages / <span>{{ currentPageName }}</span>
         </p>
-        <h1 class="topbar-title">Main Dashboard</h1>
+        <h1 class="topbar-title">{{ currentPageName }}</h1>
       </div>
 
       <!-- Right: Search + Icons + Theme Toggle + Avatar -->
@@ -28,23 +30,23 @@ import { LayoutService } from '../../core/services/layout.service';
           <lucide-icon name="search" [size]="16" [strokeWidth]="2.5"></lucide-icon>
           <input
             type="text"
-            placeholder="Search..."
-            aria-label="Search dashboard"
+            placeholder="Rechercher..."
+            aria-label="Rechercher dans le tableau de bord"
           />
         </div>
 
         <!-- Mobile Search Icon -->
-        <button class="topbar-icon lg:hidden" aria-label="Search">
+        <button class="topbar-icon lg:hidden" aria-label="Rechercher">
           <lucide-icon name="search" [size]="18" [strokeWidth]="2.5"></lucide-icon>
         </button>
 
         <!-- Bell -->
-        <button class="topbar-icon" aria-label="Notifications">
+          <button class="topbar-icon" aria-label="Notifications">
            <lucide-icon name="bell" [size]="18" [strokeWidth]="2.5"></lucide-icon>
         </button>
 
         <!-- Info -->
-         <button class="topbar-icon hidden sm:flex" aria-label="Information">
+         <button class="topbar-icon hidden sm:flex" aria-label="Informations">
           <lucide-icon name="info" [size]="18" [strokeWidth]="2.5"></lucide-icon>
         </button>
 
@@ -52,7 +54,7 @@ import { LayoutService } from '../../core/services/layout.service';
         <button
           class="topbar-icon"
           (click)="toggleTheme()"
-          aria-label="Toggle theme"
+          aria-label="Changer le theme"
         >
           <lucide-icon *ngIf="themeService.isDark$ | async" name="sun" [size]="18" [strokeWidth]="2.5"></lucide-icon>
           <lucide-icon *ngIf="!(themeService.isDark$ | async)" name="moon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
@@ -66,7 +68,7 @@ import { LayoutService } from '../../core/services/layout.service';
         <!-- Mobile Hamburger Menu (beside other icons) -->
         <button class="topbar-icon lg:hidden" 
                 (click)="layoutService.toggleMobileMenu()" 
-                aria-label="Open menu">
+          aria-label="Ouvrir le menu">
           <lucide-icon name="menu" [size]="22" [strokeWidth]="2.5"></lucide-icon>
         </button>
       </div>
@@ -77,8 +79,37 @@ import { LayoutService } from '../../core/services/layout.service';
 export class TopbarComponent {
   themeService = inject(ThemeService);
   layoutService = inject(LayoutService);
+  private router = inject(Router);
+
+  currentPageName = 'Tableau de bord principal';
+
+  constructor() {
+    this.currentPageName = this.getPageNameFromUrl(this.router.url);
+
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.currentPageName = this.getPageNameFromUrl(event.urlAfterRedirects);
+      });
+  }
 
   toggleTheme(): void {
     this.themeService.toggle();
+  }
+
+  private getPageNameFromUrl(url: string): string {
+    const [pathname] = url.split('?');
+    const normalizedPath = pathname.replace(/\/+$/, '') || '/';
+
+    if (normalizedPath === '/') return 'Tableau de bord principal';
+    if (normalizedPath === '/etl-pipeline') return 'Pipeline ETL';
+    if (normalizedPath === '/datamart') return 'Datamart';
+
+    return normalizedPath
+      .split('/')
+      .filter(Boolean)
+      .map((segment) => segment.replace(/-/g, ' '))
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join(' / ');
   }
 }
