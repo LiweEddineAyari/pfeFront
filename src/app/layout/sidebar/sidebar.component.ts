@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -148,6 +148,7 @@ interface NavItem {
 export class SidebarComponent {
   layoutService = inject(LayoutService);
   router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   navItems: NavItem[] = [
     { label: 'Tableau de bord', icon: 'home', active: false, path: '/' },
@@ -173,6 +174,8 @@ export class SidebarComponent {
     this.navItems.forEach((item) => {
       item.active = normalizedUrl === this.normalizeUrl(item.path);
     });
+
+    this.cdr.markForCheck();
   }
 
   private normalizeUrl(url: string): string {

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -80,6 +80,7 @@ export class TopbarComponent {
   themeService = inject(ThemeService);
   layoutService = inject(LayoutService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   currentPageName = 'Tableau de bord principal';
 
@@ -90,6 +91,7 @@ export class TopbarComponent {
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
         this.currentPageName = this.getPageNameFromUrl(event.urlAfterRedirects);
+        this.cdr.markForCheck();
       });
   }
 
