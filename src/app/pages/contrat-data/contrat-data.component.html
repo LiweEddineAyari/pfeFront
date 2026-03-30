@@ -1,0 +1,337 @@
+<div class="p-6 max-w-[1800px] mx-auto bg-transparent">
+  <div class="mb-6 flex justify-end">
+    <button
+      type="button"
+      (click)="goBack()"
+      class="inline-flex items-center gap-2 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:text-[#01B574] dark:hover:text-[#01B574] hover:border-[#01B574]/40 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-colors"
+    >
+      <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      Retour au datamart
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-6">
+        <article class="xl:col-span-2 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+            <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+                <div>
+                <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Objet finance</h2>
+                <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ objetTotal() }} objets</p>
+                </div>
+                <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+                <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-white/[0.02]">
+                    <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5 w-[80px]">ID</th>
+                    <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Libelle</th>
+                    </tr>
+                </thead>
+
+                <tbody *ngIf="objetLoading()">
+                    <tr *ngFor="let _ of smallSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+                    <td class="px-6 py-4"><div class="h-3 w-12 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+                    <td class="px-6 py-4"><div class="h-3 w-full rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+                    </tr>
+                </tbody>
+
+                <tbody *ngIf="!objetLoading()">
+                    <tr *ngFor="let row of objetItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+                    <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+                    <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white truncate" [attr.title]="row.libelle">{{ row.libelle }}</td>
+                    </tr>
+                    <tr *ngIf="objetItems().length === 0">
+                    <td colspan="2" class="px-6 py-8 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+
+            <div *ngIf="objetError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+                <span class="text-[13px] text-red-700 dark:text-red-300">{{ objetError() }}</span>
+                <button type="button" (click)="retryObjet()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+            </div>
+
+            <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+                <p class="text-[13px] text-gray-600 dark:text-white/60">
+                Affichage {{ getStartIndex(objetPage(), objetPageSize, objetTotal()) }}-{{ getEndIndex(objetPage(), objetPageSize, objetTotal()) }} sur {{ objetTotal().toLocaleString() }} resultats
+                </p>
+                <div class="flex items-center gap-1">
+                <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="objetPage() === 0" (click)="goObjetPage(objetPage() - 1)">
+                    <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+                </button>
+
+                <button
+                    *ngFor="let p of getPagesArray(objetTotalPages(), objetPage())"
+                    type="button"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+                    [ngClass]="p === objetPage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+                    (click)="goObjetPage(p)"
+                >
+                    {{ p + 1 }}
+                </button>
+
+                <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="objetPage() >= objetTotalPages() - 1" (click)="goObjetPage(objetPage() + 1)">
+                    <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+                </button>
+                </div>
+            </div>
+    </article>
+
+    <article class="xl:col-span-1 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+      <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+        <div>
+          <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Devise</h2>
+          <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ deviseTotal() }} devises</p>
+        </div>
+        <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+          <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-white/[0.02]">
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5 w-[80px]">ID</th>
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Devise</th>
+            </tr>
+          </thead>
+
+          <tbody *ngIf="deviseLoading()">
+            <tr *ngFor="let _ of smallSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+              <td class="px-6 py-4"><div class="h-3 w-12 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+              <td class="px-6 py-4"><div class="h-3 w-full rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+            </tr>
+          </tbody>
+
+          <tbody *ngIf="!deviseLoading()">
+            <tr *ngFor="let row of deviseItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+              <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+              <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white truncate" [attr.title]="row.devise">{{ row.devise }}</td>
+            </tr>
+            <tr *ngIf="deviseItems().length === 0">
+              <td colspan="2" class="px-6 py-8 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="deviseError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+        <span class="text-[13px] text-red-700 dark:text-red-300">{{ deviseError() }}</span>
+        <button type="button" (click)="retryDevise()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+      </div>
+
+      <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+        <p class="text-[13px] text-gray-600 dark:text-white/60">
+          Affichage {{ getStartIndex(devisePage(), devisePageSize, deviseTotal()) }}-{{ getEndIndex(devisePage(), devisePageSize, deviseTotal()) }} sur {{ deviseTotal().toLocaleString() }} resultats
+        </p>
+        <div class="flex items-center gap-1">
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="devisePage() === 0" (click)="goDevisePage(devisePage() - 1)">
+            <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+          </button>
+
+          <button
+            *ngFor="let p of getPagesArray(deviseTotalPages(), devisePage())"
+            type="button"
+            class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+            [ngClass]="p === devisePage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+            (click)="goDevisePage(p)"
+          >
+            {{ p + 1 }}
+          </button>
+
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="devisePage() >= deviseTotalPages() - 1" (click)="goDevisePage(devisePage() + 1)">
+            <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <article class="xl:col-span-1 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+      <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+        <div>
+          <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Type contrat</h2>
+          <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ typeTotal() }} types</p>
+        </div>
+        <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+          <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-white/[0.02]">
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5 w-[80px]">ID</th>
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Type contrat</th>
+            </tr>
+          </thead>
+
+          <tbody *ngIf="typeLoading()">
+            <tr *ngFor="let _ of smallSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+              <td class="px-6 py-4"><div class="h-3 w-12 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+              <td class="px-6 py-4"><div class="h-3 w-full rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+            </tr>
+          </tbody>
+
+          <tbody *ngIf="!typeLoading()">
+            <tr *ngFor="let row of typeItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+              <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+              <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white truncate" [attr.title]="row.typcontrat">{{ row.typcontrat }}</td>
+            </tr>
+            <tr *ngIf="typeItems().length === 0">
+              <td colspan="2" class="px-6 py-8 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="typeError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+        <span class="text-[13px] text-red-700 dark:text-red-300">{{ typeError() }}</span>
+        <button type="button" (click)="retryType()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+      </div>
+
+      <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+        <p class="text-[13px] text-gray-600 dark:text-white/60">
+          Affichage {{ getStartIndex(typePage(), typePageSize, typeTotal()) }}-{{ getEndIndex(typePage(), typePageSize, typeTotal()) }} sur {{ typeTotal().toLocaleString() }} resultats
+        </p>
+        <div class="flex items-center gap-1">
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="typePage() === 0" (click)="goTypePage(typePage() - 1)">
+            <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+          </button>
+
+          <button
+            *ngFor="let p of getPagesArray(typeTotalPages(), typePage())"
+            type="button"
+            class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+            [ngClass]="p === typePage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+            (click)="goTypePage(p)"
+          >
+            {{ p + 1 }}
+          </button>
+
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="typePage() >= typeTotalPages() - 1" (click)="goTypePage(typePage() + 1)">
+            <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <article class="bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+    <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+      <div>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Contrats</h2>
+        <p class="text-[16px] text-gray-600 dark:text-white/60 mt-0.5">{{ contratTotal().toLocaleString() }} contrats</p>
+      </div>
+      <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+        <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1500px]">
+        <thead>
+          <tr class="bg-gray-50 dark:bg-white/[0.02]">
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">ID Contrat</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Client</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Nom</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Agence</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Devise</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Objet finance</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Type contrat</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Taux</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Actif</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Ouverture</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Echeance</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="contratLoading()">
+          <tr *ngFor="let _ of contratSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+            <td *ngFor="let col of [0,1,2,3,4,5,6,7,8,9,10]" class="px-6 py-4">
+              <div class="h-3 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse" [ngClass]="getContratSkeletonWidth(col)"></div>
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody *ngIf="!contratLoading()">
+          <tr *ngFor="let row of contratItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+            <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+            <td class="px-6 py-4 text-[13px] text-gray-700 dark:text-white/80">{{ row.id_client }}</td>
+            <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white">{{ getContratDisplayName(row) }}</td>
+            <td class="px-6 py-4 text-[13px] text-gray-700 dark:text-white/80">{{ row.numagence }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-[#EAFBF4] border-[#B7EDD7] text-[#01B574] dark:bg-[#01B574]/20 dark:border-[#01B574]/30 dark:text-[#6CF5C7]">{{ row.devise || '—' }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="row.objetfinance"
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-violet-100 border-violet-200 text-violet-700 dark:bg-violet-900/20 dark:border-violet-500/25 dark:text-violet-300 max-w-[230px] truncate"
+                [attr.title]="row.objetfinance"
+              >
+                {{ row.objetfinance }}
+              </span>
+              <span *ngIf="!row.objetfinance" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="row.typcontrat"
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-500/25 dark:text-amber-300 max-w-[220px] truncate"
+                [attr.title]="row.typcontrat"
+              >
+                {{ row.typcontrat }}
+              </span>
+              <span *ngIf="!row.typcontrat" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ row.tauxcontrat }}</td>
+            <td class="px-6 py-4">
+              <span *ngIf="row.actif === 1" class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border bg-sky-100 border-sky-200 text-sky-700 dark:bg-sky-900/20 dark:border-sky-500/25 dark:text-sky-300">ACTIF</span>
+              <span *ngIf="row.actif !== 1" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+            <td class="px-6 py-4 text-[13px] text-gray-600 dark:text-white/60">{{ formatDate(row.dateouverture) }}</td>
+            <td class="px-6 py-4 text-[13px] text-gray-600 dark:text-white/60">{{ formatDate(row.dateecheance) }}</td>
+          </tr>
+
+          <tr *ngIf="contratItems().length === 0">
+            <td colspan="11" class="px-6 py-10 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="contratError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+      <span class="text-[13px] text-red-700 dark:text-red-300">{{ contratError() }}</span>
+      <button type="button" (click)="retryContrat()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+    </div>
+
+    <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+      <p class="text-[13px] text-gray-600 dark:text-white/60">
+        Affichage {{ getStartIndex(contratPage(), contratPageSize, contratTotal()) }}-{{ getEndIndex(contratPage(), contratPageSize, contratTotal()) }} sur {{ contratTotal().toLocaleString() }} resultats
+      </p>
+      <div class="flex items-center gap-1">
+        <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="contratPage() === 0" (click)="goContratPage(contratPage() - 1)">
+          <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+        </button>
+
+        <button
+          *ngFor="let p of getPagesArray(contratTotalPages(), contratPage())"
+          type="button"
+          class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+          [ngClass]="p === contratPage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+          (click)="goContratPage(p)"
+        >
+          {{ p + 1 }}
+        </button>
+
+        <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="contratPage() >= contratTotalPages() - 1" (click)="goContratPage(contratPage() + 1)">
+          <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </article>
+</div>

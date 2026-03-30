@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   signal,
   ViewChild,
   AfterViewInit,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Vflow, VflowComponent, Node, Edge } from 'ngx-vflow';
 import {
   ChevronRight,
@@ -252,6 +254,7 @@ const DATAMART_CONNECTIONS: DatamartConnection[] = [
 })
 export class DatamartComponent implements OnInit, AfterViewInit {
   private readonly initialFocusNodes = ['fact_balance', 'dim_client', 'dim_contrat'];
+  private readonly router = inject(Router);
   private currentZoom = signal(1);
   private readonly handlePositions = new Map<string, HandleConfig[]>();
 
@@ -593,8 +596,15 @@ export class DatamartComponent implements OnInit, AfterViewInit {
     }
   }
 
-  openTablePage(_tableName: string) {
-    // Placeholder for future routing to a dedicated table page.
+  openTablePage(tableName: string) {
+    if (tableName === 'dim_client') {
+      void this.router.navigate(['/datamart/client']);
+      return;
+    }
+
+    if (tableName === 'dim_contrat') {
+      void this.router.navigate(['/datamart/contrat']);
+    }
   }
 
   private buildHandleMetadata(

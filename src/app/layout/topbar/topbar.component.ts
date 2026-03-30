@@ -106,6 +106,8 @@ export class TopbarComponent {
     if (normalizedPath === '/') return 'Tableau de bord principal';
     if (normalizedPath === '/etl-pipeline') return 'Pipeline ETL';
     if (normalizedPath === '/datamart') return 'Datamart';
+    if (normalizedPath === '/datamart/client') return 'Donnees clients';
+    if (normalizedPath === '/datamart/contrat') return 'Donnees contrats';
 
     return normalizedPath
       .split('/')

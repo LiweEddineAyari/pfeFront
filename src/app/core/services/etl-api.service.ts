@@ -105,6 +105,67 @@ export interface DatamartTiersResult {
   message?: string
 }
 
+export interface PagedResponse<T> {
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  items: T[]
+}
+
+export interface ClientRow {
+  idtiers: string
+  nomprenom: string | null
+  raisonsoc: string | null
+  chiffreaffaires: string
+  pays: string
+  geo: string
+  libelle: string
+  douteux: number
+  nomgroupaffaire: string | null
+  sectionactivite: string | null
+}
+
+export interface AgentEcoRow {
+  id: number
+  libelle: string
+}
+
+export interface SectionActiviteRow {
+  id: number
+  libelle: string
+}
+
+export interface ContratRow {
+  id: string
+  id_client: string
+  ancienneteimpaye: number
+  tauxcontrat: number
+  actif: number
+  numagence: number
+  nomprenom: string | null
+  devise: string | null
+  objetfinance: string | null
+  typcontrat: string | null
+  dateouverture: string | null
+  dateecheance: string | null
+}
+
+export interface ContratDeviseRow {
+  id: number
+  devise: string
+}
+
+export interface ContratObjetFinanceRow {
+  id: number
+  libelle: string
+}
+
+export interface ContratTypeContratRow {
+  id: number
+  typcontrat: string
+}
+
 @Injectable({ providedIn: 'root' })
 export class EtlApiService {
 
@@ -336,6 +397,62 @@ export class EtlApiService {
       `${this.BASE}/datamart/compta`,
       { method: 'POST' },
       10 * 60 * 1000
+    );
+  }
+
+  async getClientList(page: number, size: number): Promise<PagedResponse<ClientRow>> {
+    return this.fetchJson<PagedResponse<ClientRow>>(
+      `${this.BASE}/datamart/tiers/client/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getAgentEcoList(page: number, size: number): Promise<PagedResponse<AgentEcoRow>> {
+    return this.fetchJson<PagedResponse<AgentEcoRow>>(
+      `${this.BASE}/datamart/tiers/agenteco/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getSectionActiviteList(page: number, size: number): Promise<PagedResponse<SectionActiviteRow>> {
+    return this.fetchJson<PagedResponse<SectionActiviteRow>>(
+      `${this.BASE}/datamart/tiers/sectionactivite/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getContratList(page: number, size: number): Promise<PagedResponse<ContratRow>> {
+    return this.fetchJson<PagedResponse<ContratRow>>(
+      `${this.BASE}/datamart/contrat/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getContratDeviseList(page: number, size: number): Promise<PagedResponse<ContratDeviseRow>> {
+    return this.fetchJson<PagedResponse<ContratDeviseRow>>(
+      `${this.BASE}/datamart/contrat/devise/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getContratObjetFinanceList(page: number, size: number): Promise<PagedResponse<ContratObjetFinanceRow>> {
+    return this.fetchJson<PagedResponse<ContratObjetFinanceRow>>(
+      `${this.BASE}/datamart/contrat/objetfinance/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getContratTypeContratList(page: number, size: number): Promise<PagedResponse<ContratTypeContratRow>> {
+    return this.fetchJson<PagedResponse<ContratTypeContratRow>>(
+      `${this.BASE}/datamart/contrat/typecontrat/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
     );
   }
 

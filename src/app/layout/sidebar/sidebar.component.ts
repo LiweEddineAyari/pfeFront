@@ -172,7 +172,8 @@ export class SidebarComponent {
     const normalizedUrl = this.normalizeUrl(url);
 
     this.navItems.forEach((item) => {
-      item.active = normalizedUrl === this.normalizeUrl(item.path);
+      const itemPath = this.normalizeUrl(item.path);
+      item.active = normalizedUrl === itemPath || (itemPath !== '/' && normalizedUrl.startsWith(`${itemPath}/`));
     });
 
     this.cdr.markForCheck();

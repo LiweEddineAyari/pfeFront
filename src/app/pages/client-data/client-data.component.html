@@ -1,0 +1,268 @@
+<div class="p-6 max-w-[1800px] mx-auto bg-transparent">
+  <div class="mb-6 flex justify-end">
+    <button
+      type="button"
+      (click)="goBack()"
+      class="inline-flex items-center gap-2 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:text-[#01B574] dark:hover:text-[#01B574] hover:border-[#01B574]/40 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-colors"
+    >
+      <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      Retour au datamart
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+    <article class="bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+      <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+        <div>
+          <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Agent Economique</h2>
+          <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ agentEcoTotal() }} agents</p>
+        </div>
+        <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+          <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-white/[0.02]">
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5 w-[80px]">ID</th>
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Libelle</th>
+            </tr>
+          </thead>
+
+          <tbody *ngIf="agentEcoLoading()">
+            <tr *ngFor="let _ of smallSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+              <td class="px-6 py-4"><div class="h-3 w-12 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+              <td class="px-6 py-4"><div class="h-3 w-full rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+            </tr>
+          </tbody>
+
+          <tbody *ngIf="!agentEcoLoading()">
+            <tr *ngFor="let row of agentEcoItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+              <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+              <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white truncate" [attr.title]="row.libelle">{{ row.libelle }}</td>
+            </tr>
+            <tr *ngIf="agentEcoItems().length === 0">
+              <td colspan="2" class="px-6 py-8 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="agentEcoError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+        <span class="text-[13px] text-red-700 dark:text-red-300">{{ agentEcoError() }}</span>
+        <button type="button" (click)="retryAgentEco()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+      </div>
+
+      <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+        <p class="text-[13px] text-gray-600 dark:text-white/60">
+          Affichage {{ getStartIndex(agentEcoPage(), agentEcoPageSize, agentEcoTotal()) }}-{{ getEndIndex(agentEcoPage(), agentEcoPageSize, agentEcoTotal()) }} sur {{ agentEcoTotal().toLocaleString() }} resultats
+        </p>
+        <div class="flex items-center gap-1">
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="agentEcoPage() === 0" (click)="goAgentEcoPage(agentEcoPage() - 1)">
+            <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+          </button>
+
+          <button
+            *ngFor="let p of getPagesArray(agentEcoTotalPages(), agentEcoPage())"
+            type="button"
+            class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+            [ngClass]="p === agentEcoPage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+            (click)="goAgentEcoPage(p)"
+          >
+            {{ p + 1 }}
+          </button>
+
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="agentEcoPage() >= agentEcoTotalPages() - 1" (click)="goAgentEcoPage(agentEcoPage() + 1)">
+            <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <article class="bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+      <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+        <div>
+          <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Section d'activite</h2>
+          <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ sectionTotal() }} sections</p>
+        </div>
+        <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+          <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-white/[0.02]">
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5 w-[80px]">ID</th>
+              <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Libelle</th>
+            </tr>
+          </thead>
+
+          <tbody *ngIf="sectionLoading()">
+            <tr *ngFor="let _ of smallSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+              <td class="px-6 py-4"><div class="h-3 w-12 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+              <td class="px-6 py-4"><div class="h-3 w-full rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div></td>
+            </tr>
+          </tbody>
+
+          <tbody *ngIf="!sectionLoading()">
+            <tr *ngFor="let row of sectionItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+              <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+              <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white truncate" [attr.title]="row.libelle">{{ row.libelle }}</td>
+            </tr>
+            <tr *ngIf="sectionItems().length === 0">
+              <td colspan="2" class="px-6 py-8 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="sectionError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+        <span class="text-[13px] text-red-700 dark:text-red-300">{{ sectionError() }}</span>
+        <button type="button" (click)="retrySection()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+      </div>
+
+      <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+        <p class="text-[13px] text-gray-600 dark:text-white/60">
+          Affichage {{ getStartIndex(sectionPage(), sectionPageSize, sectionTotal()) }}-{{ getEndIndex(sectionPage(), sectionPageSize, sectionTotal()) }} sur {{ sectionTotal().toLocaleString() }} resultats
+        </p>
+        <div class="flex items-center gap-1">
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="sectionPage() === 0" (click)="goSectionPage(sectionPage() - 1)">
+            <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+          </button>
+
+          <button
+            *ngFor="let p of getPagesArray(sectionTotalPages(), sectionPage())"
+            type="button"
+            class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+            [ngClass]="p === sectionPage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+            (click)="goSectionPage(p)"
+          >
+            {{ p + 1 }}
+          </button>
+
+          <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="sectionPage() >= sectionTotalPages() - 1" (click)="goSectionPage(sectionPage() + 1)">
+            <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <article class="bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+    <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+      <div>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Clients</h2>
+        <p class="text-[16px] text-gray-600 dark:text-white/60 mt-0.5">{{ clientTotal().toLocaleString() }} clients</p>
+      </div>
+      <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+        <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1200px]">
+        <thead>
+          <tr class="bg-gray-50 dark:bg-white/[0.02]">
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5 w-[100px]">ID Tiers</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Nom / Raison</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Pays</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Geo</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Agent eco</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Chiffre aff.</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Douteux</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Section</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="clientLoading()">
+          <tr *ngFor="let _ of clientSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+            <td *ngFor="let col of [0,1,2,3,4,5,6,7]" class="px-6 py-4">
+              <div class="h-3 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse" [ngClass]="getClientSkeletonWidth(col)"></div>
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody *ngIf="!clientLoading()">
+          <tr *ngFor="let row of clientItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+            <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.idtiers }}</td>
+            <td class="px-6 py-4 text-[14px] font-semibold text-[#1a202c] dark:text-white">{{ getClientDisplayName(row) }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-[#EAFBF4] border-[#B7EDD7] text-[#01B574] dark:bg-[#01B574]/20 dark:border-[#01B574]/30 dark:text-[#6CF5C7]">{{ row.pays || '—' }}</span>
+            </td>
+            <td class="px-6 py-4 text-[13px] text-gray-600 dark:text-white/60 truncate max-w-[160px]" [attr.title]="row.geo">{{ row.geo || '—' }}</td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="row.libelle"
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-500/25 dark:text-indigo-300 max-w-[200px] truncate"
+                [attr.title]="row.libelle"
+              >
+                {{ row.libelle }}
+              </span>
+              <span *ngIf="!row.libelle" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono" [ngClass]="formatChiffreAffaires(row.chiffreaffaires) === '—' ? 'text-gray-500 dark:text-white/40' : 'text-[#01B574]'">
+              {{ formatChiffreAffaires(row.chiffreaffaires) }}
+            </td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="row.douteux === 1"
+                class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
+              >
+                DOUTEUX
+              </span>
+              <span *ngIf="row.douteux !== 1" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="row.sectionactivite"
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-cyan-100 border-cyan-200 text-cyan-700 dark:bg-cyan-900/20 dark:border-cyan-500/25 dark:text-cyan-300 max-w-[200px] truncate"
+                [attr.title]="row.sectionactivite"
+              >
+                {{ row.sectionactivite }}
+              </span>
+              <span *ngIf="!row.sectionactivite" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+          </tr>
+
+          <tr *ngIf="clientItems().length === 0">
+            <td colspan="8" class="px-6 py-10 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="clientError()" class="mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+      <span class="text-[13px] text-red-700 dark:text-red-300">{{ clientError() }}</span>
+      <button type="button" (click)="retryClient()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+    </div>
+
+    <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
+      <p class="text-[13px] text-gray-600 dark:text-white/60">
+        Affichage {{ getStartIndex(clientPage(), clientPageSize, clientTotal()) }}-{{ getEndIndex(clientPage(), clientPageSize, clientTotal()) }} sur {{ clientTotal().toLocaleString() }} resultats
+      </p>
+      <div class="flex items-center gap-1">
+        <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="clientPage() === 0" (click)="goClientPage(clientPage() - 1)">
+          <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+        </button>
+
+        <button
+          *ngFor="let p of getPagesArray(clientTotalPages(), clientPage())"
+          type="button"
+          class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+          [ngClass]="p === clientPage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+          (click)="goClientPage(p)"
+        >
+          {{ p + 1 }}
+        </button>
+
+        <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="clientPage() >= clientTotalPages() - 1" (click)="goClientPage(clientPage() + 1)">
+          <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </article>
+</div>

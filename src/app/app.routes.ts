@@ -27,6 +27,22 @@ export const routes: Routes = [
             (m) => m.DatamartComponent
           ),
       },
+      {
+        path: 'datamart/client',
+        title: 'Donnees clients',
+        loadComponent: () =>
+          import('./pages/client-data/client-data.component').then(
+            (m) => m.ClientDataComponent
+          ),
+      },
+      {
+        path: 'datamart/contrat',
+        title: 'Donnees contrats',
+        loadComponent: () =>
+          import('./pages/contrat-data/contrat-data.component').then(
+            (m) => m.ContratDataComponent
+          ),
+      },
     ],
   },
 ];
