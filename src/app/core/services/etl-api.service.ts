@@ -2,11 +2,13 @@ import { Injectable, NgZone } from '@angular/core';
 
 export interface ProcessResult {
   status:        string;        // "COMPLETED" or "ERROR"
-  file:          string;        // original filename
+  file?:         string;        // original filename
   rowCount:      number;        // rows inserted
-  format:        string;        // "JSON" | "EXCEL" | "SQL"
+  format?:       string;        // "JSON" | "EXCEL" | "SQL"
   mappingUsed:   string;        // "auto" | "explicit+auto"
   mappedColumns: Record<string, string>;  // fileCol → dbCol
+  sourceTable?:  string;
+  targetTable?:  string;
   message?:      string;        // present on error
 }
 
@@ -15,6 +17,31 @@ export interface ProcessFileParams {
   type:      string;           // TIERS | CONTRAT | COMPTA | SQL
   mappings:  Record<string, string> | null;  // { dbCol: fileCol }
   dateBal?:  string;           // dd/MM/yyyy, only for COMPTA
+}
+
+export type DbType = 'POSTGRES' | 'MYSQL' | 'SQLSERVER' | 'ORACLE';
+
+export interface DbConnectionConfig {
+  host: string;
+  port: number;
+  database: string;
+  dbType: DbType;
+  username: string;
+  password: string;
+  table: string;
+}
+
+export interface DbColumnMetadata {
+  columnName: string;
+  dataType: string;
+  nullable: boolean;
+}
+
+export interface LoadFromDbParams {
+  connection: DbConnectionConfig;
+  type: 'TIERS' | 'CONTRAT' | 'COMPTA';
+  mapping: Record<string, string> | null;
+  dateBal?: string;
 }
 
 export interface QualityResult {
@@ -166,6 +193,32 @@ export interface ContratTypeContratRow {
   typcontrat: string
 }
 
+export interface BalanceRow {
+  id: string | number
+  numagence?: number | string | null
+  devise?: string | null
+  devisebanque?: string | null
+  devisebbnq?: string | null
+  numcompte?: string | null
+  compte?: string | null
+  chapitre?: string | null
+  libellecompte?: string | null
+  idtiers?: string | null
+  id_client?: string | null
+  idcontrat?: string | null
+  id_contrat?: string | null
+  soldeorigine?: number | string | null
+  soldeconvertie?: number | string | null
+  cumulmvtdb?: number | string | null
+  cumulmvtcr?: number | string | null
+  soldeinitdebmois?: number | string | null
+  amount?: number | string | null
+  actif?: number | boolean | string | null
+  datevalue?: string | null
+  date_bal?: string | null
+  date_value?: string | null
+}
+
 @Injectable({ providedIn: 'root' })
 export class EtlApiService {
 
@@ -288,6 +341,47 @@ export class EtlApiService {
     } finally {
       clearTimeout(timeoutId);
     }
+  }
+
+  async fetchColumnsFromDb(connection: DbConnectionConfig): Promise<DbColumnMetadata[]> {
+    return this.fetchJson<DbColumnMetadata[]>(
+      `${this.BASE}/columns`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(connection)
+      },
+      2 * 60 * 1000
+    );
+  }
+
+  async loadFromDatabase(params: LoadFromDbParams): Promise<ProcessResult> {
+    const payload: {
+      connection: DbConnectionConfig;
+      type: 'TIERS' | 'CONTRAT' | 'COMPTA';
+      mapping: Record<string, string> | null;
+      dateBal?: string;
+      date_bal?: string;
+    } = {
+      connection: params.connection,
+      type: params.type,
+      mapping: params.mapping
+    };
+
+    if (params.dateBal && params.type === 'COMPTA') {
+      payload.dateBal = params.dateBal;
+      payload.date_bal = params.dateBal;
+    }
+
+    return this.fetchJson<ProcessResult>(
+      `${this.BASE}/load-from-db`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      },
+      this.TIMEOUT_MS
+    );
   }
 
   // ── Quality endpoints ──────────────────────────
@@ -451,6 +545,14 @@ export class EtlApiService {
   async getContratTypeContratList(page: number, size: number): Promise<PagedResponse<ContratTypeContratRow>> {
     return this.fetchJson<PagedResponse<ContratTypeContratRow>>(
       `${this.BASE}/datamart/contrat/typecontrat/list?page=${page}&size=${size}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getBalanceList(page: number, size: number): Promise<PagedResponse<BalanceRow>> {
+    return this.fetchJson<PagedResponse<BalanceRow>>(
+      `${this.BASE}/datamart/compta/balance/list?page=${page}&size=${size}`,
       { method: 'GET' },
       30 * 1000
     );

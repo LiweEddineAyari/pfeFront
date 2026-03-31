@@ -89,9 +89,34 @@
             
             <!-- COLUMN 1: Configuration -->
             <div class="flex flex-col">
+
+              <!-- Source Toggle -->
+              <div class="flex flex-col mb-6">
+                <label class="form-label">Source des donnees</label>
+                <div class="source-toggle">
+                  <button type="button" class="source-toggle-btn" [class.active]="sourceMode === 'file'" (click)="onSourceModeChange('file')">
+                    <lucide-icon name="file-up" [size]="15" [strokeWidth]="2.5"></lucide-icon>
+                    Fichier
+                  </button>
+                  <button type="button" class="source-toggle-btn" [class.active]="sourceMode === 'database'" (click)="onSourceModeChange('database')">
+                    <lucide-icon name="database" [size]="15" [strokeWidth]="2.5"></lucide-icon>
+                    Base de donnees
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="sourceMode === 'database'" class="db-hint-card mb-6 date-row-appear">
+                <div class="flex items-center gap-2.5 mb-2">
+                  <lucide-icon name="plug-zap" [size]="16" class="text-[#01b574]"></lucide-icon>
+                  <span class="font-bold">Connexion directe a une table source</span>
+                </div>
+                <p class="text-[12px] leading-relaxed opacity-80">
+                  Renseignez la connexion et la table a lire. Les colonnes detectees seront envoyees au mapping, comme pour un fichier.
+                </p>
+              </div>
               
               <!-- Segmented Pill Selector -->
-              <div class="flex flex-col mb-6" *ngIf="!isSqlFile()">
+              <div class="flex flex-col mb-6" *ngIf="sourceMode === 'database' || !isSqlFile()">
                 <label class="form-label">Type de donnees</label>
                 <div class="segmented-control">
                   <button type="button" class="segment-btn" [class.active]="fileType === 'TIERS'" (click)="fileType = 'TIERS'">TIERS</button>
@@ -101,7 +126,7 @@
               </div>
 
               <!-- Balance Date Conditional -->
-              <div class="flex flex-col date-row-appear" *ngIf="!isSqlFile() && fileType === 'COMPTA'">
+              <div class="flex flex-col date-row-appear" *ngIf="fileType === 'COMPTA' && (sourceMode === 'database' || !isSqlFile())">
                 <label class="form-label">Date de balance</label>
                 <div class="flex items-center gap-2">
                   <input #ddInput id="dd" type="text" maxlength="2" placeholder="DD" 
@@ -123,7 +148,7 @@
               </div>
 
               <!-- SQL Notification -->
-              <div *ngIf="isSqlFile()" class="sql-info-card date-row-appear mb-6">
+              <div *ngIf="sourceMode === 'file' && isSqlFile()" class="sql-info-card date-row-appear mb-6">
                  <div class="flex items-center gap-3 mb-2">
                    <lucide-icon name="check" [size]="16" class="text-[#01b574]"></lucide-icon>
                    <span class="font-bold">Fichier SQL detecte</span>
@@ -135,41 +160,79 @@
 
             </div>
 
-            <!-- COLUMN 2: File Picker Drop Zone -->
-            <div class="flex flex-col max-h-[400px] h-full ">
-               <div class="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer drop-zone group relative overflow-hidden"
-                    [class.is-dragging]="isDragging"
-                    [class.has-file]="selectedFile"
-                    [class.has-error]="extractionError"
-                    (dragover)="onDragOver($event)"
-                    (dragleave)="onDragLeave($event)"
-                    (drop)="onDrop($event)"
-                    (click)="triggerFileInput()">
-                 
-                 <input type="file" #fileInput class="hidden" accept=".xlsx,.xls,.json,.sql" (change)="onFileChange($event)">
-                 
-                 <lucide-icon name="cloud-upload" [size]="56" [strokeWidth]="2.5" 
-                              class="mx-auto mb-6 transition-colors text-brand-primary dark:text-white group-hover:dark:text-[#01b574] group-hover:text-[#01b574]">
-                 </lucide-icon>
-                 
-                 <p class="text-[18px] font-bold mb-2 text-text-primary dark:text-white relative z-10">
-                   Deposez vos fichiers ici
-                 </p>
-                 <p class="text-[15px] font-medium text-[#01b574] mb-3 relative z-10">
-                   ou cliquez pour parcourir
-                 </p>
-                 <p class="text-[13px] text-text-secondary dark:text-[#8f9bba] font-medium px-4 relative z-10">
-                   Les fichiers .xlsx, .xls, .json et .sql sont autorises via ce portail.
-                 </p>
-                 
-                 <div *ngIf="selectedFile && !extractionError && !extractionResult" class="absolute w-full bottom-0 left-0 pt-6 pb-6 bg-[#01b574]/10 border-t border-[#01b574]/20 text-center animate-fade-in-up">
-                   <div class="flex items-center justify-center gap-2 text-[#01b574] font-bold text-[14px]">
-                     <lucide-icon name="check-circle-2" [size]="18"></lucide-icon>
-                     {{ selectedFile.name }}
-                   </div>
-                 </div>
-                 
-               </div>
+            <!-- COLUMN 2: Source Picker / DB Form -->
+            <div class="flex flex-col max-h-[560px] h-full">
+              <ng-container *ngIf="sourceMode === 'file'; else dbConnectionForm">
+                <div class="w-full h-full min-h-[340px] flex flex-col items-center justify-center text-center cursor-pointer drop-zone group relative overflow-hidden"
+                     [class.is-dragging]="isDragging"
+                     [class.has-file]="selectedFile"
+                     [class.has-error]="extractionError"
+                     (dragover)="onDragOver($event)"
+                     (dragleave)="onDragLeave($event)"
+                     (drop)="onDrop($event)"
+                     (click)="triggerFileInput()">
+
+                  <input type="file" #fileInput class="hidden" accept=".xlsx,.xls,.json,.sql" (change)="onFileChange($event)">
+
+                  <lucide-icon name="cloud-upload" [size]="56" [strokeWidth]="2.5"
+                               class="mx-auto mb-6 transition-colors text-brand-primary dark:text-white group-hover:dark:text-[#01b574] group-hover:text-[#01b574]">
+                  </lucide-icon>
+
+                  <p class="text-[18px] font-bold mb-2 text-text-primary dark:text-white relative z-10">
+                    Deposez vos fichiers ici
+                  </p>
+                  <p class="text-[15px] font-medium text-[#01b574] mb-3 relative z-10">
+                    ou cliquez pour parcourir
+                  </p>
+                  <p class="text-[13px] text-text-secondary dark:text-[#8f9bba] font-medium px-4 relative z-10">
+                    Les fichiers .xlsx, .xls, .json et .sql sont autorises via ce portail.
+                  </p>
+
+                  <div *ngIf="selectedFile && !extractionError && !extractionResult" class="absolute w-full bottom-0 left-0 pt-6 pb-6 bg-[#01b574]/10 border-t border-[#01b574]/20 text-center animate-fade-in-up">
+                    <div class="flex items-center justify-center gap-2 text-[#01b574] font-bold text-[14px]">
+                      <lucide-icon name="check-circle-2" [size]="18"></lucide-icon>
+                      {{ selectedFile.name }}
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-template #dbConnectionForm>
+                <div class="db-form-card date-row-appear">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-1">
+                      <label class="form-label">Host</label>
+                      <input class="form-input" type="text" placeholder="localhost" [(ngModel)]="dbConnection.host" (ngModelChange)="onDbConnectionFieldChange()" />
+                    </div>
+                    <div class="md:col-span-1">
+                      <label class="form-label">Port</label>
+                      <input class="form-input" type="number" min="1" placeholder="5432" [(ngModel)]="dbConnection.port" (ngModelChange)="onDbConnectionFieldChange()" />
+                    </div>
+                    <div class="md:col-span-1">
+                      <label class="form-label">Database</label>
+                      <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.database" (ngModelChange)="onDbConnectionFieldChange()" />
+                    </div>
+                    <div class="md:col-span-1">
+                      <label class="form-label">DB Type</label>
+                      <select class="form-input" [(ngModel)]="dbConnection.dbType" (ngModelChange)="onDbConnectionFieldChange()">
+                        <option *ngFor="let dbType of dbTypeOptions" [ngValue]="dbType">{{ dbType }}</option>
+                      </select>
+                    </div>
+                    <div class="md:col-span-1">
+                      <label class="form-label">Username</label>
+                      <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.username" (ngModelChange)="onDbConnectionFieldChange()" />
+                    </div>
+                    <div class="md:col-span-1">
+                      <label class="form-label">Password</label>
+                      <input class="form-input" type="password" placeholder="********" [(ngModel)]="dbConnection.password" (ngModelChange)="onDbConnectionFieldChange()" />
+                    </div>
+                    <div class="md:col-span-2">
+                      <label class="form-label">Table</label>
+                      <input class="form-input" type="text" placeholder="source.contrat" [(ngModel)]="dbConnection.table" (ngModelChange)="onDbConnectionFieldChange()" />
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
 
                <!-- ============================================== -->
                <!-- EXTRACTION FEEDBACK UI (Errors & Success)      -->
@@ -206,12 +269,15 @@
                      <span class="preview-label text-[13px] font-bold text-[#01b574]">
                        {{ extractionResult?.columns?.length }} colonnes detectees
                      </span>
-                     <span class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
+                     <span *ngIf="sourceMode === 'file'" class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
                        a partir de {{ extractionResult?.rowCount }} lignes
+                     </span>
+                     <span *ngIf="sourceMode === 'database'" class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
+                       depuis {{ dbConnection.table || 'la table source' }}
                      </span>
                    </div>
                    <span class="file-type-badge text-[10px] font-extrabold tracking-[0.8px] px-2 py-0.5 rounded-md bg-[#01b574]/10 text-[#01b574] border border-[#01b574]/20 uppercase">
-                     {{ extractionResult?.fileType }}
+                     {{ sourceMode === 'database' ? dbConnection.dbType : extractionResult?.fileType }}
                    </span>
                  </div>
              
@@ -246,13 +312,13 @@
                   [ngClass]="{'opacity-50 cursor-not-allowed shadow-none': !canContinueToMapping}">
             
             <ng-container *ngIf="!isExtracting">
-              Continuer vers le mapping
+              {{ sourceMode === 'database' ? 'Connexion et lecture des colonnes' : 'Continuer vers le mapping' }}
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
             </ng-container>
             
             <ng-container *ngIf="isExtracting">
               <div class="spinner-sm"></div>
-              Analyse du fichier...
+              {{ sourceMode === 'database' ? 'Connexion a la base...' : 'Analyse du fichier...' }}
             </ng-container>
             
           </button>
@@ -284,11 +350,11 @@
 
           <!-- Badge -->
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ fileType }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">{{ selectedFile?.name }}</span>
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ loadingSourceBadge }}</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[260px]">{{ loadingSourceLabel }}</span>
           </div>
 
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Traitement de votre fichier</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">{{ loadingTitle }}</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
             {{ currentLoadingMessage }}
           </p>
@@ -307,7 +373,7 @@
           <div class="w-24 h-24 rounded-full bg-[#01b574] flex items-center justify-center mb-6 animate-fade-in-scale shadow-[0_0_40px_rgba(1,181,116,0.25)]">
             <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
           </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-2">Televersement termine !</h3>
+          <h3 class="text-[28px] font-bold text-text-primary mb-2">{{ uploadSuccessTitle }}</h3>
           <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10">{{ uploadResult.rowCount | number }} lignes chargees avec succes</p>
           
           <button (click)="runQuality()" class="flex items-center justify-center gap-2 bg-[#01b574] text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] mb-4 w-[280px]">

@@ -254,12 +254,12 @@ html.dark .credit-wave path {
   height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   background: var(--bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   transition: transform 0.3s ease, width 0.25s ease;
   z-index: 360;
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
   margin: 16px 0 16px 16px;
   border-radius: 20px;
   width: var(--sidebar-w-expanded);

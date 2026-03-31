@@ -597,6 +597,11 @@ export class DatamartComponent implements OnInit, AfterViewInit {
   }
 
   openTablePage(tableName: string) {
+    if (tableName === 'fact_balance') {
+      void this.router.navigate(['/datamart/balance']);
+      return;
+    }
+
     if (tableName === 'dim_client') {
       void this.router.navigate(['/datamart/client']);
       return;

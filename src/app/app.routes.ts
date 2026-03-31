@@ -43,6 +43,14 @@ export const routes: Routes = [
             (m) => m.ContratDataComponent
           ),
       },
+      {
+        path: 'datamart/balance',
+        title: 'Donnees balance',
+        loadComponent: () =>
+          import('./pages/balance-data/balance-data.component').then(
+            (m) => m.BalanceDataComponent
+          ),
+      },
     ],
   },
 ];

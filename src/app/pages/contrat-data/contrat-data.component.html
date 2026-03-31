@@ -1,20 +1,20 @@
-<div class="p-6 max-w-[1800px] mx-auto bg-transparent">
-  <div class="mb-6 flex justify-end">
+<div class="px-3 py-4 sm:p-6 max-w-[1800px] mx-auto bg-transparent">
+  <div class="mb-4 sm:mb-6 flex justify-start sm:justify-end">
     <button
       type="button"
       (click)="goBack()"
-      class="inline-flex items-center gap-2 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:text-[#01B574] dark:hover:text-[#01B574] hover:border-[#01B574]/40 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-colors"
+      class="inline-flex w-full sm:w-auto justify-center items-center gap-2 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:text-[#01B574] dark:hover:text-[#01B574] hover:border-[#01B574]/40 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-colors"
     >
       <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.8"></lucide-icon>
       Retour au datamart
     </button>
   </div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-6">
-        <article class="xl:col-span-2 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
-            <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+      <article class="md:col-span-2 xl:col-span-2 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+        <div class="px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
                 <div>
-                <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Objet finance</h2>
+          <h2 class="text-[20px] sm:text-[24px] font-bold text-gray-900 dark:text-white">Objet finance</h2>
                 <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ objetTotal() }} objets</p>
                 </div>
                 <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
@@ -55,11 +55,11 @@
                 <button type="button" (click)="retryObjet()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
             </div>
 
-            <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
-                <p class="text-[13px] text-gray-600 dark:text-white/60">
+            <div class="border-t border-gray-100 dark:border-white/5 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p class="text-[13px] text-gray-600 dark:text-white/60 text-center sm:text-left">
                 Affichage {{ getStartIndex(objetPage(), objetPageSize, objetTotal()) }}-{{ getEndIndex(objetPage(), objetPageSize, objetTotal()) }} sur {{ objetTotal().toLocaleString() }} resultats
                 </p>
-                <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1 overflow-x-auto w-full sm:w-auto justify-center sm:justify-start pb-1 sm:pb-0">
                 <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="objetPage() === 0" (click)="goObjetPage(objetPage() - 1)">
                     <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
                 </button>
@@ -82,9 +82,9 @@
     </article>
 
     <article class="xl:col-span-1 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
-      <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+      <div class="px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
         <div>
-          <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Devise</h2>
+          <h2 class="text-[20px] sm:text-[24px] font-bold text-gray-900 dark:text-white">Devise</h2>
           <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ deviseTotal() }} devises</p>
         </div>
         <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
@@ -125,11 +125,11 @@
         <button type="button" (click)="retryDevise()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
       </div>
 
-      <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
-        <p class="text-[13px] text-gray-600 dark:text-white/60">
+      <div class="border-t border-gray-100 dark:border-white/5 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p class="text-[13px] text-gray-600 dark:text-white/60 text-center sm:text-left">
           Affichage {{ getStartIndex(devisePage(), devisePageSize, deviseTotal()) }}-{{ getEndIndex(devisePage(), devisePageSize, deviseTotal()) }} sur {{ deviseTotal().toLocaleString() }} resultats
         </p>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 overflow-x-auto w-full sm:w-auto justify-center sm:justify-start pb-1 sm:pb-0">
           <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="devisePage() === 0" (click)="goDevisePage(devisePage() - 1)">
             <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
           </button>
@@ -152,9 +152,9 @@
     </article>
 
     <article class="xl:col-span-1 bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
-      <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+      <div class="px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
         <div>
-          <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Type contrat</h2>
+          <h2 class="text-[20px] sm:text-[24px] font-bold text-gray-900 dark:text-white">Type contrat</h2>
           <p class="text-[13px] text-gray-600 dark:text-white/60 mt-0.5">{{ typeTotal() }} types</p>
         </div>
         <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
@@ -195,11 +195,11 @@
         <button type="button" (click)="retryType()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
       </div>
 
-      <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
-        <p class="text-[13px] text-gray-600 dark:text-white/60">
+      <div class="border-t border-gray-100 dark:border-white/5 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p class="text-[13px] text-gray-600 dark:text-white/60 text-center sm:text-left">
           Affichage {{ getStartIndex(typePage(), typePageSize, typeTotal()) }}-{{ getEndIndex(typePage(), typePageSize, typeTotal()) }} sur {{ typeTotal().toLocaleString() }} resultats
         </p>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 overflow-x-auto w-full sm:w-auto justify-center sm:justify-start pb-1 sm:pb-0">
           <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="typePage() === 0" (click)="goTypePage(typePage() - 1)">
             <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
           </button>
@@ -223,9 +223,9 @@
   </div>
 
   <article class="bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
-    <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+    <div class="px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
       <div>
-        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white">Contrats</h2>
+        <h2 class="text-[20px] sm:text-[24px] font-bold text-gray-900 dark:text-white">Contrats</h2>
         <p class="text-[16px] text-gray-600 dark:text-white/60 mt-0.5">{{ contratTotal().toLocaleString() }} contrats</p>
       </div>
       <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
@@ -233,7 +233,7 @@
       </button>
     </div>
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-scroll overflow-y-hidden pb-2 sm:pb-3">
       <table class="w-full min-w-[1500px]">
         <thead>
           <tr class="bg-gray-50 dark:bg-white/[0.02]">
@@ -309,11 +309,11 @@
       <button type="button" (click)="retryContrat()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
     </div>
 
-    <div class="border-t border-gray-100 dark:border-white/5 px-6 py-4 flex items-center justify-between gap-3">
-      <p class="text-[13px] text-gray-600 dark:text-white/60">
+    <div class="border-t border-gray-100 dark:border-white/5 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <p class="text-[13px] text-gray-600 dark:text-white/60 text-center sm:text-left">
         Affichage {{ getStartIndex(contratPage(), contratPageSize, contratTotal()) }}-{{ getEndIndex(contratPage(), contratPageSize, contratTotal()) }} sur {{ contratTotal().toLocaleString() }} resultats
       </p>
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1 overflow-x-auto w-full sm:w-auto justify-center sm:justify-start pb-1 sm:pb-0">
         <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="contratPage() === 0" (click)="goContratPage(contratPage() - 1)">
           <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
         </button>

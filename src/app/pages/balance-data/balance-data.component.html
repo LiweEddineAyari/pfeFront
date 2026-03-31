@@ -1,0 +1,129 @@
+<div class="px-3 py-4 sm:p-6 max-w-[1800px] mx-auto bg-transparent">
+  <div class="mb-4 sm:mb-6 flex justify-start sm:justify-end">
+    <button
+      type="button"
+      (click)="goBack()"
+      class="inline-flex w-full sm:w-auto justify-center items-center gap-2 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:text-[#01B574] dark:hover:text-[#01B574] hover:border-[#01B574]/40 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-colors"
+    >
+      <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      Retour au datamart
+    </button>
+  </div>
+
+  <article class="bg-white dark:bg-[#111C44] rounded-[20px] shadow-card-light dark:shadow-card-dark overflow-hidden">
+    <div class="px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center border-b border-gray-100 dark:border-white/5">
+      <div>
+        <h2 class="text-[20px] sm:text-[24px] font-bold text-gray-900 dark:text-white">Balances</h2>
+        <p class="text-[16px] text-gray-600 dark:text-white/60 mt-0.5">{{ balanceTotal().toLocaleString() }} lignes</p>
+      </div>
+      <button type="button" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center">
+        <lucide-icon name="more-horizontal" [size]="28" class="text-[#01B574] dark:text-white/80"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="px-4 sm:px-6 pt-2 sm:pt-3 lg:hidden text-[11px] text-gray-500 dark:text-white/45">
+      Defilez horizontalement pour voir toutes les colonnes
+    </div>
+
+    <div class="overflow-x-scroll overflow-y-hidden pb-2 sm:pb-3">
+      <table class="w-full min-w-[2200px]">
+        <thead>
+          <tr class="bg-gray-50 dark:bg-white/[0.02]">
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">ID</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">ID Client</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">ID Contrat</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Solde origine</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Solde convertie</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Cumul mvt db</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Cumul mvt cr</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Solde init. mois</th>
+            <th class="px-6 py-3 text-right text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Amount</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Actif</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Num agence</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Devise</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Devise banque</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Libelle compte</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Chapitre</th>
+            <th class="px-6 py-3 text-left text-[12px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-white/35 border-b border-gray-100 dark:border-white/5">Date value</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="balanceLoading()">
+          <tr *ngFor="let _ of balanceSkeletonRows" class="border-b border-gray-50 dark:border-white/[0.03]">
+            <td *ngFor="let col of [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]" class="px-6 py-4">
+              <div class="h-3 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse" [ngClass]="getBalanceSkeletonWidth(col)"></div>
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody *ngIf="!balanceLoading()">
+          <tr *ngFor="let row of balanceItems()" class="border-b border-gray-50 dark:border-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+            <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ row.id }}</td>
+            <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ getClientId(row) }}</td>
+            <td class="px-6 py-4 text-[12px] font-mono text-gray-500 dark:text-white/40">{{ getContratId(row) }}</td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ formatAmount(row.soldeorigine) }}</td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ formatAmount(row.soldeconvertie) }}</td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ formatAmount(row.cumulmvtdb) }}</td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ formatAmount(row.cumulmvtcr) }}</td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ formatAmount(row.soldeinitdebmois) }}</td>
+            <td class="px-6 py-4 text-right text-[13px] font-mono text-[#01B574]">{{ formatAmount(row.amount) }}</td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="getActifLabel(row) !== '—'"
+                class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border"
+                [ngClass]="getActifLabel(row) === 'ACTIF' ? 'bg-emerald-100 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-500/25 dark:text-emerald-300' : 'bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-500/25 dark:text-amber-300'"
+              >
+                {{ getActifLabel(row) }}
+              </span>
+              <span *ngIf="getActifLabel(row) === '—'" class="text-gray-500 dark:text-white/40">—</span>
+            </td>
+            <td class="px-6 py-4 text-[13px] text-gray-700 dark:text-white/80">{{ row.numagence ?? '—' }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-[#EAFBF4] border-[#B7EDD7] text-[#01B574] dark:bg-[#01B574]/20 dark:border-[#01B574]/30 dark:text-[#6CF5C7]">{{ row.devise || '—' }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold border bg-sky-100 border-sky-200 text-sky-700 dark:bg-sky-900/20 dark:border-sky-500/25 dark:text-sky-300">{{ row.devisebanque ?? row.devisebbnq ?? '—' }}</span>
+            </td>
+            <td class="px-6 py-4 text-[13px] text-gray-700 dark:text-white/80 max-w-[260px] truncate" [attr.title]="row.libellecompte">{{ row.libellecompte || '—' }}</td>
+            <td class="px-6 py-4 text-[13px] text-gray-700 dark:text-white/80">{{ row.chapitre || '—' }}</td>
+            <td class="px-6 py-4 text-[13px] text-gray-600 dark:text-white/60">{{ formatDate(row.datevalue ?? row.date_bal ?? row.date_value ?? null) }}</td>
+          </tr>
+
+          <tr *ngIf="balanceItems().length === 0">
+            <td colspan="16" class="px-6 py-10 text-center text-[14px] text-gray-600 dark:text-white/60">Aucune donnee disponible</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="balanceError()" class="mx-4 sm:mx-6 mt-4 mb-2 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <span class="text-[13px] text-red-700 dark:text-red-300">{{ balanceError() }}</span>
+      <button type="button" (click)="retryBalance()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+    </div>
+
+    <div class="border-t border-gray-100 dark:border-white/5 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <p class="text-[13px] text-gray-600 dark:text-white/60 text-center sm:text-left">
+        Affichage {{ getStartIndex(balancePage(), balancePageSize, balanceTotal()) }}-{{ getEndIndex(balancePage(), balancePageSize, balanceTotal()) }} sur {{ balanceTotal().toLocaleString() }} resultats
+      </p>
+      <div class="flex items-center gap-1 overflow-x-auto w-full sm:w-auto justify-center sm:justify-start pb-1 sm:pb-0">
+        <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="balancePage() === 0" (click)="goBalancePage(balancePage() - 1)">
+          <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+        </button>
+
+        <button
+          *ngFor="let p of getPagesArray(balanceTotalPages(), balancePage())"
+          type="button"
+          class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all"
+          [ngClass]="p === balancePage() ? 'bg-[#01B574] text-white font-bold' : 'bg-transparent text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'"
+          (click)="goBalancePage(p)"
+        >
+          {{ p + 1 }}
+        </button>
+
+        <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-medium transition-all text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed" [disabled]="balancePage() >= balanceTotalPages() - 1" (click)="goBalancePage(balancePage() + 1)">
+          <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </article>
+</div>

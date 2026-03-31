@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,6 +10,15 @@ interface NavItem {
   icon: string;
   active: boolean;
   path: string;
+  expanded?: boolean;
+  children?: NavSubItem[];
+}
+
+interface NavSubItem {
+  label: string;
+  icon: string;
+  path: string;
+  active: boolean;
 }
 
 @Component({
@@ -29,7 +38,7 @@ interface NavItem {
             [class.opacity-0]="state.collapsed"
             [class.w-0]="state.collapsed"
             [class.overflow-hidden]="state.collapsed">
-          HORIZON <span class="font-normal">PRO</span>
+          DASHBOARD <span class="font-normal">PRO</span>
         </h1>
         
         <!-- Mobile Close Button -->
@@ -77,41 +86,117 @@ interface NavItem {
       <!-- Nav Items -->
       <nav class="flex-1 mt-6 px-3" role="navigation">
         <ul class="flex flex-col gap-1">
-          <li *ngFor="let item of navItems; trackBy: trackByLabel">
-            
-            <a [routerLink]="item.path"
-               class="flex items-center rounded-xl transition-all duration-200 cursor-pointer overflow-hidden p-3 relative"
-               [ngClass]="{
-                 'text-text-primary bg-page': item.active && !state.collapsed,
-                 'text-text-secondary hover:bg-page': !item.active || state.collapsed,
-                 'justify-center': state.collapsed
-               }"
-               (click)="handleNavClick()">
-               
-               <!-- Active Indicator Pill for Collapsed State -->
-               <div *ngIf="item.active && state.collapsed"
-                    class="absolute left-0 w-1 h-8 bg-[var(--color-primary)] rounded-r-lg"></div>
+            <li *ngFor="let item of navItems; trackBy: trackByLabel"
+              class="relative">
 
-               <lucide-icon [name]="item.icon" [size]="20" [strokeWidth]="item.active ? 2.5 : 2"
-                            class="shrink-0 transition-colors"
-                            [ngClass]="{
-                              'text-brand-primary': item.active,
-                              'text-text-primary': !item.active && !state.collapsed,
-                              'text-text-secondary': !item.active && state.collapsed
-                            }">
-               </lucide-icon>
-               
-               <span class="text-[16px] font-bold whitespace-nowrap ml-4 transition-all duration-200"
-                     [ngClass]="{
-                       'text-text-primary': item.active,
-                       'text-text-secondary': !item.active
-                     }"
-                     [class.opacity-0]="state.collapsed"
-                     [class.w-0]="state.collapsed"
-                     [class.hidden]="state.collapsed">
-                 {{ item.label }}
-               </span>
-            </a>
+            <div class="relative">
+              <a [routerLink]="item.path"
+                 class="flex items-center rounded-xl transition-all duration-200 cursor-pointer overflow-hidden p-3 relative"
+                 [ngClass]="{
+                   'text-text-primary bg-page dark:bg-white/5 shadow-[inset_0_0_0_1px_rgba(163,174,208,0.18)]': item.active && !state.collapsed,
+                   'text-text-secondary hover:bg-page/80 dark:hover:bg-white/5': !item.active || state.collapsed,
+                   'justify-center': state.collapsed,
+                   'pr-10': item.children?.length && !state.collapsed,
+                   'bg-page/90 dark:bg-white/5': state.collapsed && isFloatingSubmenuOpen(item)
+                 }"
+                 [attr.aria-expanded]="item.children?.length && !state.collapsed ? item.expanded : null"
+                 [attr.aria-haspopup]="item.children?.length ? 'menu' : null"
+                 (click)="onNavItemClick(item, !!state.collapsed, $event)">
+
+                 <!-- Active Indicator Pill for Collapsed State -->
+                 <div *ngIf="item.active && state.collapsed"
+                      class="absolute left-0 w-1 h-8 bg-[var(--color-primary)] rounded-r-lg"></div>
+
+                 <lucide-icon [name]="item.icon" [size]="20" [strokeWidth]="item.active ? 2.5 : 2"
+                              class="shrink-0 transition-colors"
+                              [ngClass]="{
+                                'text-brand-primary': item.active,
+                                'text-text-primary': !item.active && !state.collapsed,
+                                'text-text-secondary': !item.active && state.collapsed
+                              }">
+                 </lucide-icon>
+
+                 <span class="text-[16px] font-bold whitespace-nowrap ml-4 transition-all duration-200"
+                       [ngClass]="{
+                         'text-text-primary': item.active,
+                         'text-text-secondary': !item.active
+                       }"
+                       [class.opacity-0]="state.collapsed"
+                       [class.w-0]="state.collapsed"
+                       [class.hidden]="state.collapsed">
+                   {{ item.label }}
+                 </span>
+              </a>
+
+              <button
+                *ngIf="item.children?.length && !state.collapsed"
+                type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-text-secondary hover:text-brand-primary hover:bg-brand-primary/10 transition-all"
+                aria-label="Basculer le sous-menu Datamart"
+                (click)="toggleInlineSubmenu(item, $event)">
+                <lucide-icon [name]="item.expanded ? 'chevron-down' : 'chevron-right'" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+              </button>
+            </div>
+
+            <!-- Expanded Sidebar: Inline Submenu -->
+            <div *ngIf="item.children?.length && !state.collapsed"
+                 class="ml-6 pl-3 border-l border-gray-200 dark:border-white/10 overflow-hidden transition-all duration-250 ease-out"
+                 [ngClass]="item.expanded ? 'max-h-72 opacity-100 mt-1 py-1' : 'max-h-0 opacity-0 mt-0 py-0 pointer-events-none'">
+              <a *ngFor="let child of item.children; trackBy: trackByPath"
+                 [routerLink]="child.path"
+                 class="group flex items-center gap-2 rounded-xl px-2.5 py-2.5 text-[14px] font-semibold transition-all duration-200"
+                 [ngClass]="{
+                   'bg-brand-primary/10 dark:bg-brand-primary/25 text-brand-primary shadow-[inset_0_0_0_1px_rgba(1,181,116,0.2)]': child.active,
+                   'text-text-secondary dark:text-[#c9d3f8] hover:text-text-primary dark:hover:text-white hover:bg-page/80 dark:hover:bg-white/10': !child.active
+                 }"
+                 (click)="handleChildNavClick()">
+                <span class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                      [ngClass]="child.active ? 'bg-brand-primary/15 text-brand-primary' : 'bg-page dark:bg-[#1b2a5b]/90 text-text-secondary dark:text-[#c9d3f8] group-hover:text-text-primary dark:group-hover:text-white group-hover:bg-brand-primary/10 dark:group-hover:bg-brand-primary/20'">
+                  <lucide-icon [name]="child.icon" [size]="15" [strokeWidth]="2.4"></lucide-icon>
+                </span>
+                <span class="truncate">{{ child.label }}</span>
+                <span class="ml-auto opacity-0 translate-x-[-2px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                      [ngClass]="child.active ? 'text-brand-primary opacity-100 translate-x-0' : 'text-text-secondary dark:text-[#9fb1eb]'">
+                  <lucide-icon name="chevron-right" [size]="14" [strokeWidth]="2.5"></lucide-icon>
+                </span>
+              </a>
+            </div>
+
+            <!-- Collapsed Sidebar: Floating Dropdown -->
+            <div *ngIf="item.children?.length && state.collapsed && isFloatingSubmenuOpen(item)"
+                 role="menu"
+                 class="absolute left-[calc(100%+14px)] top-0 w-[252px] rounded-2xl border border-gray-200/90 dark:border-[#2a3d7a] bg-white/97 dark:bg-[#0f1a42]/98 backdrop-blur-xl shadow-[0_20px_46px_rgba(17,28,68,0.24)] dark:shadow-[0_20px_46px_rgba(0,0,0,0.55)] p-2.5 z-[520]">
+              <div class="px-2.5 pt-1.5 pb-2.5 flex items-center gap-2.5 border-b border-gray-200/80 dark:border-[#2a3d7a]">
+                <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-brand-primary/12 text-brand-primary">
+                  <lucide-icon name="database" [size]="15" [strokeWidth]="2.5"></lucide-icon>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-[12px] font-extrabold tracking-[0.12em] uppercase text-text-secondary dark:text-[#b6c6f6] leading-none">
+                    {{ item.label }}
+                  </p>
+                  <p class="text-[11px] text-text-secondary/80 dark:text-[#8fa3da] mt-1 leading-none">Navigation rapide</p>
+                </div>
+              </div>
+
+              <a *ngFor="let child of item.children; trackBy: trackByPath"
+                 [routerLink]="child.path"
+                 class="group mt-1 first:mt-2 flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-[14px] font-semibold transition-all duration-200"
+                 [ngClass]="{
+                   'bg-brand-primary/10 dark:bg-brand-primary/25 text-brand-primary shadow-[inset_0_0_0_1px_rgba(1,181,116,0.24)]': child.active,
+                   'text-text-secondary dark:text-[#c9d3f8] hover:text-text-primary dark:hover:text-white hover:bg-page/80 dark:hover:bg-white/10': !child.active
+                 }"
+                 (click)="handleChildNavClick()">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                      [ngClass]="child.active ? 'bg-brand-primary/15 text-brand-primary' : 'bg-page dark:bg-[#1b2a5b]/90 text-text-secondary dark:text-[#c9d3f8] group-hover:text-text-primary dark:group-hover:text-white group-hover:bg-brand-primary/10 dark:group-hover:bg-brand-primary/20'">
+                  <lucide-icon [name]="child.icon" [size]="15" [strokeWidth]="2.4"></lucide-icon>
+                </span>
+                <span class="truncate">{{ child.label }}</span>
+                <span class="ml-auto opacity-0 translate-x-[-2px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                      [ngClass]="child.active ? 'text-brand-primary opacity-100 translate-x-0' : 'text-text-secondary dark:text-[#9fb1eb]'">
+                  <lucide-icon name="chevron-right" [size]="14" [strokeWidth]="2.5"></lucide-icon>
+                </span>
+              </a>
+            </div>
           </li>
         </ul>
       </nav>
@@ -149,11 +234,24 @@ export class SidebarComponent {
   layoutService = inject(LayoutService);
   router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private host = inject(ElementRef<HTMLElement>);
+  private floatingSubmenuLabel: string | null = null;
 
   navItems: NavItem[] = [
     { label: 'Tableau de bord', icon: 'home', active: false, path: '/' },
     { label: 'ETL Pipeline', icon: 'server', active: false, path: '/etl-pipeline' },
-    { label: 'Datamart', icon: 'database', active: false, path: '/datamart' },
+    {
+      label: 'Datamart',
+      icon: 'database',
+      active: false,
+      path: '/datamart',
+      expanded: false,
+      children: [
+        { label: 'Clients', icon: 'users', path: '/datamart/client', active: false },
+        { label: 'Contrats', icon: 'file-text', path: '/datamart/contrat', active: false },
+        { label: 'Balance', icon: 'dollar-sign', path: '/datamart/balance', active: false },
+      ],
+    },
   ];
 
   constructor() {
@@ -165,7 +263,54 @@ export class SidebarComponent {
   }
 
   handleNavClick(): void {
+    this.floatingSubmenuLabel = null;
     this.layoutService.closeMobileMenu();
+  }
+
+  handleChildNavClick(): void {
+    this.floatingSubmenuLabel = null;
+    this.layoutService.closeMobileMenu();
+  }
+
+  onNavItemClick(item: NavItem, isCollapsed: boolean, event: Event): void {
+    if (item.children?.length) {
+      if (isCollapsed) {
+        event.preventDefault();
+        this.floatingSubmenuLabel = this.floatingSubmenuLabel === item.label ? null : item.label;
+        this.cdr.markForCheck();
+        return;
+      }
+
+      item.expanded = true;
+      this.cdr.markForCheck();
+    }
+
+    this.handleNavClick();
+  }
+
+  toggleInlineSubmenu(item: NavItem, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    item.expanded = !item.expanded;
+    this.cdr.markForCheck();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.floatingSubmenuLabel) {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    if (target && !this.host.nativeElement.contains(target)) {
+      this.floatingSubmenuLabel = null;
+      this.cdr.markForCheck();
+    }
+  }
+
+  isFloatingSubmenuOpen(item: NavItem): boolean {
+    return this.floatingSubmenuLabel === item.label;
   }
 
   private updateActiveState(url: string): void {
@@ -174,7 +319,23 @@ export class SidebarComponent {
     this.navItems.forEach((item) => {
       const itemPath = this.normalizeUrl(item.path);
       item.active = normalizedUrl === itemPath || (itemPath !== '/' && normalizedUrl.startsWith(`${itemPath}/`));
+
+      if (item.children?.length) {
+        item.children.forEach((child) => {
+          const childPath = this.normalizeUrl(child.path);
+          child.active = normalizedUrl === childPath || normalizedUrl.startsWith(`${childPath}/`);
+        });
+
+        if (item.children.some((child) => child.active)) {
+          item.expanded = true;
+          item.active = true;
+        }
+      }
     });
+
+    if (!this.navItems.some((item) => item.children?.some((child) => child.active))) {
+      this.floatingSubmenuLabel = null;
+    }
 
     this.cdr.markForCheck();
   }
@@ -188,5 +349,9 @@ export class SidebarComponent {
 
   trackByLabel(_: number, item: NavItem): string {
     return item.label;
+  }
+
+  trackByPath(_: number, item: NavSubItem): string {
+    return item.path;
   }
 }

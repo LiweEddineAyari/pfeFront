@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { FieldMappingComponent } from '../../shared/components/field-mapping/field-mapping.component';
 import { ColumnExtractorService, ExtractionResult } from '../../core/services/column-extractor.service';
 import { exportToExcel } from '../../core/utils/excel-export.util';
-import { DatamartComptaResult, DatamartContratResult, DatamartTiersResult, EtlApiService, ProcessResult, QualityTiersResult, QualityContratResult, QualityComptaResult, QualityListResponse, TransformResult } from '../../core/services/etl-api.service';
+import { DatamartComptaResult, DatamartContratResult, DatamartTiersResult, DbColumnMetadata, DbConnectionConfig, DbType, EtlApiService, ProcessResult, QualityTiersResult, QualityContratResult, QualityComptaResult, QualityListResponse, TransformResult } from '../../core/services/etl-api.service';
 
 @Component({
   selector: 'app-etl-pipeline',
@@ -21,8 +21,19 @@ export class EtlPipelineComponent {
   step: 'intro' | 'form' | 'mapping' | 'loading' | 'result' | 'quality-loading' | 'quality-result' | 'transform-loading' | 'transform-result' | 'datamart-loading' | 'datamart-result' = 'intro';
   
   isDragging = false;
+  sourceMode: 'file' | 'database' = 'file';
   selectedFile: File | null = null;
   fileType: 'SQL' | 'TIERS' | 'CONTRAT' | 'COMPTA' = 'TIERS';
+  dbTypeOptions: DbType[] = ['POSTGRES', 'MYSQL', 'SQLSERVER', 'ORACLE'];
+  dbConnection: DbConnectionConfig = {
+    host: '',
+    port: 5432,
+    database: '',
+    dbType: 'POSTGRES',
+    username: '',
+    password: '',
+    table: ''
+  };
   
   extractionResult: ExtractionResult | null = null;
   isExtracting = false;
@@ -56,12 +67,51 @@ export class EtlPipelineComponent {
   datamartLoadingMessage = '';
 
   get canContinueToMapping(): boolean {
-    if (!this.selectedFile || this.isExtracting) return false;
-    if (!this.isSqlFile() && this.fileType === 'COMPTA' && !this.isDateValid) return false;
+    if (this.isExtracting) return false;
+    if (this.sourceMode === 'file' && !this.selectedFile) return false;
+    if (this.sourceMode === 'database' && !this.isDbConnectionValid) return false;
+    if (this.fileType === 'COMPTA' && !this.isDateValid) return false;
     return true;
   }
 
+  get isDatabaseMode(): boolean {
+    return this.sourceMode === 'database';
+  }
+
+  get isDbConnectionValid(): boolean {
+    const { host, port, database, username, password, table } = this.dbConnection;
+    return !!host.trim()
+      && Number.isFinite(port)
+      && port > 0
+      && !!database.trim()
+      && !!username.trim()
+      && !!password
+      && !!table.trim();
+  }
+
+  get loadingSourceBadge(): string {
+    return this.sourceMode === 'database' ? this.mappingFileType : this.fileType;
+  }
+
+  get loadingSourceLabel(): string {
+    if (this.sourceMode === 'database') {
+      return this.dbConnection.table || `${this.dbConnection.host}:${this.dbConnection.port}`;
+    }
+    return this.selectedFile?.name || 'Fichier';
+  }
+
+  get loadingTitle(): string {
+    return this.sourceMode === 'database'
+      ? 'Chargement des donnees depuis la base'
+      : 'Traitement de votre fichier';
+  }
+
+  get uploadSuccessTitle(): string {
+    return this.sourceMode === 'database' ? 'Chargement termine !' : 'Televersement termine !';
+  }
+
   loadingMessages = ['Veuillez patienter...', 'Lecture de votre fichier...', 'Chargement des lignes...', 'Mappage des colonnes...', 'Traitement des donnees...', 'Cela peut prendre un instant...'];
+  dbLoadingMessages = ['Connexion a la base de donnees...', 'Lecture des colonnes source...', 'Preparation du chargement en staging...', 'Application du mapping...', 'Traitement des donnees...', 'Cela peut prendre un instant...'];
   currentLoadingMessage = this.loadingMessages[0];
   msgInterval: any;
 
@@ -87,11 +137,12 @@ export class EtlPipelineComponent {
   datamartMsgInterval: any;
 
   startLoadingMessages() {
-    this.currentLoadingMessage = this.loadingMessages[0];
+    const messages = this.sourceMode === 'database' ? this.dbLoadingMessages : this.loadingMessages;
+    this.currentLoadingMessage = messages[0];
     let msgIndex = 0;
     this.msgInterval = setInterval(() => {
-      msgIndex = (msgIndex + 1) % this.loadingMessages.length;
-      this.currentLoadingMessage = this.loadingMessages[msgIndex];
+      msgIndex = (msgIndex + 1) % messages.length;
+      this.currentLoadingMessage = messages[msgIndex];
       this.cdr.markForCheck();
     }, 5000);
   }
@@ -424,22 +475,103 @@ export class EtlPipelineComponent {
     this.step = newStep;
   }
 
+  onSourceModeChange(mode: 'file' | 'database'): void {
+    if (this.sourceMode === mode) return;
+
+    this.sourceMode = mode;
+    this.isDragging = false;
+    this.clearError();
+    this.extractionResult = null;
+    this.fileColumns = [];
+
+    if (mode === 'database') {
+      this.selectedFile = null;
+      if (this.fileType === 'SQL') {
+        this.fileType = 'TIERS';
+      }
+    }
+
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
+
+    this.cdr.markForCheck();
+  }
+
+  onDbConnectionFieldChange(): void {
+    this.clearError();
+    this.extractionResult = null;
+    this.fileColumns = [];
+    this.cdr.markForCheck();
+  }
+
+  private buildDbConnectionPayload(): DbConnectionConfig {
+    return {
+      host: this.dbConnection.host.trim(),
+      port: Number(this.dbConnection.port),
+      database: this.dbConnection.database.trim(),
+      dbType: this.dbConnection.dbType,
+      username: this.dbConnection.username.trim(),
+      password: this.dbConnection.password,
+      table: this.dbConnection.table.trim()
+    };
+  }
+
+  private normalizeDbColumns(columns: DbColumnMetadata[]): string[] {
+    return Array.from(new Set(columns
+      .map(col => col.columnName?.trim())
+      .filter((name): name is string => !!name)));
+  }
+
   async onContinueToMapping() {
-    if (!this.canContinueToMapping || !this.selectedFile) return;
+    if (!this.canContinueToMapping) return;
     this.isExtracting = true;
     this.extractionError = null;
+    this.extractionResult = null;
     this.cdr.markForCheck();
 
     try {
-      const result = await this.columnExtractor.extract(this.selectedFile);
-      
-      if (result.status === 'success') {
-        this.fileColumns = result.columns;
-        this.extractionResult = result;
+      if (this.sourceMode === 'database') {
+        const dbColumns = await this.etlApi.fetchColumnsFromDb(this.buildDbConnectionPayload());
+        const columnNames = this.normalizeDbColumns(dbColumns);
+
+        if (columnNames.length === 0) {
+          this.extractionError = {
+            status: 'no-columns',
+            columns: [],
+            fileType: 'unknown',
+            errorMessage: 'Aucune colonne detectee pour la table renseignee.'
+          };
+          return;
+        }
+
+        this.fileColumns = columnNames;
+        this.extractionResult = {
+          status: 'success',
+          columns: columnNames,
+          fileType: 'unknown',
+          rowCount: undefined
+        };
         this.setStep('mapping');
       } else {
-        this.extractionError = result;
+        if (!this.selectedFile) return;
+        const result = await this.columnExtractor.extract(this.selectedFile);
+
+        if (result.status === 'success') {
+          this.fileColumns = result.columns;
+          this.extractionResult = result;
+          this.setStep('mapping');
+        } else {
+          this.extractionError = result;
+        }
       }
+    } catch (err: any) {
+      this.extractionError = {
+        status: 'parse-error',
+        columns: [],
+        fileType: 'unknown',
+        errorMessage: err?.message ?? 'Impossible de recuperer les colonnes de la source.'
+      };
     } finally {
       this.isExtracting = false;
       this.cdr.markForCheck();
@@ -447,6 +579,14 @@ export class EtlPipelineComponent {
   }
 
   getErrorTitle(status: string): string {
+    if (this.sourceMode === 'database') {
+      switch (status) {
+        case 'no-columns': return 'Aucune colonne detectee';
+        case 'parse-error': return 'Connexion impossible';
+        default: return 'Erreur de connexion';
+      }
+    }
+
     switch (status) {
       case 'empty': return 'Fichier vide';
       case 'no-columns': return 'Aucune colonne detectee';
@@ -458,6 +598,14 @@ export class EtlPipelineComponent {
   }
 
   getErrorHint(status: string): string {
+    if (this.sourceMode === 'database') {
+      switch (status) {
+        case 'no-columns': return 'Verifiez le schema/nom de table et les permissions de lecture de cet utilisateur.';
+        case 'parse-error': return 'Verifiez host, port, identifiants, type de base et acces reseau, puis reessayez.';
+        default: return 'Veuillez verifier les parametres de connexion puis reessayer.';
+      }
+    }
+
     switch (status) {
       case 'empty': return 'Essayez de televerser un fichier contenant des lignes de donnees.';
       case 'no-columns': return 'Assurez-vous que la ligne 1 contient les en-tetes de colonnes (Excel) ou que votre JSON contient des objets avec des cles.';
@@ -478,7 +626,7 @@ export class EtlPipelineComponent {
     const SCHEMAS = {
       TIERS: { target: ['idtiers','nomprenom','raisonsoc','residence','agenteco','sectionactivite','chiffreaffaires','nationalite','douteux','datdouteux','grpaffaires','nomgrpaffaires'] },
       CONTRAT: { target: ['idcontrat','agence','devise','ancienneteimpaye','objetfinance','typcontrat','datouv','datech','idtiers','tauxcontrat','actif'] },
-      COMPTA: { target: ['agence','devise','compte','chapitre','libellecompte','idtiers','solde'] }
+      COMPTA: { target: ['agence','devise','compte','chapitre','libellecompte','idtiers','soldeorigine','soldeconvertie','devisebbnq','cumulmvtdb','cumulmvtcr','soldeinitdebmois','idcontrat','amount','actif'] }
     };
     
     // SQL defaults to mapping to TIERS usually, so fallback mapped to mappingFileType
@@ -490,13 +638,25 @@ export class EtlPipelineComponent {
     const diff = Math.abs(expected - got);
     
     if (diff > 3) {
-      return `Votre fichier contient ${got} colonnes, mais le schema ${this.fileType} en attend ${expected}. Certains champs peuvent rester non mappes.`;
+      const sourceLabel = this.sourceMode === 'database' ? 'La table source' : 'Votre fichier';
+      return `${sourceLabel} contient ${got} colonnes, mais le schema ${this.mappingFileType} en attend ${expected}. Certains champs peuvent rester non mappes.`;
     }
     return null;
   }
 
+  private toDbLoadMapping(mappings: Record<string, string>): Record<string, string> | null {
+    if (Object.keys(mappings).length === 0) return null;
+
+    return Object.entries(mappings).reduce<Record<string, string>>((acc, [target, source]) => {
+      acc[target.toUpperCase()] = source;
+      return acc;
+    }, {});
+  }
+
   async onMappingComplete(mappings: Record<string, string>) {
-    if (!this.selectedFile || this.isUploading) return;
+    if (this.isUploading) return;
+    if (this.sourceMode === 'file' && !this.selectedFile) return;
+
     const requestSeq = ++this.uploadRequestSeq;
     this.isUploading = true;
 
@@ -516,12 +676,19 @@ export class EtlPipelineComponent {
       // Determine mappings to pass (null means auto-match)
       const hasMappings = Object.keys(mappings).length > 0;
 
-      const result = await this.etlApi.processFile({
-        file: this.selectedFile,
-        type: this.fileType,
-        mappings: hasMappings ? mappings : null,
-        dateBal
-      });
+      const result = this.sourceMode === 'database'
+        ? await this.etlApi.loadFromDatabase({
+            connection: this.buildDbConnectionPayload(),
+            type: this.mappingFileType,
+            mapping: hasMappings ? this.toDbLoadMapping(mappings) : null,
+            dateBal
+          })
+        : await this.etlApi.processFile({
+            file: this.selectedFile!,
+            type: this.fileType,
+            mappings: hasMappings ? mappings : null,
+            dateBal
+          });
 
       if (requestSeq !== this.uploadRequestSeq) return;
 
@@ -555,16 +722,19 @@ export class EtlPipelineComponent {
   }
 
   onDragOver(event: DragEvent) {
+    if (this.sourceMode !== 'file') return;
     event.preventDefault();
     this.isDragging = true;
   }
 
   onDragLeave(event: DragEvent) {
+    if (this.sourceMode !== 'file') return;
     event.preventDefault();
     this.isDragging = false;
   }
 
   onDrop(event: DragEvent) {
+    if (this.sourceMode !== 'file') return;
     event.preventDefault();
     this.isDragging = false;
     if (event.dataTransfer?.files.length) {
@@ -573,10 +743,12 @@ export class EtlPipelineComponent {
   }
 
   triggerFileInput() {
+    if (this.sourceMode !== 'file') return;
     this.fileInput.nativeElement.click();
   }
 
   onFileChange(event: Event) {
+    if (this.sourceMode !== 'file') return;
     const target = event.target as HTMLInputElement;
     if (target.files?.length) {
       this.handleFile(target.files[0]);
@@ -584,9 +756,11 @@ export class EtlPipelineComponent {
   }
 
   handleFile(file: File) {
+    this.sourceMode = 'file';
     this.selectedFile = file;
     this.extractionError = null;
     this.extractionResult = null;
+    this.fileColumns = [];
     
     const name = file.name.toLowerCase();
     
@@ -602,6 +776,7 @@ export class EtlPipelineComponent {
 
 
   isSqlFile(): boolean {
+    if (this.sourceMode !== 'file') return false;
     return this.selectedFile?.name?.toLowerCase().endsWith('.sql') ?? false;
   }
 
@@ -661,7 +836,17 @@ export class EtlPipelineComponent {
   }
 
   resetPipeline(): void {
+    this.sourceMode = 'file';
     this.selectedFile = null;
+    this.dbConnection = {
+      host: '',
+      port: 5432,
+      database: '',
+      dbType: 'POSTGRES',
+      username: '',
+      password: '',
+      table: ''
+    };
     this.fileColumns = [];
     this.extractionResult = null;
     this.extractionError = null;
