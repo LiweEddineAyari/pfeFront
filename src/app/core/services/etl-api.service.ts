@@ -12,13 +12,6 @@ export interface ProcessResult {
   message?:      string;        // present on error
 }
 
-export interface ProcessFileParams {
-  file:      File;
-  type:      string;           // TIERS | CONTRAT | COMPTA | SQL
-  mappings:  Record<string, string> | null;  // { dbCol: fileCol }
-  dateBal?:  string;           // dd/MM/yyyy, only for COMPTA
-}
-
 export type DbType = 'POSTGRES' | 'MYSQL' | 'SQLSERVER' | 'ORACLE';
 
 export interface DbConnectionConfig {
@@ -29,6 +22,7 @@ export interface DbConnectionConfig {
   username: string;
   password: string;
   table: string;
+  schema?: string;
 }
 
 export interface DbColumnMetadata {
@@ -219,10 +213,96 @@ export interface BalanceRow {
   date_value?: string | null
 }
 
+export interface MappingConfigRow {
+  id: number
+  tableSource: string
+  tableTarget: string
+  columnSource: string
+  columnTarget: string
+  configGroupNumber: number
+}
+
+export interface MappingConfigUpsertRequest {
+  tableSource: string
+  tableTarget: string
+  columnSource: string
+  columnTarget: string
+  configGroupNumber: number
+}
+
+export interface SourceTableColumnMetadata {
+  columnName: string
+  dataType: string
+  nullable: boolean
+}
+
+export interface SourceTableMetadata {
+  schema: string
+  tableName: string
+  qualifiedTable: string
+  columns: SourceTableColumnMetadata[]
+}
+
+export interface SourceTablesColumnsResponse {
+  tables: SourceTableMetadata[]
+  status: string
+  tableCount: number
+}
+
+export interface MappingConfigBulkResponse {
+  status?: string
+  message?: string
+  createdCount?: number
+}
+
+export interface PipelineLoadTableResult {
+  sourceTable: string
+  targetTable: string
+  rowCount: number
+  mappedColumns: Record<string, string>
+}
+
+export interface PipelineLoadFromDbResponse {
+  status: string
+  rowCount: number
+  configGroupNumber: number
+  sourceTable: string
+  targetTable: string
+  mappingUsed: string
+  mappedColumns: Record<string, string>
+  tableResults: Record<string, PipelineLoadTableResult>
+}
+
+export interface QualityTransformTableResult {
+  quality?: Record<string, number>
+  transform?: Record<string, number>
+  durationMs: number
+}
+
+export interface QualityTransformResponse {
+  status: string
+  totalDurationMs: number
+  sequence: string[]
+  tables: Record<string, QualityTransformTableResult>
+}
+
+export interface DatamartPipelineTableResult {
+  durationMs: number
+  [metric: string]: number
+}
+
+export interface DatamartPipelineResponse {
+  status: string
+  totalDurationMs: number
+  sequence: string[]
+  tables: Record<string, DatamartPipelineTableResult>
+}
+
 @Injectable({ providedIn: 'root' })
 export class EtlApiService {
 
   private readonly BASE = '/api/etl';
+  private readonly MAPPING_BASE = '/api/mapping-configs';
   private readonly TIMEOUT_MS = 10 * 60 * 1000;  // 10 minutes
 
   constructor(private zone: NgZone) {}
@@ -235,10 +315,6 @@ export class EtlApiService {
           .catch(err => this.zone.run(() => reject(err)));
       });
     });
-  }
-
-  private fetchOutsideZone(url: string, options: RequestInit): Promise<Response> {
-    return this.runOutsideZone(() => fetch(url, options));
   }
 
   private async fetchJson<T>(
@@ -274,68 +350,42 @@ export class EtlApiService {
     }
   }
 
-  /**
-   * Build FormData for the ETL process endpoint.
-   * Critical logic — follow exactly:
-   * 1. Always append: file, type
-   * 2. date_bal only if provided AND type === 'COMPTA'
-   * 3. mapping only if mappings has at least 1 key
-   */
-  private buildFormData(params: ProcessFileParams): FormData {
-    const { file, type, mappings, dateBal } = params;
-    const fd = new FormData();
-
-    fd.append('file', file);
-    fd.append('type', type);
-
-    if (dateBal && type === 'COMPTA') {
-      fd.append('date_bal', dateBal);
-    }
-
-    // Mapping logic: only append if mappings is not null and has keys
-    if (mappings && Object.keys(mappings).length > 0) {
-      // Convert { dbCol: fileCol } → [{ fileCol: dbCol }, ...]
-      const arr = Object.entries(mappings)
-        .map(([dbCol, fileCol]) => ({ [fileCol]: dbCol }));
-      fd.append('mapping', JSON.stringify(arr));
-    }
-    // If mappings is null or empty, do NOT append 'mapping' — backend auto-matches
-
-    return fd;
-  }
-
-  /**
-   * Upload file with optional mapping.
-   * Uses native fetch + AbortController for long-running uploads.
-   */
-  async processFile(params: ProcessFileParams): Promise<ProcessResult> {
-    const fd = this.buildFormData(params);
-
+  private async fetchNoContent(
+    url: string,
+    options: RequestInit = {},
+    timeoutMs = 2 * 60 * 1000
+  ): Promise<void> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      return await this.runOutsideZone(async () => {
-        const response = await fetch(`${this.BASE}/process`, {
-          method: 'POST',
-          body: fd,
+      await this.runOutsideZone(async () => {
+        const response = await fetch(url, {
+          ...options,
           signal: controller.signal
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || `Server error: ${response.status}`);
+        if (response.ok) {
+          return;
         }
 
-        return data as ProcessResult;
-      });
+        const errorPayload = await response.text();
+        let message = `Server error: ${response.status}`;
 
+        if (errorPayload) {
+          try {
+            const parsed = JSON.parse(errorPayload) as { message?: string };
+            message = parsed.message || message;
+          } catch {
+            message = errorPayload;
+          }
+        }
+
+        throw new Error(message);
+      });
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        throw new Error(
-          'Upload timed out after 10 minutes. ' +
-          'Try splitting the file into smaller chunks.');
+        throw new Error(`Request timed out after ${Math.round(timeoutMs / 60000)} minutes.`);
       }
       throw err;
     } finally {
@@ -350,6 +400,18 @@ export class EtlApiService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(connection)
+      },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchSourceTablesAndColumns(connection: DbConnectionConfig): Promise<SourceTablesColumnsResponse> {
+    return this.fetchJson<SourceTablesColumnsResponse>(
+      `${this.BASE}/source/tables-columns`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connection })
       },
       2 * 60 * 1000
     );
@@ -379,6 +441,71 @@ export class EtlApiService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
+      },
+      this.TIMEOUT_MS
+    );
+  }
+
+  async loadFromDatabaseByConfigGroup(params: {
+    connection: {
+      host: string;
+      port: number;
+      database: string;
+      dbType: DbType;
+      username: string;
+      password: string;
+    };
+    configGroupNumber: number;
+    dateBal?: string;
+  }): Promise<PipelineLoadFromDbResponse> {
+    const payload: {
+      connection: {
+        host: string;
+        port: number;
+        database: string;
+        dbType: DbType;
+        username: string;
+        password: string;
+      };
+      configGroupNumber: number;
+      date_bal?: string;
+    } = {
+      connection: params.connection,
+      configGroupNumber: params.configGroupNumber,
+    };
+
+    if (params.dateBal) {
+      payload.date_bal = params.dateBal;
+    }
+
+    return this.fetchJson<PipelineLoadFromDbResponse>(
+      `${this.BASE}/load-from-db`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      },
+      this.TIMEOUT_MS
+    );
+  }
+
+  async runQualityTransform(): Promise<QualityTransformResponse> {
+    return this.fetchJson<QualityTransformResponse>(
+      `${this.BASE}/quality_transform`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      },
+      this.TIMEOUT_MS
+    );
+  }
+
+  async runDatamartPipeline(): Promise<DatamartPipelineResponse> {
+    return this.fetchJson<DatamartPipelineResponse>(
+      `${this.BASE}/datamart`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
       },
       this.TIMEOUT_MS
     );
@@ -555,6 +682,54 @@ export class EtlApiService {
       `${this.BASE}/datamart/compta/balance/list?page=${page}&size=${size}`,
       { method: 'GET' },
       30 * 1000
+    );
+  }
+
+  async getAllMappingConfigs(): Promise<MappingConfigRow[]> {
+    return this.fetchJson<MappingConfigRow[]>(
+      this.MAPPING_BASE,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async getMappingConfigsByGroupNumber(configGroupNumber: number): Promise<MappingConfigRow[]> {
+    return this.fetchJson<MappingConfigRow[]>(
+      `${this.MAPPING_BASE}/groups/${configGroupNumber}`,
+      { method: 'GET' },
+      30 * 1000
+    );
+  }
+
+  async updateMappingConfig(id: number, request: MappingConfigUpsertRequest): Promise<MappingConfigRow> {
+    return this.fetchJson<MappingConfigRow>(
+      `${this.MAPPING_BASE}/${id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      },
+      30 * 1000
+    );
+  }
+
+  async deleteMappingConfigGroup(configGroupNumber: number): Promise<void> {
+    return this.fetchNoContent(
+      `${this.MAPPING_BASE}/groups/${configGroupNumber}`,
+      { method: 'DELETE' },
+      30 * 1000
+    );
+  }
+
+  async createMappingConfigsBulk(requests: MappingConfigUpsertRequest[]): Promise<MappingConfigBulkResponse> {
+    return this.fetchJson<MappingConfigBulkResponse>(
+      `${this.MAPPING_BASE}/bulk`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requests)
+      },
+      60 * 1000
     );
   }
 

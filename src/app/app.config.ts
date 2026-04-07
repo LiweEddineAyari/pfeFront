@@ -10,7 +10,7 @@ import { LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';import { provi
   ChevronDown, ChevronRight, ChevronLeft, Menu, X, ArrowUp,
   Home, LayoutGrid, Info, ShoppingBag, ShoppingBasket, RefreshCcw, BusFront,
   Tv, GlassWater, LogOut,
-  Server, CloudUpload, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
+  Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download
 } from 'lucide-angular';
 
@@ -24,7 +24,7 @@ const icons = {
   ChevronDown, ChevronRight, ChevronLeft, Menu, X, ArrowUp,
   Home, LayoutGrid, Info, ShoppingBag, ShoppingBasket, RefreshCcw, BusFront,
   Tv, GlassWater, LogOut,
-  Server, CloudUpload, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
+  Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download
 };
 

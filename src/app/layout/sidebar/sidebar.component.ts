@@ -132,7 +132,7 @@ interface NavSubItem {
                 *ngIf="item.children?.length && !state.collapsed"
                 type="button"
                 class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-text-secondary hover:text-brand-primary hover:bg-brand-primary/10 transition-all"
-                aria-label="Basculer le sous-menu Datamart"
+                [attr.aria-label]="'Basculer le sous-menu ' + item.label"
                 (click)="toggleInlineSubmenu(item, $event)">
                 <lucide-icon [name]="item.expanded ? 'chevron-down' : 'chevron-right'" [size]="16" [strokeWidth]="2.5"></lucide-icon>
               </button>
@@ -250,6 +250,17 @@ export class SidebarComponent {
         { label: 'Clients', icon: 'users', path: '/datamart/client', active: false },
         { label: 'Contrats', icon: 'file-text', path: '/datamart/contrat', active: false },
         { label: 'Balance', icon: 'dollar-sign', path: '/datamart/balance', active: false },
+      ],
+    },
+    {
+      label: 'Mapping',
+      icon: 'settings',
+      active: false,
+      path: '/mapping',
+      expanded: false,
+      children: [
+        { label: 'Configuration mapping', icon: 'database', path: '/mapping/configurations', active: false },
+        { label: 'Ajouter configuration', icon: 'plus', path: '/mapping/nouvelle-configuration', active: false },
       ],
     },
   ];

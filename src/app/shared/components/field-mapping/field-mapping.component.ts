@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, AfterViewInit, OnDestroy, OnChanges, ChangeDetectorRef, ViewChild, ChangeDetectionStrategy, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -35,11 +35,17 @@ interface Arrow {
   styleUrls: ['./field-mapping.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FieldMappingComponent implements AfterViewInit, OnDestroy {
+export class FieldMappingComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() fileColumns: string[] = [];
   @Input() fileType: 'TIERS' | 'CONTRAT' | 'COMPTA' = 'TIERS';
+  @Input() title = 'Mapping des champs';
+  @Input() subtitle = 'Etape 2 sur 4 - Associez vos colonnes source aux champs de la base';
+  @Input() continueLabel = 'Continuer vers le chargement';
   @Output() complete = new EventEmitter<Record<string, string>>();
   @Output() back = new EventEmitter<void>();
+
+  private static nextInstanceId = 0;
+  private readonly instanceId = `fm-${FieldMappingComponent.nextInstanceId++}`;
 
   mappings: Record<string, string> = {};
   selectedSource: string | null = null;
@@ -70,6 +76,12 @@ export class FieldMappingComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => this.updateArrows(), 100);
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['fileColumns'] || changes['fileType']) {
+      setTimeout(() => this.updateArrows(), 0);
+    }
+  }
+
   ngOnDestroy() {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
@@ -87,6 +99,12 @@ export class FieldMappingComponent implements AfterViewInit, OnDestroy {
 
   onTargetClick(tgt: string) {
     if (!this.selectedSource) return;
+
+    const currentTargetForSource = this.findTargetBySource(this.selectedSource);
+    if (currentTargetForSource && currentTargetForSource !== tgt) {
+      // Do not silently steal an existing source-to-target assignment.
+      return;
+    }
 
     const nextMappings = { ...this.mappings };
     
@@ -111,6 +129,12 @@ export class FieldMappingComponent implements AfterViewInit, OnDestroy {
     this.mappings = nextMappings;
     this.updateArrows();
     this.cdr.markForCheck();
+  }
+
+  onArrowDeleteClick(event: MouseEvent, targetField: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.removeMapping(targetField);
   }
 
   autoMatch(): void {
@@ -172,8 +196,8 @@ export class FieldMappingComponent implements AfterViewInit, OnDestroy {
     const newArrows: Arrow[] = [];
     
     Object.entries(this.mappings).forEach(([tgt, src]) => {
-      const se = document.getElementById(`source-${src}`);
-      const te = document.getElementById(`target-${tgt}`);
+      const se = document.getElementById(this.sourceElementId(src));
+      const te = document.getElementById(this.targetElementId(tgt));
       if (!se || !te) return;
 
       const sr = se.getBoundingClientRect();
@@ -205,5 +229,30 @@ export class FieldMappingComponent implements AfterViewInit, OnDestroy {
 
   isTargetMapped(tgt: string): boolean {
     return !!this.mappings[tgt];
+  }
+
+  sourceElementId(col: string): string {
+    return `${this.instanceId}-source-${this.toDomToken(col)}-${this.simpleHash(col)}`;
+  }
+
+  targetElementId(tgt: string): string {
+    return `${this.instanceId}-target-${this.toDomToken(tgt)}-${this.simpleHash(tgt)}`;
+  }
+
+  private findTargetBySource(source: string): string | null {
+    const found = Object.entries(this.mappings).find(([_, mappedSource]) => mappedSource === source);
+    return found ? found[0] : null;
+  }
+
+  private toDomToken(value: string): string {
+    return value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+  }
+
+  private simpleHash(value: string): string {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash).toString(36);
   }
 }

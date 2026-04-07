@@ -1,0 +1,357 @@
+<div class="p-6 max-w-[1800px] mx-auto">
+  <div class="card-base bg-white dark:bg-[#111C44] shadow-card-light dark:shadow-card-dark rounded-[20px] overflow-hidden relative">
+    <div
+      class="flex w-[800%] items-stretch"
+      [style.transform]="getSliderTransform()"
+      [style.transition]="'transform 0.55s cubic-bezier(0.77,0,0.18,1)'"
+    >
+      <section class="w-[12.5%] flex flex-col pt-16 pb-16 px-10">
+        <div class="mb-14 text-center z-10">
+          <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">Creation d'une configuration de mapping</h2>
+          <p class="text-text-secondary text-[18px] max-w-4xl mx-auto leading-relaxed dark:text-[#a3aed1]">
+            Construisez une configuration complete en connectant votre base source, en associant les tables puis en mappant les colonnes vers les tables de staging.
+          </p>
+        </div>
+
+        <div class="relative w-full max-w-[1300px] mx-auto mt-3 px-4 sm:px-12">
+          <svg
+            class="absolute top-[-42px] left-0 w-full h-[170px] pointer-events-none z-0 hidden md:block overflow-visible"
+            preserveAspectRatio="none"
+            viewBox="0 0 1000 180"
+          >
+            <path class="flow-arrow arrow-1" d="M 125,90 Q 250,0 375,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <path class="flow-arrow arrow-2" d="M 375,90 Q 500,180 625,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <path class="flow-arrow arrow-3" d="M 625,90 Q 750,0 875,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+          </svg>
+
+          <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-0">
+            <div class="flex flex-col items-center">
+              <div class="w-[84px] h-[84px] rounded-full flex items-center justify-center mb-5 bg-[#f0faf5] text-[#01b574] dark:bg-[#1b2559] dark:text-white shadow-[0_8px_24px_rgba(112,144,176,0.15)]">
+                <lucide-icon name="database" [size]="36" [strokeWidth]="2.4"></lucide-icon>
+              </div>
+              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">Etape 1</span>
+              <h3 class="text-[18px] font-bold text-text-primary mb-2 text-center">Connexion base source</h3>
+              <p class="text-[14px] text-text-secondary text-center max-w-[220px] leading-relaxed dark:text-[#8f9bba]">Renseignez host, port, schema et identifiants.</p>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div class="w-[84px] h-[84px] rounded-full flex items-center justify-center mb-5 bg-[#f0faf5] text-[#01b574] dark:bg-[#1b2559] dark:text-white shadow-[0_8px_24px_rgba(112,144,176,0.15)]">
+                <lucide-icon name="layout-grid" [size]="36" [strokeWidth]="2.4"></lucide-icon>
+              </div>
+              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">Etape 2</span>
+              <h3 class="text-[18px] font-bold text-text-primary mb-2 text-center">Matching des tables</h3>
+              <p class="text-[14px] text-text-secondary text-center max-w-[220px] leading-relaxed dark:text-[#8f9bba]">Associez Tiers, Contrat et Compta aux tables detectees.</p>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div class="w-[84px] h-[84px] rounded-full flex items-center justify-center mb-5 bg-[#f0faf5] text-[#01b574] dark:bg-[#1b2559] dark:text-white shadow-[0_8px_24px_rgba(112,144,176,0.15)]">
+                <lucide-icon name="settings" [size]="36" [strokeWidth]="2.4"></lucide-icon>
+              </div>
+              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">Etape 3</span>
+              <h3 class="text-[18px] font-bold text-text-primary mb-2 text-center">Mapping des colonnes</h3>
+              <p class="text-[14px] text-text-secondary text-center max-w-[220px] leading-relaxed dark:text-[#8f9bba]">Utilisez la meme UX de mapping visuel que le pipeline ETL.</p>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div class="w-[84px] h-[84px] rounded-full flex items-center justify-center mb-5 bg-[#01b574] text-white shadow-[0_8px_24px_rgba(1,181,116,0.32)]">
+                <lucide-icon name="check-circle" [size]="36" [strokeWidth]="2.4"></lucide-icon>
+              </div>
+              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">Etape 4</span>
+              <h3 class="text-[18px] font-bold text-text-primary mb-2 text-center">Enregistrement bulk</h3>
+              <p class="text-[14px] text-text-secondary text-center max-w-[220px] leading-relaxed dark:text-[#8f9bba]">Sauvegardez toute la configuration dans un seul groupe.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16 flex justify-center relative z-10">
+          <button
+            (click)="setStep('connect')"
+            class="flex items-center gap-2.5 bg-brand-primary text-white px-10 py-3.5 rounded-[14px] font-bold text-[16px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group"
+          >
+            <lucide-icon name="play" [size]="20" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+            Demarrer l'assistant
+          </button>
+        </div>
+      </section>
+
+      <section class="w-[12.5%] flex flex-col pt-12 pb-12 px-10 md:px-16 h-[860px]">
+        <div class="flex justify-between items-start mb-8 flex-shrink-0">
+          <div>
+            <h2 class="text-[22px] font-bold text-text-primary mb-1">Connexion a la base source</h2>
+            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 1 sur 4 - Detection des tables et colonnes</p>
+            <div class="flex items-center gap-2 mt-4">
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-6 transition-all duration-300"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+            </div>
+          </div>
+
+          <button
+            (click)="setStep('intro')"
+            class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group"
+          >
+            <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
+            Retour
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto pr-3 form-scroll-y">
+          <div class="db-form-card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Host</label>
+                <input class="form-input" type="text" placeholder="localhost" [(ngModel)]="dbConnection.host" />
+              </div>
+              <div>
+                <label class="form-label">Port</label>
+                <input class="form-input" type="number" min="1" placeholder="5432" [(ngModel)]="dbConnection.port" />
+              </div>
+              <div>
+                <label class="form-label">Database</label>
+                <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.database" />
+              </div>
+              <div>
+                <label class="form-label">DB Type</label>
+                <select class="form-input" [(ngModel)]="dbConnection.dbType">
+                  <option *ngFor="let dbType of dbTypeOptions" [ngValue]="dbType">{{ dbType }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Username</label>
+                <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.username" />
+              </div>
+              <div>
+                <label class="form-label">Password</label>
+                <input class="form-input" type="password" placeholder="********" [(ngModel)]="dbConnection.password" />
+              </div>
+              <div>
+                <label class="form-label">Schema</label>
+                <input class="form-input" type="text" placeholder="source" [(ngModel)]="dbConnection.schema" />
+              </div>
+              <div >
+                <label class="form-label">Numero du groupe de configuration</label>
+                <input class="form-input" type="number" min="1" [(ngModel)]="configGroupNumber" />
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="schemaError" class="animate-slide-down mt-4 flex items-start gap-3 bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-500/25 border rounded-xl p-4">
+            <div class="w-8 h-8 rounded-full bg-red-100/60 dark:bg-red-500/12 flex items-center justify-center">
+              <lucide-icon name="alert-triangle" [size]="16" class="text-red-600 dark:text-red-300"></lucide-icon>
+            </div>
+            <p class="text-[13px] text-red-700 dark:text-red-300">{{ schemaError }}</p>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end flex-shrink-0 pt-6">
+          <button
+            (click)="discoverSchema()"
+            [disabled]="!canDiscoverSchema || isFetchingSchema"
+            class="flex items-center gap-2.5 bg-brand-primary text-white px-8 py-3.5 rounded-[14px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            <ng-container *ngIf="!isFetchingSchema">
+              Recuperer tables et colonnes
+              <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+            </ng-container>
+            <ng-container *ngIf="isFetchingSchema">
+              <span class="spinner-sm"></span>
+              Analyse en cours...
+            </ng-container>
+          </button>
+        </div>
+      </section>
+
+      <section class="w-[12.5%] flex flex-col pt-12 pb-12 px-10 md:px-16 h-[860px]">
+        <div class="flex justify-between items-start mb-8 flex-shrink-0">
+          <div>
+            <h2 class="text-[22px] font-bold text-text-primary mb-1">Matching des tables</h2>
+            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 2 sur 4 - Associez chaque entite cible</p>
+            <div class="flex items-center gap-2 mt-4">
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-3"></div>
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-6"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+            </div>
+          </div>
+
+          <button
+            (click)="setStep('connect')"
+            class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group"
+          >
+            <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
+            Retour
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-6 flex-1 overflow-y-auto pr-3 form-scroll-y">
+          <article class="bg-white dark:bg-[#0f1a42] border border-gray-200 dark:border-white/10 rounded-[18px] p-5">
+            <div class="mb-4">
+              <h3 class="text-[18px] font-bold text-text-primary">Association source vers staging</h3>
+              <p class="text-[13px] text-text-secondary dark:text-white/60 mt-1">Selectionnez la table source pour chaque cible.</p>
+            </div>
+
+            <div class="space-y-4">
+              <div *ngFor="let target of targets" class="mapping-target-card">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-[#EAFBF4] dark:bg-[#01B574]/20 text-[#01B574] dark:text-[#6CF5C7] flex items-center justify-center">
+                      <lucide-icon [name]="target.icon" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+                    </span>
+                    <div>
+                      <p class="text-[14px] font-bold text-text-primary">{{ target.label }}</p>
+                      <p class="text-[12px] text-text-secondary dark:text-white/55">{{ target.hint }}</p>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-extrabold tracking-[0.08em] uppercase text-[#01B574]">{{ target.targetTable }}</span>
+                </div>
+
+                <label class="form-label mb-1 block">Table source</label>
+                <select
+                  class="form-input"
+                  [ngModel]="getSelectedSource(target.key)"
+                  (ngModelChange)="onSelectedSourceChange(target.key, $event)"
+                >
+                  <option value="">Selectionner une table</option>
+                  <option *ngFor="let table of sourceTables" [ngValue]="table.qualifiedTable">
+                    {{ table.qualifiedTable }} ({{ table.columns.length }} colonnes)
+                  </option>
+                </select>
+
+                <div class="mt-2 text-[12px] text-text-secondary dark:text-white/55">
+                  Colonnes detectees: <span class="font-bold text-[#01B574]">{{ getColumnCountForTarget(target.key) }}</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="bg-white dark:bg-[#0f1a42] border border-gray-200 dark:border-white/10 rounded-[18px] p-5">
+            <h3 class="text-[18px] font-bold text-text-primary mb-1">Tables detectees</h3>
+            <p class="text-[13px] text-text-secondary dark:text-white/60 mb-4">{{ sourceTables.length }} table(s) trouvee(s)</p>
+
+            <div class="space-y-3 max-h-[510px] overflow-y-auto pr-1 form-scroll-y">
+              <div *ngFor="let table of sourceTables" class="rounded-xl border border-gray-200 dark:border-white/10 px-3 py-2.5 bg-gray-50 dark:bg-[#1B2559]">
+                <p class="text-[13px] font-bold text-text-primary dark:text-white">{{ table.qualifiedTable }}</p>
+                <p class="text-[12px] text-text-secondary dark:text-white/55 mt-0.5">{{ table.columns.length }} colonnes</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="mt-8 flex justify-end flex-shrink-0 pt-6">
+          <button
+            (click)="continueToTiersMapping()"
+            [disabled]="!canContinueToMappings"
+            class="flex items-center gap-2.5 bg-brand-primary text-white px-8 py-3.5 rounded-[14px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            Continuer vers mapping Tiers
+            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+          </button>
+        </div>
+      </section>
+
+      <section class="w-[12.5%] h-[860px] bg-transparent">
+        <app-field-mapping
+          [fileColumns]="getSourceColumnsForTarget('TIERS')"
+          [fileType]="'TIERS'"
+          [title]="'Mapping des colonnes - TIERS'"
+          [subtitle]="getMappingSubtitle('TIERS')"
+          [continueLabel]="'Continuer vers CONTRAT'"
+          (back)="setStep('table-match')"
+          (complete)="onTiersMapped($event)"
+        ></app-field-mapping>
+      </section>
+
+      <section class="w-[12.5%] h-[860px] bg-transparent">
+        <app-field-mapping
+          [fileColumns]="getSourceColumnsForTarget('CONTRAT')"
+          [fileType]="'CONTRAT'"
+          [title]="'Mapping des colonnes - CONTRAT'"
+          [subtitle]="getMappingSubtitle('CONTRAT')"
+          [continueLabel]="'Continuer vers COMPTA'"
+          (back)="setStep('map-tiers')"
+          (complete)="onContratMapped($event)"
+        ></app-field-mapping>
+      </section>
+
+      <section class="w-[12.5%] h-[860px] bg-transparent">
+        <app-field-mapping
+          [fileColumns]="getSourceColumnsForTarget('COMPTA')"
+          [fileType]="'COMPTA'"
+          [title]="'Mapping des colonnes - COMPTA'"
+          [subtitle]="getMappingSubtitle('COMPTA')"
+          [continueLabel]="'Enregistrer la configuration'"
+          (back)="setStep('map-contrat')"
+          (complete)="onComptaMapped($event)"
+        ></app-field-mapping>
+      </section>
+
+      <section class="w-[12.5%] h-[860px] flex flex-col justify-center items-center bg-transparent">
+        <div class="flex flex-col items-center justify-center p-12 w-full h-full text-center">
+          <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">CONFIG {{ configGroupNumber }}</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60">Enregistrement bulk</span>
+          </div>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Sauvegarde de la configuration</h3>
+          <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1]">Insertion des mappings en cours...</p>
+        </div>
+      </section>
+
+      <section class="w-[12.5%] h-[860px] flex flex-col overflow-hidden bg-transparent">
+        <div *ngIf="!submitError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
+          <div class="w-24 h-24 rounded-full bg-[#01b574] flex items-center justify-center mb-6 animate-fade-in-scale shadow-[0_0_40px_rgba(1,181,116,0.25)]">
+            <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
+          </div>
+          <h3 class="text-[28px] font-bold text-text-primary mb-2">Configuration enregistree</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-2">{{ submittedCount | number }} mappings sauvegardes</p>
+          <p class="text-[14px] text-[#01B574] font-bold mb-10">Groupe {{ configGroupNumber }}</p>
+
+          <div *ngIf="submitSuccessMessage" class="mb-8 text-[14px] text-gray-700 dark:text-white/75 max-w-[550px]">
+            {{ submitSuccessMessage }}
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 w-[320px] sm:w-auto">
+            <button
+              (click)="goToList()"
+              class="flex items-center justify-center gap-2 bg-[#01b574] text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]"
+            >
+              Voir les configurations
+              <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
+            </button>
+            <button
+              (click)="resetWizard()"
+              class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all"
+            >
+              Nouvelle configuration
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="submitError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
+          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
+            <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
+          </div>
+          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec de l'enregistrement</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-lg">{{ submitError }}</p>
+
+          <div class="flex flex-col gap-3 w-[320px]">
+            <button
+              (click)="retryFromResult()"
+              class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all"
+            >
+              <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
+              Retour au mapping COMPTA
+            </button>
+            <button
+              (click)="goToList()"
+              class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]"
+            >
+              Voir les configurations
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

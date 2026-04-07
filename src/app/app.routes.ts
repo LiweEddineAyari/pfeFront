@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout/layout.component';
+import { EtlPipelineComponent } from './pages/etl-pipeline/etl-pipeline.component';
 
 export const routes: Routes = [
   {
@@ -15,10 +16,7 @@ export const routes: Routes = [
       },
       {
         path: 'etl-pipeline',
-        loadComponent: () =>
-          import('./pages/etl-pipeline/etl-pipeline.component').then(
-            (m) => m.EtlPipelineComponent
-          ),
+        component: EtlPipelineComponent,
       },
       {
         path: 'datamart',
@@ -50,6 +48,44 @@ export const routes: Routes = [
           import('./pages/balance-data/balance-data.component').then(
             (m) => m.BalanceDataComponent
           ),
+      },
+      {
+        path: 'mapping',
+        pathMatch: 'full',
+        redirectTo: 'mapping/configurations',
+      },
+      {
+        path: 'mapping/configurations',
+        title: 'Configurations de mapping',
+        loadComponent: () =>
+          import('./pages/mapping-config/mapping-config.component').then(
+            (m) => m.MappingConfigComponent
+          ),
+      },
+      {
+        path: 'mapping/configurations/:configGroupNumber',
+        title: 'Details configuration de mapping',
+        loadComponent: () =>
+          import('./pages/mapping-config-details/mapping-config-details.component').then(
+            (m) => m.MappingConfigDetailsComponent
+          ),
+      },
+      {
+        path: 'mapping/nouvelle-configuration',
+        title: 'Ajouter une configuration de mapping',
+        loadComponent: () =>
+          import('./pages/add-mapping-config/add-mapping-config.component').then(
+            (m) => m.AddMappingConfigComponent
+          ),
+      },
+      {
+        path: 'datamart/mapping-config',
+        pathMatch: 'full',
+        redirectTo: 'mapping/configurations',
+      },
+      {
+        path: 'datamart/mapping-config/:configGroupNumber',
+        redirectTo: 'mapping/configurations/:configGroupNumber',
       },
     ],
   },

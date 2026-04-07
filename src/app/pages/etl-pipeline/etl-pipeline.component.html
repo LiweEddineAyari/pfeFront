@@ -1,945 +1,510 @@
 <div class="p-6 max-w-[1800px] mx-auto">
-  
-  <!-- Outer Slide Container -->
-  <div class="card-base bg-white dark:bg-[#111C44] shadow-card-light dark:shadow-card-dark rounded-[20px] overflow-hidden relative" >
-    
-    <!-- Inner Sliding Row (1100% width for 11 panels) -->
-    <div class="flex w-[1100%] items-stretch" 
-         [style.transform]="getSliderTransform()"
-         [style.transition]="'transform 0.55s cubic-bezier(0.77,0,0.18,1)'">
-      
-      <!-- ============================================== -->
-      <!-- PANEL 1: INTRO (9.0909% of parent flex width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] flex flex-col pt-16 pb-16 px-12">
+  <div class="card-base bg-white dark:bg-[#111C44] shadow-card-light dark:shadow-card-dark rounded-[20px] overflow-hidden relative">
+    <div
+      class="flex w-[700%] items-stretch"
+      [style.transform]="getSliderTransform()"
+      [style.transition]="'transform 0.55s cubic-bezier(0.77,0,0.18,1)'"
+    >
+      <section class="w-[14.2857%] flex flex-col pt-16 pb-16 px-12">
         <div class="mb-16 text-center z-10">
-          <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">Pipeline ETL - Comment ca marche</h2>
+          <h2 class="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">Pipeline ETL - Mode base de donnees</h2>
           <p class="text-text-secondary text-[18px] max-w-4xl mx-auto leading-relaxed dark:text-[#a3aed1]">
-            Televersez vos donnees source et laissez le pipeline gerer automatiquement l'extraction, les controles qualite, la transformation et le chargement du datamart.
+            Lancez un pipeline complet a partir de la base source, avec selection de configuration de mapping, chargement, quality/transform puis datamart.
           </p>
         </div>
 
         <div class="relative w-full max-w-[1400px] mx-auto mt-6 px-4 sm:px-12">
-          <!-- Animated SVG Arrows Layer -->
-          <svg class="absolute top-[-46px] left-0 w-full h-[180px] pointer-events-none z-0 hidden md:block overflow-visible"
-               preserveAspectRatio="none" viewBox="0 0 1000 180">
+          <svg
+            class="absolute top-[-46px] left-0 w-full h-[180px] pointer-events-none z-0 hidden md:block overflow-visible"
+            preserveAspectRatio="none"
+            viewBox="0 0 1000 180"
+          >
             <path class="flow-arrow arrow-1" d="M 125,90 Q 250,0 375,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
             <path class="flow-arrow arrow-2" d="M 375,90 Q 500,180 625,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
             <path class="flow-arrow arrow-3" d="M 625,90 Q 750,0 875,90" fill="none" stroke="#01b574" stroke-width="2.2" stroke-dasharray="8 6" stroke-linecap="round" vector-effect="non-scaling-stroke" />
           </svg>
 
-          <!-- Step Nodes -->
           <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-0">
-            <div *ngFor="let step of steps; let i = index" class="flex flex-col items-center">
-              
-              <div class="w-[88px] h-[88px] rounded-full flex items-center justify-center mb-6 transition-all duration-300 relative z-10 shadow-[0_8px_24px_rgba(112,144,176,0.15)] dark:shadow-[0_0_40px_rgba(255,255,255,0.06)]"
-                   [ngClass]="i === steps.length - 1 ? 'bg-[#01b574] text-white' : 'bg-[#f0faf5] text-[#01b574] dark:bg-[#1b2559] dark:text-white'">
-                <lucide-icon [name]="step.icon" [size]="40" [strokeWidth]="2.5"></lucide-icon>
+            <div *ngFor="let stepItem of steps; let i = index" class="flex flex-col items-center">
+              <div
+                class="w-[88px] h-[88px] rounded-full flex items-center justify-center mb-6 transition-all duration-300 relative z-10 shadow-[0_8px_24px_rgba(112,144,176,0.15)] dark:shadow-[0_0_40px_rgba(255,255,255,0.06)]"
+                [ngClass]="i === steps.length - 1 ? 'bg-[#01b574] text-white' : 'bg-[#f0faf5] text-[#01b574] dark:bg-[#1b2559] dark:text-white'"
+              >
+                <lucide-icon [name]="stepItem.icon" [size]="40" [strokeWidth]="2.5"></lucide-icon>
               </div>
-              
-              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">{{ step.stepLabel }}</span>
-              <h3 class="text-[19px] font-bold text-text-primary mb-3 text-center">{{ step.title }}</h3>
+
+              <span class="text-[11px] font-extrabold text-[#01b574] uppercase tracking-wider mb-2">{{ stepItem.stepLabel }}</span>
+              <h3 class="text-[19px] font-bold text-text-primary mb-3 text-center">{{ stepItem.title }}</h3>
               <p class="text-[14px] text-text-secondary text-center max-w-[240px] leading-relaxed dark:text-[#8f9bba]">
-                {{ step.description }}
+                {{ stepItem.description }}
               </p>
             </div>
           </div>
         </div>
-        
-        <!-- Intro Footer Start Button Area (No separator, free floating) -->
+
         <div class="mt-20 flex justify-center relative z-10">
-          <button (click)="setStep('form')" class="flex items-center gap-2.5 bg-brand-primary text-white px-10 py-3.5 rounded-[14px] font-bold text-[16px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group">
+          <button
+            (click)="setStep('connection')"
+            class="flex items-center gap-2.5 bg-brand-primary text-white px-10 py-3.5 rounded-[14px] font-bold text-[16px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group"
+          >
             <lucide-icon name="play" [size]="20" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
             Demarrer le pipeline
           </button>
         </div>
-      </div>
+      </section>
 
-      <!-- ============================================== -->
-      <!-- PANEL 2: UPLOAD FORM (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] flex flex-col pt-12 pb-12 px-12 md:px-20 h-[800px]">
-        
-        <!-- Form Header -->
+      <section class="w-[14.2857%] flex flex-col pt-12 pb-12 px-12 md:px-20 h-[820px]">
         <div class="flex justify-between items-start mb-8 flex-shrink-0">
           <div>
-            <h2 class="text-[22px] font-bold text-text-primary mb-1">Televerser et extraire</h2>
-            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 1 sur 4 - Configurez votre source de donnees</p>
-            
-            <!-- Progress Dots -->
+            <h2 class="text-[22px] font-bold text-text-primary mb-1">Connexion base source</h2>
+            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 1 sur 4 - Parametres et date de balance</p>
             <div class="flex items-center gap-2 mt-4">
-              <div class="h-2 rounded-[4px] bg-[#01b574] w-6 transition-all duration-300"></div>
-              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
-              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
-              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-6"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
             </div>
           </div>
-          
-          <button (click)="setStep('intro')"
-            class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group">
+
+          <button
+            (click)="setStep('intro')"
+            class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group"
+          >
             <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
             Retour
           </button>
         </div>
 
-        <!-- Form Body (2-Column Grid) -->
         <div class="flex-1 overflow-y-auto pr-4 form-scroll-y">
-          
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start h-full mt-2">
-            
-            <!-- COLUMN 1: Configuration -->
-            <div class="flex flex-col">
-
-              <!-- Source Toggle -->
-              <div class="flex flex-col mb-6">
-                <label class="form-label">Source des donnees</label>
-                <div class="source-toggle">
-                  <button type="button" class="source-toggle-btn" [class.active]="sourceMode === 'file'" (click)="onSourceModeChange('file')">
-                    <lucide-icon name="file-up" [size]="15" [strokeWidth]="2.5"></lucide-icon>
-                    Fichier
-                  </button>
-                  <button type="button" class="source-toggle-btn" [class.active]="sourceMode === 'database'" (click)="onSourceModeChange('database')">
-                    <lucide-icon name="database" [size]="15" [strokeWidth]="2.5"></lucide-icon>
-                    Base de donnees
-                  </button>
-                </div>
+          <div class="db-form-card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Host</label>
+                <input class="form-input" type="text" placeholder="localhost" [(ngModel)]="dbConnection.host" />
               </div>
-
-              <div *ngIf="sourceMode === 'database'" class="db-hint-card mb-6 date-row-appear">
-                <div class="flex items-center gap-2.5 mb-2">
-                  <lucide-icon name="plug-zap" [size]="16" class="text-[#01b574]"></lucide-icon>
-                  <span class="font-bold">Connexion directe a une table source</span>
-                </div>
-                <p class="text-[12px] leading-relaxed opacity-80">
-                  Renseignez la connexion et la table a lire. Les colonnes detectees seront envoyees au mapping, comme pour un fichier.
-                </p>
+              <div>
+                <label class="form-label">Port</label>
+                <input class="form-input" type="number" min="1" placeholder="5432" [(ngModel)]="dbConnection.port" />
               </div>
-              
-              <!-- Segmented Pill Selector -->
-              <div class="flex flex-col mb-6" *ngIf="sourceMode === 'database' || !isSqlFile()">
-                <label class="form-label">Type de donnees</label>
-                <div class="segmented-control">
-                  <button type="button" class="segment-btn" [class.active]="fileType === 'TIERS'" (click)="fileType = 'TIERS'">TIERS</button>
-                  <button type="button" class="segment-btn" [class.active]="fileType === 'CONTRAT'" (click)="fileType = 'CONTRAT'">CONTRAT</button>
-                  <button type="button" class="segment-btn" [class.active]="fileType === 'COMPTA'" (click)="fileType = 'COMPTA'">COMPTA</button>
-                </div>
+              <div>
+                <label class="form-label">Database</label>
+                <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.database" />
               </div>
-
-              <!-- Balance Date Conditional -->
-              <div class="flex flex-col date-row-appear" *ngIf="fileType === 'COMPTA' && (sourceMode === 'database' || !isSqlFile())">
-                <label class="form-label">Date de balance</label>
-                <div class="flex items-center gap-2">
-                  <input #ddInput id="dd" type="text" maxlength="2" placeholder="DD" 
-                         [ngModel]="dd" (input)="onDdInput($event, mmInput)" (keydown.backspace)="onBackspace($event, null)"
-                         class="segment-input w-[52px] dark:bg-white/10 dark:text-white dark:border-white/10" [class.invalid]="isDdInvalid" />
-                  <span class="text-gray-400 dark:text-white/30 text-[18px]">/</span>
-                  <input #mmInput id="mm" type="text" maxlength="2" placeholder="MM"
-                         [ngModel]="mm" (input)="onMmInput($event, yyyyInput)" (keydown.backspace)="onBackspace($event, ddInput)"
-                         class="segment-input w-[52px] dark:bg-white/10 dark:text-white dark:border-white/10" [class.invalid]="isMmInvalid" />
-                  <span class="text-gray-400 dark:text-white/30 text-[18px]">/</span>
-                  <input #yyyyInput id="yyyy" type="text" maxlength="4" placeholder="YYYY"
-                         [ngModel]="yyyy" (input)="onYyyyInput($event)" (keydown.backspace)="onBackspace($event, mmInput)"
-                         class="segment-input w-[76px] dark:bg-white/10 dark:text-white dark:border-white/10" />
-                  <lucide-icon *ngIf="isDateValid" name="check-circle-2" [size]="16" class="text-[#01b574] ml-2"></lucide-icon>
-                </div>
-                <div class="mt-1.5 text-[11px] text-[#a3aed0] dark:text-white/30 leading-snug">
-                  La date de balance definit la date limite de la periode comptable pour cet import COMPTA.
-                </div>
+              <div>
+                <label class="form-label">DB Type</label>
+                <select class="form-input" [(ngModel)]="dbConnection.dbType">
+                  <option *ngFor="let dbType of dbTypeOptions" [ngValue]="dbType">{{ dbType }}</option>
+                </select>
               </div>
-
-              <!-- SQL Notification -->
-              <div *ngIf="sourceMode === 'file' && isSqlFile()" class="sql-info-card date-row-appear mb-6">
-                 <div class="flex items-center gap-3 mb-2">
-                   <lucide-icon name="check" [size]="16" class="text-[#01b574]"></lucide-icon>
-                   <span class="font-bold">Fichier SQL detecte</span>
-                 </div>
-                 <div class="mb-3 opacity-80">Le type est configure automatiquement</div>
-                 <div class="opacity-80">Fichier : {{ selectedFile?.name }}</div>
-                 <div class="opacity-80">Type : SQL (auto)</div>
+              <div>
+                <label class="form-label">Username</label>
+                <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.username" />
               </div>
-
+              <div>
+                <label class="form-label">Password</label>
+                <input class="form-input" type="password" placeholder="********" [(ngModel)]="dbConnection.password" />
+              </div>
             </div>
+          </div>
 
-            <!-- COLUMN 2: Source Picker / DB Form -->
-            <div class="flex flex-col max-h-[560px] h-full">
-              <ng-container *ngIf="sourceMode === 'file'; else dbConnectionForm">
-                <div class="w-full h-full min-h-[340px] flex flex-col items-center justify-center text-center cursor-pointer drop-zone group relative overflow-hidden"
-                     [class.is-dragging]="isDragging"
-                     [class.has-file]="selectedFile"
-                     [class.has-error]="extractionError"
-                     (dragover)="onDragOver($event)"
-                     (dragleave)="onDragLeave($event)"
-                     (drop)="onDrop($event)"
-                     (click)="triggerFileInput()">
-
-                  <input type="file" #fileInput class="hidden" accept=".xlsx,.xls,.json,.sql" (change)="onFileChange($event)">
-
-                  <lucide-icon name="cloud-upload" [size]="56" [strokeWidth]="2.5"
-                               class="mx-auto mb-6 transition-colors text-brand-primary dark:text-white group-hover:dark:text-[#01b574] group-hover:text-[#01b574]">
-                  </lucide-icon>
-
-                  <p class="text-[18px] font-bold mb-2 text-text-primary dark:text-white relative z-10">
-                    Deposez vos fichiers ici
-                  </p>
-                  <p class="text-[15px] font-medium text-[#01b574] mb-3 relative z-10">
-                    ou cliquez pour parcourir
-                  </p>
-                  <p class="text-[13px] text-text-secondary dark:text-[#8f9bba] font-medium px-4 relative z-10">
-                    Les fichiers .xlsx, .xls, .json et .sql sont autorises via ce portail.
-                  </p>
-
-                  <div *ngIf="selectedFile && !extractionError && !extractionResult" class="absolute w-full bottom-0 left-0 pt-6 pb-6 bg-[#01b574]/10 border-t border-[#01b574]/20 text-center animate-fade-in-up">
-                    <div class="flex items-center justify-center gap-2 text-[#01b574] font-bold text-[14px]">
-                      <lucide-icon name="check-circle-2" [size]="18"></lucide-icon>
-                      {{ selectedFile.name }}
-                    </div>
-                  </div>
-                </div>
-              </ng-container>
-
-              <ng-template #dbConnectionForm>
-                <div class="db-form-card date-row-appear">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-1">
-                      <label class="form-label">Host</label>
-                      <input class="form-input" type="text" placeholder="localhost" [(ngModel)]="dbConnection.host" (ngModelChange)="onDbConnectionFieldChange()" />
-                    </div>
-                    <div class="md:col-span-1">
-                      <label class="form-label">Port</label>
-                      <input class="form-input" type="number" min="1" placeholder="5432" [(ngModel)]="dbConnection.port" (ngModelChange)="onDbConnectionFieldChange()" />
-                    </div>
-                    <div class="md:col-span-1">
-                      <label class="form-label">Database</label>
-                      <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.database" (ngModelChange)="onDbConnectionFieldChange()" />
-                    </div>
-                    <div class="md:col-span-1">
-                      <label class="form-label">DB Type</label>
-                      <select class="form-input" [(ngModel)]="dbConnection.dbType" (ngModelChange)="onDbConnectionFieldChange()">
-                        <option *ngFor="let dbType of dbTypeOptions" [ngValue]="dbType">{{ dbType }}</option>
-                      </select>
-                    </div>
-                    <div class="md:col-span-1">
-                      <label class="form-label">Username</label>
-                      <input class="form-input" type="text" placeholder="postgres" [(ngModel)]="dbConnection.username" (ngModelChange)="onDbConnectionFieldChange()" />
-                    </div>
-                    <div class="md:col-span-1">
-                      <label class="form-label">Password</label>
-                      <input class="form-input" type="password" placeholder="********" [(ngModel)]="dbConnection.password" (ngModelChange)="onDbConnectionFieldChange()" />
-                    </div>
-                    <div class="md:col-span-2">
-                      <label class="form-label">Table</label>
-                      <input class="form-input" type="text" placeholder="source.contrat" [(ngModel)]="dbConnection.table" (ngModelChange)="onDbConnectionFieldChange()" />
-                    </div>
-                  </div>
-                </div>
-              </ng-template>
-
-               <!-- ============================================== -->
-               <!-- EXTRACTION FEEDBACK UI (Errors & Success)      -->
-               <!-- ============================================== -->
-               
-               <!-- Error Banner -->
-               <div *ngIf="extractionError" class="animate-slide-down mt-4 flex items-start gap-3 bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-500/25 border rounded-xl p-4">
-                 <div class="error-icon-circle shrink-0 w-8 h-8 rounded-full bg-red-100/50 dark:bg-red-500/10 flex items-center justify-center">
-                   <lucide-icon name="x-circle" [size]="18" class="text-red-600 dark:text-red-400"></lucide-icon>
-                 </div>
-                 <div class="flex-1 min-w-0">
-                   <p class="error-title text-[14px] font-bold text-red-700 dark:text-red-300 mb-1">{{ getErrorTitle(extractionError.status) }}</p>
-                   <p class="error-msg text-[13px] text-red-900/70 dark:text-white/60 leading-relaxed">{{ extractionError.errorMessage }}</p>
-                   
-                   <!-- Raw Preview inside error -->
-                   <div *ngIf="extractionError.rawPreview" class="code-preview mt-2.5 bg-black/5 dark:bg-black/30 rounded-lg p-2.5">
-                     <p class="code-label text-[10px] font-bold uppercase text-red-900/50 dark:text-white/40 mb-1.5 tracking-wider">Apercu du fichier :</p>
-                     <code class="block font-mono text-[11px] text-red-900/80 dark:text-white/50 whitespace-pre-wrap break-all max-h-[80px] overflow-hidden">{{ extractionError.rawPreview }}</code>
-                   </div>
-
-                   <p class="error-hint mt-2 text-[12px] text-red-900/60 dark:text-white/40 italic">{{ getErrorHint(extractionError.status) }}</p>
-                 </div>
-                 <button (click)="clearError()" class="shrink-0 text-red-400 hover:text-red-600 dark:text-red-500/60 dark:hover:text-red-400 transition-colors ml-auto p-1">
-                   <lucide-icon name="x" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-                 </button>
-               </div>
-
-               <!-- Success State: Column Preview Chip Row -->
-               <div *ngIf="extractionResult?.status === 'success'" class="column-preview-section animate-fade-in-up mt-4 p-[14px] px-4 rounded-xl border border-green-200/50 bg-green-50/50 dark:border-green-500/20 dark:bg-green-900/10">
-                 <!-- Header row -->
-                 <div class="flex items-center justify-between mb-3">
-                   <div class="flex items-center gap-2">
-                     <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                     <span class="preview-label text-[13px] font-bold text-[#01b574]">
-                       {{ extractionResult?.columns?.length }} colonnes detectees
-                     </span>
-                     <span *ngIf="sourceMode === 'file'" class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
-                       a partir de {{ extractionResult?.rowCount }} lignes
-                     </span>
-                     <span *ngIf="sourceMode === 'database'" class="preview-sub text-[12px] text-gray-500 dark:text-white/50 font-medium">
-                       depuis {{ dbConnection.table || 'la table source' }}
-                     </span>
-                   </div>
-                   <span class="file-type-badge text-[10px] font-extrabold tracking-[0.8px] px-2 py-0.5 rounded-md bg-[#01b574]/10 text-[#01b574] border border-[#01b574]/20 uppercase">
-                     {{ sourceMode === 'database' ? dbConnection.dbType : extractionResult?.fileType }}
-                   </span>
-                 </div>
-             
-                 <!-- Column chips -->
-                 <div class="chips-wrap flex flex-wrap gap-[6px] mt-2.5">
-                   <div *ngFor="let col of extractionResult?.columns?.slice(0, 12)" 
-                        class="col-chip text-[12px] font-medium font-mono py-1 px-2.5 rounded-md bg-gray-100 border border-gray-200 text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white/80 whitespace-nowrap">
-                     {{ col }}
-                   </div>
-                   <div *ngIf="(extractionResult?.columns?.length || 0) > 12" 
-                        class="col-chip overflow-chip text-[12px] font-bold py-1 px-2.5 rounded-md bg-[#01b574]/10 border border-[#01b574]/20 text-[#01b574] whitespace-nowrap">
-                     +{{ (extractionResult?.columns?.length || 0) - 12 }} de plus
-                   </div>
-                 </div>
-               </div>
-
-               <!-- Warning Banner (Column Mismatch) -->
-               <div *ngIf="columnCountWarning" class="animate-slide-down mt-3 flex items-start gap-2.5 bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-500/25 border rounded-xl p-3 px-4">
-                 <lucide-icon name="alert-triangle" [size]="16" class="text-amber-500 shrink-0 mt-0.5"></lucide-icon>
-                 <p class="text-[12px] text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed">{{ columnCountWarning }}</p>
-               </div>
-
+          <div class="db-hint-card mt-6 date-row-appear">
+            <div class="flex items-center gap-2.5 mb-2">
+              <lucide-icon name="calendar" [size]="16" class="text-[#01b574]"></lucide-icon>
+              <span class="font-bold">Date de balance</span>
             </div>
-
+            <div class="flex items-center gap-2 mt-3">
+              <input
+                #ddInput
+                id="dd"
+                type="text"
+                maxlength="2"
+                placeholder="DD"
+                [ngModel]="dd"
+                (input)="onDdInput($event, mmInput)"
+                (keydown.backspace)="onBackspace($event, null)"
+                class="segment-input w-[52px] dark:bg-white/10 dark:text-white dark:border-white/10"
+                [class.invalid]="isDdInvalid"
+              />
+              <span class="text-gray-400 dark:text-white/30 text-[18px]">/</span>
+              <input
+                #mmInput
+                id="mm"
+                type="text"
+                maxlength="2"
+                placeholder="MM"
+                [ngModel]="mm"
+                (input)="onMmInput($event, yyyyInput)"
+                (keydown.backspace)="onBackspace($event, ddInput)"
+                class="segment-input w-[52px] dark:bg-white/10 dark:text-white dark:border-white/10"
+                [class.invalid]="isMmInvalid"
+              />
+              <span class="text-gray-400 dark:text-white/30 text-[18px]">/</span>
+              <input
+                #yyyyInput
+                id="yyyy"
+                type="text"
+                maxlength="4"
+                placeholder="YYYY"
+                [ngModel]="yyyy"
+                (input)="onYyyyInput($event)"
+                (keydown.backspace)="onBackspace($event, mmInput)"
+                class="segment-input w-[76px] dark:bg-white/10 dark:text-white dark:border-white/10"
+              />
+              <lucide-icon *ngIf="isDateValid" name="check-circle-2" [size]="16" class="text-[#01b574] ml-2"></lucide-icon>
+            </div>
+            <div class="mt-2 text-[11px] text-[#a3aed0] dark:text-white/40 leading-snug">
+              Format attendu: DD/MM/YYYY. Cette date sera envoyee a l'API load-from-db.
+            </div>
           </div>
         </div>
 
-        <!-- Footer Submit Button Area -->
         <div class="mt-8 flex justify-end flex-shrink-0 pt-6">
-          <button (click)="onContinueToMapping()" class="flex items-center gap-2.5 bg-brand-primary text-white px-8 py-3.5 rounded-[14px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group"
-                  [disabled]="!canContinueToMapping"
-                  [ngClass]="{'opacity-50 cursor-not-allowed shadow-none': !canContinueToMapping}">
-            
-            <ng-container *ngIf="!isExtracting">
-              {{ sourceMode === 'database' ? 'Connexion et lecture des colonnes' : 'Continuer vers le mapping' }}
-              <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
-            </ng-container>
-            
-            <ng-container *ngIf="isExtracting">
-              <div class="spinner-sm"></div>
-              {{ sourceMode === 'database' ? 'Connexion a la base...' : 'Analyse du fichier...' }}
-            </ng-container>
-            
+          <button
+            (click)="goToMatchingSelection()"
+            [disabled]="!canContinueToMatching"
+            class="flex items-center gap-2.5 bg-brand-primary text-white px-8 py-3.5 rounded-[14px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            Continuer vers selection matching
+            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+          </button>
+        </div>
+      </section>
+
+      <section class="w-[14.2857%] flex flex-col pt-12 pb-12 px-12 md:px-16 h-[820px]">
+        <div class="flex justify-between items-start mb-8 flex-shrink-0">
+          <div>
+            <h2 class="text-[22px] font-bold text-text-primary mb-1">Selection du matching</h2>
+            <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 2 sur 4 - Choisir un groupe de configuration</p>
+            <div class="flex items-center gap-2 mt-4">
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-3"></div>
+              <div class="h-2 rounded-[4px] bg-[#01b574] w-6"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+              <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div>
+            </div>
+          </div>
+
+          <button
+            (click)="setStep('connection')"
+            class="flex items-center gap-2 bg-transparent border border-gray-300 dark:border-white/15 text-gray-500 dark:text-white/60 rounded-full px-5 py-2.5 text-[13px] font-medium hover:border-brand-primary hover:text-brand-primary dark:hover:border-white/35 dark:hover:text-white transition-all duration-200 group"
+          >
+            <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.5" class="transition-transform duration-200 group-hover:-translate-x-0.5"></lucide-icon>
+            Retour
           </button>
         </div>
 
-      </div>
+        <div class="flex-1 overflow-y-auto pr-3 form-scroll-y">
+          <div *ngIf="configLoading" class="grid grid-cols-1 gap-4">
+            <div *ngFor="let _ of [0,1,2,3]" class="rounded-2xl border border-gray-100 dark:border-white/10 p-4">
+              <div class="h-4 w-32 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse mb-3"></div>
+              <div class="h-3 w-full rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse mb-2"></div>
+              <div class="h-3 w-3/4 rounded bg-gray-200 dark:bg-white/[0.10] animate-pulse"></div>
+            </div>
+          </div>
 
-      <!-- ============================================== -->
-      <!-- PANEL 3: FIELD MAPPING (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] bg-transparent">
-        <app-field-mapping 
-          [fileColumns]="fileColumns"
-          [fileType]="mappingFileType"
-          (back)="onMappingBack()"
-          (complete)="onMappingComplete($event)">
-        </app-field-mapping>
-      </div>
+          <div *ngIf="configError" class="rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-900/10 px-4 py-3 flex items-center justify-between gap-3">
+            <span class="text-[13px] text-red-700 dark:text-red-300">{{ configError }}</span>
+            <button type="button" (click)="loadMappingGroups()" class="text-[12px] font-bold text-red-600 dark:text-red-300 hover:underline">Reessayer</button>
+          </div>
 
-      <!-- ============================================== -->
-      <!-- PANEL 4: LOADING (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
-        <!-- Center Animation Area -->
-        <div class="flex flex-col items-center justify-center p-12 w-full h-full">
-          
-          <!-- Green Spinner -->
+          <div *ngIf="!configLoading && !configError && mappingGroups.length > 0" class="grid grid-cols-1 gap-4">
+            <article
+              *ngFor="let group of mappingGroups; trackBy: trackByGroup"
+              class="rounded-2xl border p-4 transition-all cursor-pointer"
+              [ngClass]="selectedConfigGroupNumber === group.configGroupNumber ? 'border-[#01b574] bg-[#01b574]/5 dark:bg-[#01b574]/15 shadow-[0_0_0_2px_rgba(1,181,116,0.16)]' : 'border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] hover:border-[#01b574]/45'"
+              (click)="selectConfigGroup(group.configGroupNumber)"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-[17px] font-extrabold text-text-primary dark:text-white">Config {{ group.configGroupNumber }}</h3>
+                  <p class="text-[13px] text-text-secondary dark:text-white/60 mt-0.5">{{ group.totalMappings }} mappings</p>
+                </div>
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider"
+                  [ngClass]="selectedConfigGroupNumber === group.configGroupNumber ? 'bg-[#01b574] text-white' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70'"
+                >
+                  {{ selectedConfigGroupNumber === group.configGroupNumber ? 'Selectionnee' : 'Disponible' }}
+                </span>
+              </div>
+
+              <div class="mt-3">
+                <p class="text-[11px] uppercase tracking-[0.08em] font-extrabold text-gray-500 dark:text-white/45 mb-1.5">Tables source</p>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    *ngFor="let source of group.sourceTables"
+                    class="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-bold border bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-500/25 dark:text-indigo-300"
+                  >
+                    {{ source }}
+                  </span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div *ngIf="!configLoading && !configError && mappingGroups.length === 0" class="rounded-2xl border border-gray-200 dark:border-white/10 px-6 py-10 text-center bg-white dark:bg-white/[0.03]">
+            <div class="mx-auto w-12 h-12 rounded-xl bg-gray-100 dark:bg-[#1B2559] flex items-center justify-center mb-4">
+              <lucide-icon name="database" [size]="22" class="text-[#01B574]"></lucide-icon>
+            </div>
+            <h3 class="text-[18px] font-extrabold text-text-primary dark:text-white">Aucune configuration trouvee</h3>
+            <p class="text-[13px] text-text-secondary dark:text-white/60 mt-1.5">Ajoutez une configuration de mapping avant de lancer le pipeline.</p>
+          </div>
+        </div>
+
+        <div class="mt-8 flex items-center justify-between flex-shrink-0 pt-5 border-t border-gray-100 dark:border-white/10">
+          <div class="text-[13px] text-text-secondary dark:text-white/60">
+            <span *ngIf="selectedGroupSummary">Config selectionnee: <strong> {{ selectedGroupSummary.configGroupNumber }} </strong></span>
+            <span *ngIf="!selectedGroupSummary">Aucune config selectionnee</span>
+          </div>
+          <button
+            (click)="startPipelineExecution()"
+            [disabled]="!canStartPipeline"
+            class="flex items-center gap-2.5 bg-brand-primary text-white px-8 py-3.5 rounded-[14px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            Lancer le pipeline
+            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
+          </button>
+        </div>
+      </section>
+
+      <section class="w-[14.2857%] h-[820px] flex flex-col justify-center items-center bg-transparent">
+        <div class="flex flex-col items-center justify-center p-12 w-full h-full text-center">
           <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
-
-          <!-- Badge -->
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ loadingSourceBadge }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[260px]">{{ loadingSourceLabel }}</span>
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">
+              Config {{ selectedConfigGroupNumber }}
+            </span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60">Execution pipeline</span>
           </div>
-
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">{{ loadingTitle }}</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Chargement + quality/transform</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
-            {{ currentLoadingMessage }}
+            {{ pipelineLoadingMessage }}
           </p>
-
         </div>
-      </div>
+      </section>
 
-      <!-- ============================================== -->
-      <!-- PANEL 5: RESULT (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col overflow-hidden bg-transparent">
-        
-        <!-- SUCCESS STATE -->
-        <div *ngIf="uploadResult && !uploadError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
-          
-          <div class="w-24 h-24 rounded-full bg-[#01b574] flex items-center justify-center mb-6 animate-fade-in-scale shadow-[0_0_40px_rgba(1,181,116,0.25)]">
-            <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
-          </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-2">{{ uploadSuccessTitle }}</h3>
-          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10">{{ uploadResult.rowCount | number }} lignes chargees avec succes</p>
-          
-          <button (click)="runQuality()" class="flex items-center justify-center gap-2 bg-[#01b574] text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] mb-4 w-[280px]">
-            Continuer vers la qualite
-            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
-          </button>
-
-          
-        </div>
-
-        <!-- ERROR STATE -->
-        <div *ngIf="uploadError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
+      <section class="w-[14.2857%] h-[820px] flex flex-col overflow-hidden bg-transparent">
+        <div *ngIf="pipelineError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
           <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
             <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
           </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec du televersement</h3>
-          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(uploadError) }}</p>
-          
-          <div class="flex flex-col gap-3 w-[280px]">
-            <button (click)="setStep('mapping')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
+          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec du pipeline</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-md">{{ pipelineError }}</p>
+
+          <div class="flex flex-col gap-3 w-[320px]">
+            <button
+              (click)="setStep('matching')"
+              class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all"
+            >
               <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retour au mapping
+              Retour a la selection
             </button>
-            <button (click)="retryUpload()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
-              <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
+            <button
+              (click)="startPipelineExecution()"
+              class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]"
+            >
               Reessayer
             </button>
           </div>
         </div>
 
-      </div>
-
-      <!-- ============================================== -->
-      <!-- PANEL 6: QUALITY LOADING (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
-        <div class="flex flex-col items-center justify-center p-12 w-full h-full">
-          <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
-          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ fileType || 'TOUTES LES ENTITES' }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Controle qualite</span>
-          </div>
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Execution des controles qualite</h3>
-          <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
-            {{ qualityLoadingMessage }}
-          </p>
-        </div>
-      </div>
-
-      <!-- ============================================== -->
-      <!-- PANEL 7: QUALITY RESULT (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col overflow-hidden bg-transparent border-l-0">
-        
-        <!-- SUCCESS STATE -->
-        <div *ngIf="!qualityError" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
-          
-          <div class="px-12 pt-10 pb-6 flex flex-shrink-0 justify-between items-center">
-            <div class="flex flex-col gap-1">
-              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Qualite terminee</h2>
-              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 3 sur 4 - Donnees de staging validees</p>
-              <div class="flex items-center gap-2 mt-2">
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-6 transition-all duration-300"></div>
-                <div class="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 transition-all duration-300"></div>
-              </div>
+        <div *ngIf="!pipelineError && pipelineLoadResult && qualityTransformResult" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
+          <div class="px-10 pt-8 pb-5 flex flex-shrink-0 justify-between items-center">
+            <div>
+              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Chargement et quality/transform termines</h2>
+              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 3 sur 4 - Resultats consolides</p>
             </div>
-            <div class="flex flex-col items-center gap-1.5 focus-in-expand">
-              <div class="w-10 h-10 rounded-full bg-[#01b574]/10 border border-[#01b574]/30 flex items-center justify-center">
-                <lucide-icon name="check-circle-2" [size]="22" class="text-[#01b574]"></lucide-icon>
-              </div>
-              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">TERMINE</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider bg-[#01b574]/15 border border-[#01b574]/25 text-[#01b574]">Config {{ pipelineLoadResult.configGroupNumber }}</span>
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider bg-cyan-100 border border-cyan-200 text-cyan-700 dark:bg-cyan-900/20 dark:border-cyan-500/25 dark:text-cyan-300">{{ totalLoadedRows | number }} lignes</span>
             </div>
           </div>
 
-          <div class="px-12 flex flex-col flex-1 overflow-y-auto mb-4 min-h-0 form-scroll-y gap-4">
-            <!-- TIERS CARD -->
-            <div *ngIf="qualityTiersResult" class="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-blue-950 rounded-2xl overflow-hidden shadow-sm">
-              <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.03] flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#01b574]/10 flex items-center justify-center">
-                    <lucide-icon name="users" [size]="18" class="text-[#01b574]"></lucide-icon>
-                  </div>
-                  <span class="text-[16px] font-bold text-text-primary">TIERS</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#01b574] bg-[#01b574]/10 border border-[#01b574]/20 px-2 py-0.5 rounded-md ml-1">TIERS</span>
-                </div>
-                <span class="text-[12px] font-mono text-gray-500 dark:text-white/40">stg_tiers_raw</span>
+          <div class="px-10 flex-1 overflow-y-auto min-h-0 form-scroll-y space-y-5 pb-4">
+            <article class="result-box">
+              <div class="result-box-head">
+                <h3>Chargement depuis la base</h3>
+                <p>Source: {{ pipelineLoadResult.sourceTable }} | Cible: {{ pipelineLoadResult.targetTable }}</p>
               </div>
-              <div class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Nuls supprimes</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.nullCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.nullCheckDeleted === 0}">{{ qualityTiersResult.nullCheckDeleted }}</div>
+              <div class="result-box-grid">
+                <div class="result-stat">
+                  <span>Total lignes</span>
+                  <strong>{{ pipelineLoadResult.rowCount | number }}</strong>
                 </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Doublons supprimes</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.duplicateDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.duplicateDeleted === 0}">{{ qualityTiersResult.duplicateDeleted }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Erreurs de type</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.typeCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.typeCheckDeleted === 0}">{{ qualityTiersResult.typeCheckDeleted }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total supprime</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityTiersResult.totalDeleted > 0, 'text-gray-900 dark:text-white': qualityTiersResult.totalDeleted === 0}">{{ qualityTiersResult.totalDeleted }}</div>
+                <div class="result-stat">
+                  <span>Mapping utilise</span>
+                  <strong>{{ pipelineLoadResult.mappingUsed }}</strong>
                 </div>
               </div>
-              <div class="px-6 pb-5">
-                <div *ngIf="qualityTiersResult.totalDeleted === 0" class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">Aucun probleme detecte - les donnees sont propres</span>
-                </div>
-                <div *ngIf="qualityTiersResult.totalDeleted > 0" class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="alert-triangle" [size]="14" class="text-amber-500 dark:text-amber-400"></lucide-icon>
-                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityTiersResult.totalDeleted }} lignes supprimees lors du controle qualite</span>
-                </div>
-              </div>
-            </div>
 
-            <!-- CONTRAT CARD -->
-            <div *ngIf="qualityContratResult" class="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-blue-950 rounded-2xl overflow-hidden shadow-sm">
-              <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.03] flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#01b574]/10 flex items-center justify-center">
-                    <lucide-icon name="file-text" [size]="18" class="text-[#01b574]"></lucide-icon>
+              <div class="table-cards">
+                <article *ngFor="let table of pipelineTableEntries" class="table-card">
+                  <header>
+                    <h4>{{ table.key }}</h4>
+                    <span>{{ table.value.rowCount | number }} lignes</span>
+                  </header>
+                  <p class="meta">{{ table.value.sourceTable }} -> {{ table.value.targetTable }}</p>
+                  <div class="chip-row">
+                    <span class="chip">{{ getMappedCount(table.value) }} colonnes mappees</span>
                   </div>
-                  <span class="text-[16px] font-bold text-text-primary">CONTRAT</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#01b574] bg-[#01b574]/10 border border-[#01b574]/20 px-2 py-0.5 rounded-md ml-1">CONTRAT</span>
-                </div>
-                <span class="text-[12px] font-mono text-gray-500 dark:text-white/40">stg_contrat_raw</span>
+                </article>
               </div>
-              <div class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Nuls supprimes</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.nullCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.nullCheckDeleted === 0}">{{ qualityContratResult.nullCheckDeleted }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Doublons supprimes</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.duplicateDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.duplicateDeleted === 0}">{{ qualityContratResult.duplicateDeleted }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Erreurs de type</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.typeCheckDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.typeCheckDeleted === 0}">{{ qualityContratResult.typeCheckDeleted }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total supprime</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityContratResult.totalDeleted > 0, 'text-gray-900 dark:text-white': qualityContratResult.totalDeleted === 0}">{{ qualityContratResult.totalDeleted }}</div>
-                </div>
-              </div>
-              <div class="px-6 pb-5">
-                <div *ngIf="qualityContratResult.totalDeleted === 0" class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">Aucun probleme detecte - les donnees sont propres</span>
-                </div>
-                <div *ngIf="qualityContratResult.totalDeleted > 0" class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="alert-triangle" [size]="14" class="text-amber-500 dark:text-amber-400"></lucide-icon>
-                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityContratResult.totalDeleted }} lignes supprimees lors du controle qualite</span>
-                </div>
-              </div>
-            </div>
+            </article>
 
-            <!-- COMPTA CARD -->
-            <div *ngIf="qualityComptaResult" class="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-blue-950 rounded-2xl overflow-hidden shadow-sm">
-              <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.03] flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#01b574]/10 flex items-center justify-center">
-                    <lucide-icon name="calculator" [size]="18" class="text-[#01b574]"></lucide-icon>
-                  </div>
-                  <span class="text-[16px] font-bold text-text-primary">COMPTA</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#01b574] bg-[#01b574]/10 border border-[#01b574]/20 px-2 py-0.5 rounded-md ml-1">COMPTA</span>
-                </div>
-                <span class="text-[12px] font-mono text-gray-500 dark:text-white/40">stg_compta_raw</span>
+            <article class="result-box">
+              <div class="result-box-head">
+                <h3>Quality + Transform</h3>
+                <p>Duree totale: {{ formatDuration(qualityTransformResult.totalDurationMs) }}</p>
               </div>
-              <div class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Problemes de valeurs nulles</div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.nullCheckCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.nullCheckCount === 0}">{{ qualityComptaResult.nullCheckCount }}</span>
-                    <button
-                      *ngIf="qualityComptaResult.nullCheckCount > 0"
-                      (click)="downloadComptaField('nullCheckCount')"
-                      [disabled]="downloadingFields.has('nullCheckCount')"
-                      title="Telecharger les problemes de valeurs nulles au format Excel"
-                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
-                      [class.opacity-70]="!downloadingFields.has('nullCheckCount')">
-                      <div *ngIf="downloadingFields.has('nullCheckCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
-                      <lucide-icon *ngIf="!downloadingFields.has('nullCheckCount')" name="download" [size]="13"></lucide-icon>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Problemes de doublons</div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.duplicateCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.duplicateCount === 0}">{{ qualityComptaResult.duplicateCount }}</span>
-                    <button
-                      *ngIf="qualityComptaResult.duplicateCount > 0"
-                      (click)="downloadComptaField('duplicateCount')"
-                      [disabled]="downloadingFields.has('duplicateCount')"
-                      title="Telecharger les problemes de doublons au format Excel"
-                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
-                      [class.opacity-70]="!downloadingFields.has('duplicateCount')">
-                      <div *ngIf="downloadingFields.has('duplicateCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
-                      <lucide-icon *ngIf="!downloadingFields.has('duplicateCount')" name="download" [size]="13"></lucide-icon>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Problemes de type</div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.typeCheckCount > 0, 'text-gray-900 dark:text-white': qualityComptaResult.typeCheckCount === 0}">{{ qualityComptaResult.typeCheckCount }}</span>
-                    <button
-                      *ngIf="qualityComptaResult.typeCheckCount > 0"
-                      (click)="downloadComptaField('typeCheckCount')"
-                      [disabled]="downloadingFields.has('typeCheckCount')"
-                      title="Telecharger les problemes de type au format Excel"
-                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
-                      [class.opacity-70]="!downloadingFields.has('typeCheckCount')">
-                      <div *ngIf="downloadingFields.has('typeCheckCount')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
-                      <lucide-icon *ngIf="!downloadingFields.has('typeCheckCount')" name="download" [size]="13"></lucide-icon>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Somme balance</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.balanceSum > 0, 'text-gray-900 dark:text-white': qualityComptaResult.balanceSum === 0}">{{ qualityComptaResult.balanceSum }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Relations contrat</div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.contratRelationCheck > 0, 'text-gray-900 dark:text-white': qualityComptaResult.contratRelationCheck === 0}">{{ qualityComptaResult.contratRelationCheck }}</span>
-                    <button
-                      *ngIf="qualityComptaResult.contratRelationCheck > 0"
-                      (click)="downloadComptaField('contratRelationCheck')"
-                      [disabled]="downloadingFields.has('contratRelationCheck')"
-                      title="Telecharger les problemes de relation contrat au format Excel"
-                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
-                      [class.opacity-70]="!downloadingFields.has('contratRelationCheck')">
-                      <div *ngIf="downloadingFields.has('contratRelationCheck')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
-                      <lucide-icon *ngIf="!downloadingFields.has('contratRelationCheck')" name="download" [size]="13"></lucide-icon>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Relations tiers</div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': qualityComptaResult.tiersRelationCheck > 0, 'text-gray-900 dark:text-white': qualityComptaResult.tiersRelationCheck === 0}">{{ qualityComptaResult.tiersRelationCheck }}</span>
-                    <button
-                      *ngIf="qualityComptaResult.tiersRelationCheck > 0"
-                      (click)="downloadComptaField('tiersRelationCheck')"
-                      [disabled]="downloadingFields.has('tiersRelationCheck')"
-                      title="Telecharger les problemes de relation tiers au format Excel"
-                      class="text-[#01b574] cursor-pointer p-1 rounded transition-opacity hover:opacity-100 disabled:cursor-wait disabled:opacity-50"
-                      [class.opacity-70]="!downloadingFields.has('tiersRelationCheck')">
-                      <div *ngIf="downloadingFields.has('tiersRelationCheck')" class="w-[13px] h-[13px] rounded-full border-2 border-[#01b574]/30 border-t-[#01b574] animate-spin"></div>
-                      <lucide-icon *ngIf="!downloadingFields.has('tiersRelationCheck')" name="download" [size]="13"></lucide-icon>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Total des problemes</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-amber-500 dark:text-amber-400': qualityComptaResult.totalIssues > 0, 'text-gray-900 dark:text-white': qualityComptaResult.totalIssues === 0}">{{ qualityComptaResult.totalIssues }}</div>
+
+              <div class="sequence-row" *ngIf="qualityTransformResult.sequence?.length">
+                <span class="seq-label">Sequence</span>
+                <div class="seq-chips">
+                  <span *ngFor="let seq of qualityTransformResult.sequence" class="seq-chip">{{ seq }}</span>
                 </div>
               </div>
-              <div class="px-6 pb-5">
-                <div *ngIf="qualityComptaResult.totalIssues === 0" class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">Aucun probleme detecte - les donnees sont propres</span>
-                </div>
-                <div *ngIf="qualityComptaResult.totalIssues > 0" class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="alert-triangle" [size]="14" class="text-amber-500 dark:text-amber-400"></lucide-icon>
-                  <span class="text-amber-600 dark:text-amber-400 text-[13px] font-bold">{{ qualityComptaResult.totalIssues }} lignes trouvees lors du controle qualite</span>
-                </div>
+
+              <div class="table-cards">
+                <article *ngFor="let table of qualityTableEntries" class="table-card">
+                  <header>
+                    <h4>{{ table.key }}</h4>
+                    <span>{{ formatDuration(table.value.durationMs) }}</span>
+                  </header>
+
+                  <div class="metric-list" *ngIf="table.value.quality">
+                    <div *ngFor="let metric of getMetricEntries(table.value.quality)" class="metric-item">
+                      <span>{{ metric.label }}</span>
+                      <strong>{{ metric.value | number }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="metric-list" *ngIf="table.value.transform">
+                    <div *ngFor="let metric of getMetricEntries(table.value.transform)" class="metric-item success">
+                      <span>{{ metric.label }}</span>
+                      <strong>{{ metric.value | number }}</strong>
+                    </div>
+                  </div>
+                </article>
               </div>
-            </div>
+            </article>
           </div>
 
-          <div class="px-12 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto backdrop-blur-sm z-10 w-full">
-            <button (click)="setStep('result')" class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors">
+          <div class="px-10 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto">
+            <button
+              (click)="setStep('matching')"
+              class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors"
+            >
               <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-              Retour
+              Retour a la selection
             </button>
-            <button *ngIf="mappingFileType !== 'COMPTA'" (click)="runTransform()" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
-              Continuer vers la transformation
+            <button
+              (click)="runDatamartPipeline()"
+              class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]"
+            >
+              Continuer vers datamart
               <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
             </button>
-            <button *ngIf="mappingFileType === 'COMPTA'" (click)="runDatamart()" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
-              Continuer vers le datamart
-              <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
-            </button>
-          </div>
-          
-        </div>
-
-        <!-- ERROR STATE -->
-        <div *ngIf="qualityError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
-          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
-            <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
-          </div>
-          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec du controle qualite</h3>
-          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(qualityError) }}</p>
-          
-          <div class="flex flex-col gap-3 w-[280px]">
-            <button (click)="setStep('result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
-              <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retour
-            </button>
-            <button (click)="runQuality()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
-              <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Reessayer
-            </button>
           </div>
         </div>
+      </section>
 
-      </div>
-
-      <!-- ============================================== -->
-      <!-- PANEL 8: TRANSFORM LOADING (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
-        <div class="flex flex-col items-center justify-center p-12 w-full h-full">
-          <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div> 
-          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ mappingFileType }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Transformation</span>
-          </div>
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Execution des transformations</h3>
-          <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
-            {{ transformLoadingMessage }}
-          </p>
-        </div>
-      </div>
-
-      <!-- ============================================== -->
-      <!-- PANEL 9: TRANSFORM RESULT (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col bg-transparent overflow-hidden">
-        
-        <!-- SUCCESS STATE -->
-        <div *ngIf="transformResult && !transformError" class="flex flex-col items-center justify-center h-full px-16 text-center">
-          <div class="w-24 h-24 rounded-full bg-[#01b574] text-white flex flex-shrink-0 items-center justify-center shadow-lg shadow-[#01b574]/30 animate-fade-in-scale mb-6">
-            <lucide-icon name="check" [size]="44" [strokeWidth]="3" class="text-white"></lucide-icon>
-          </div>
-          
-          <h2 class="text-[28px] font-bold text-text-primary mb-2">Transformation terminee !</h2>
-          <p class="text-[16px] text-text-secondary dark:text-[#a3aed1] mb-10">{{ transformResult.rowsTransformed | number }} lignes transformees avec succes</p>
-          
-          <div class="w-full max-w-xs mx-auto bg-[#01b574]/06 dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-2xl p-6 mb-4 flex flex-col items-center">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-[#01b574]/70 mb-1">LIGNES TRANSFORMEES</span>
-            <span class="text-[30px] font-extrabold text-[#01b574] leading-none">{{ transformResult.rowsTransformed | number }}</span>
-          </div>
-
-          <div class="flex items-center gap-1.5 bg-[#01b574]/10 border border-[#01b574]/20 rounded-full px-3 py-1 mb-12">
-            <div class="w-1.5 h-1.5 rounded-full bg-[#01b574]"></div>
-            <span class="text-[11px] font-bold text-[#01b574] uppercase tracking-wider">{{ mappingFileType }}</span>
-          </div>
-
-          <button (click)="runDatamart()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-[280px]">
-            Continuer vers le datamart
-            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
-          </button>
-        </div>
-
-        <!-- ERROR STATE -->
-        <div *ngIf="transformError" class="flex flex-col items-center justify-center h-full px-16 text-center">
-          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex flex-shrink-0 items-center justify-center text-red-500 mb-6 relative">
-            <div class="absolute inset-0 rounded-full border-2 border-red-500/20 animate-ping" style="animation-duration: 2s;"></div>
-            <lucide-icon name="x-circle" [size]="44" [strokeWidth]="3"></lucide-icon>
-          </div>
-          
-          <h2 class="text-[28px] font-bold text-text-primary mb-3">Echec de la transformation</h2>
-          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(transformError) }}</p>
-
-          <div class="flex flex-col gap-3 w-[280px]">
-            <button (click)="setStep('quality-result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
-              <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retour
-            </button>
-            <button (click)="runTransform()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
-              <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Reessayer
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============================================== -->
-      <!-- PANEL 10: DATAMART LOADING (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col justify-center items-center bg-transparent">
-        <div class="flex flex-col items-center justify-center p-12 w-full h-full">
+      <section class="w-[14.2857%] h-[820px] flex flex-col justify-center items-center bg-transparent">
+        <div class="flex flex-col items-center justify-center p-12 w-full h-full text-center">
           <div class="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-white/10 border-t-[#01b574] dark:border-t-[#01b574] animate-spin mb-6"></div>
           <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">{{ mappingFileType }}</span>
-            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60 truncate max-w-[200px]">Datamart</span>
+            <span class="text-[10px] font-extrabold tracking-wider text-[#01b574] uppercase bg-[#01b574]/10 px-2 py-0.5 rounded-md">Datamart</span>
+            <span class="text-[13px] font-medium text-text-secondary dark:text-white/60">Execution globale</span>
           </div>
-          <h3 class="text-[24px] font-bold text-text-primary mb-3">Chargement du datamart</h3>
+          <h3 class="text-[24px] font-bold text-text-primary mb-3">Creation des dimensions et faits</h3>
           <p class="text-[15px] font-medium text-text-secondary dark:text-[#a3aed1] transition-all duration-300">
             {{ datamartLoadingMessage }}
           </p>
         </div>
-      </div>
+      </section>
 
-      <!-- ============================================== -->
-      <!-- PANEL 11: DATAMART RESULT (9.0909% width) -->
-      <!-- ============================================== -->
-      <div class="w-[9.0909%] h-[800px] flex flex-col bg-transparent overflow-hidden">
-
-        <!-- SUCCESS STATE -->
-        <div *ngIf="!datamartError && (datamartTiersResult || datamartContratResult || datamartComptaResult)" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
-          <div class="px-12 pt-10 pb-6 flex flex-shrink-0 justify-between items-start">
-            <div class="flex flex-col gap-1">
-              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Datamart termine</h2>
-              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 4 sur 4 - Pipeline termine</p>
-              <div class="flex items-center gap-2 mt-2">
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
-                <div class="h-2 rounded-[4px] bg-[#01b574] w-2 transition-all duration-300"></div>
-              </div>
-            </div>
-            <div class="flex flex-col items-center gap-1.5 focus-in-expand">
-              <div class="w-10 h-10 rounded-full bg-[#01b574]/10 border border-[#01b574]/30 flex items-center justify-center">
-                <lucide-icon name="check-circle-2" [size]="22" class="text-[#01b574]"></lucide-icon>
-              </div>
-              <span class="text-[10px] font-bold text-[#01b574] uppercase tracking-wider">TERMINE</span>
-            </div>
+      <section class="w-[14.2857%] h-[820px] flex flex-col overflow-hidden bg-transparent">
+        <div *ngIf="datamartError" class="flex-1 flex flex-col items-center justify-center p-12 text-center h-full">
+          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-6">
+            <lucide-icon name="x" [size]="44" [strokeWidth]="3" class="text-red-500"></lucide-icon>
           </div>
+          <h3 class="text-[28px] font-bold text-text-primary mb-3">Echec datamart</h3>
+          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-md">{{ datamartError }}</p>
 
-          <div class="px-12 flex flex-col flex-1 overflow-y-auto mb-4 min-h-0 form-scroll-y gap-4">
-            <div class="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/8 rounded-2xl overflow-hidden shadow-sm">
-              <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.03] flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#01b574]/10 flex items-center justify-center">
-                    <lucide-icon [name]="mappingFileType === 'TIERS' ? 'users' : (mappingFileType === 'CONTRAT' ? 'file-text' : 'calculator')" [size]="18" class="text-[#01b574]"></lucide-icon>
-                  </div>
-                  <span class="text-[16px] font-bold text-text-primary">{{ mappingFileType }}</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#01b574] bg-[#01b574]/10 border border-[#01b574]/20 px-2 py-0.5 rounded-md ml-1">{{ mappingFileType }}</span>
-                </div>
-                <span class="text-[12px] font-mono text-gray-500 dark:text-white/40">{{ mappingFileType === 'TIERS' ? 'dim_client' : (mappingFileType === 'CONTRAT' ? 'dim_contrat + sub-dims' : 'fact_balance + sub-dims') }}</span>
-              </div>
-
-              <div *ngIf="datamartTiersResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Lignes client chargees</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartTiersResult.dimClientRows > 0, 'text-gray-900 dark:text-white': datamartTiersResult.dimClientRows === 0}">{{ datamartTiersResult.dimClientRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim agent eco</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimAgentecoRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimAgentecoRows ?? 0) === 0}">{{ (datamartTiersResult.subDimAgentecoRows ?? 0) | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim douteux</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimDouteuxRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimDouteuxRows ?? 0) === 0}">{{ (datamartTiersResult.subDimDouteuxRows ?? 0) | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim residence</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimResidenceRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimResidenceRows ?? 0) === 0}">{{ (datamartTiersResult.subDimResidenceRows ?? 0) | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim grp affaire</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimGrpaffaireRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimGrpaffaireRows ?? 0) === 0}">{{ (datamartTiersResult.subDimGrpaffaireRows ?? 0) | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim section activite</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': (datamartTiersResult.subDimSectionactiviteRows ?? 0) > 0, 'text-gray-900 dark:text-white': (datamartTiersResult.subDimSectionactiviteRows ?? 0) === 0}">{{ (datamartTiersResult.subDimSectionactiviteRows ?? 0) | number }}</div>
-                </div>
-              </div>
-
-              <div *ngIf="datamartContratResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Lignes contrat</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.dimContratRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.dimContratRows === 0}">{{ datamartContratResult.dimContratRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim agence</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimAgenceRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimAgenceRows === 0}">{{ datamartContratResult.subDimAgenceRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim devise</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimDeviseRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimDeviseRows === 0}">{{ datamartContratResult.subDimDeviseRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Objet finance</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimObjetfinanceRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimObjetfinanceRows === 0}">{{ datamartContratResult.subDimObjetfinanceRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Type contrat</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimTypcontratRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimTypcontratRows === 0}">{{ datamartContratResult.subDimTypcontratRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim date</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartContratResult.subDimDateRows > 0, 'text-gray-900 dark:text-white': datamartContratResult.subDimDateRows === 0}">{{ datamartContratResult.subDimDateRows | number }}</div>
-                </div>
-              </div>
-
-              <div *ngIf="datamartComptaResult" class="p-6 grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Lignes fact balance</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.factBalanceRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.factBalanceRows === 0}">{{ datamartComptaResult.factBalanceRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim agence</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimAgenceRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimAgenceRows === 0}">{{ datamartComptaResult.subDimAgenceRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim devise</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimDeviseRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimDeviseRows === 0}">{{ datamartComptaResult.subDimDeviseRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim chapitre</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimChapitreRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimChapitreRows === 0}">{{ datamartComptaResult.subDimChapitreRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim compte</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimCompteRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimCompteRows === 0}">{{ datamartComptaResult.subDimCompteRows | number }}</div>
-                </div>
-                <div>
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/35 mb-1">Sous-dim date</div>
-                  <div class="text-[26px] font-extrabold leading-none" [ngClass]="{'text-[#01b574]': datamartComptaResult.subDimDateRows > 0, 'text-gray-900 dark:text-white': datamartComptaResult.subDimDateRows === 0}">{{ datamartComptaResult.subDimDateRows | number }}</div>
-                </div>
-              </div>
-
-              <div class="px-6 pb-5">
-                <div class="bg-[#01b574]/[0.06] dark:bg-[#01b574]/10 border border-[#01b574]/15 rounded-xl px-4 py-2.5 flex items-center gap-2">
-                  <lucide-icon name="check-circle" [size]="14" class="text-[#01b574]"></lucide-icon>
-                  <span class="text-[#01b574] text-[13px] font-bold">Pipeline termine - les donnees sont pretes dans le datamart</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="px-12 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto backdrop-blur-sm z-10 w-full">
-            <button (click)="mappingFileType === 'COMPTA' ? setStep('quality-result') : setStep('transform-result')" class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors">
-              <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-              Retour
-            </button>
-            <button (click)="resetPipeline(); setStep('intro')" class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]">
-              <lucide-icon name="refresh-ccw" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-              Demarrer un nouveau pipeline
-            </button>
-          </div>
-        </div>
-
-        <!-- ERROR STATE -->
-        <div *ngIf="datamartError" class="flex flex-col items-center justify-center h-full px-16 text-center">
-          <div class="w-24 h-24 rounded-full bg-red-50 dark:bg-red-500/10 flex flex-shrink-0 items-center justify-center text-red-500 mb-6 relative">
-            <div class="absolute inset-0 rounded-full border-2 border-red-500/20 animate-ping" style="animation-duration: 2s;"></div>
-            <lucide-icon name="x-circle" [size]="44" [strokeWidth]="3"></lucide-icon>
-          </div>
-
-          <h2 class="text-[28px] font-bold text-text-primary mb-3">Echec du datamart</h2>
-          <p class="text-[16px] text-text-secondary dark:text-white/60 mb-10 max-w-sm">{{ getErrorDisplayMessage(datamartError) }}</p>
-
-          <div class="flex flex-col gap-3 w-[280px]">
-            <button (click)="mappingFileType === 'COMPTA' ? setStep('quality-result') : setStep('transform-result')" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all w-full">
-              <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="3"></lucide-icon>
-              Retour
-            </button>
-            <button (click)="runDatamart()" class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] w-full">
-              <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="3"></lucide-icon>
+          <div class="flex flex-col gap-3 w-[320px]">
+            <button
+              (click)="runDatamartPipeline()"
+              class="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]"
+            >
               Reessayer
             </button>
+            <button
+              (click)="setStep('pipeline-result')"
+              class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-primary dark:text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] transition-all"
+            >
+              Retour
+            </button>
           </div>
         </div>
-      </div>
 
+        <div *ngIf="!datamartError && datamartResult" class="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
+          <div class="px-10 pt-8 pb-5 flex flex-shrink-0 justify-between items-center">
+            <div>
+              <h2 class="text-[22px] font-extrabold text-text-primary mb-1">Datamart termine</h2>
+              <p class="text-[14px] text-text-secondary font-medium dark:text-white/60">Etape 4 sur 4 - Chargement final reussi</p>
+            </div>
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider bg-[#01b574]/15 border border-[#01b574]/25 text-[#01b574]">
+              Duree totale {{ formatDuration(datamartResult.totalDurationMs) }}
+            </span>
+          </div>
+
+          <div class="px-10 flex-1 overflow-y-auto min-h-0 form-scroll-y space-y-5 pb-4">
+            <article class="result-box">
+              <div class="result-box-head">
+                <h3>Resultats datamart</h3>
+                <p>{{ datamartResult.sequence.length }} operations executees</p>
+              </div>
+
+              <div class="sequence-row" *ngIf="datamartResult.sequence?.length">
+                <span class="seq-label">Sequence</span>
+                <div class="seq-chips">
+                  <span *ngFor="let seq of datamartResult.sequence" class="seq-chip">{{ seq }}</span>
+                </div>
+              </div>
+
+              <div class="table-cards">
+                <article *ngFor="let table of datamartTableEntries" class="table-card">
+                  <header>
+                    <h4>{{ table.key }}</h4>
+                    <span>{{ formatDuration(table.value.durationMs) }}</span>
+                  </header>
+
+                  <div class="metric-list">
+                    <div *ngFor="let metric of getDatamartMetricEntries(table.value)" class="metric-item success">
+                      <span>{{ metric.label }}</span>
+                      <strong>{{ metric.value | number }}</strong>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </article>
+          </div>
+
+          <div class="px-10 py-5 border-t border-gray-100 dark:border-white/10 flex-shrink-0 flex justify-between items-center bg-transparent mt-auto">
+            <button
+              (click)="restartPipelineFlow()"
+              class="flex items-center gap-2 text-text-secondary dark:text-white/60 hover:text-brand-primary dark:hover:text-white px-3 py-2 rounded-lg font-medium text-[14px] transition-colors"
+            >
+              <lucide-icon name="refresh-cw" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+              Nouvelle execution
+            </button>
+            <button
+              (click)="openDatamartPage()"
+              class="flex items-center gap-2 bg-brand-primary text-white px-8 py-3.5 rounded-[12px] font-bold text-[15px] hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)]"
+            >
+              Ouvrir Datamart
+              <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </div>

@@ -4,8 +4,8 @@
   <div class="px-12 pt-10 pb-6 bg-transparent text-[#1b2559] dark:text-white flex-shrink-0 z-20">
     <div class="flex justify-between items-start mb-6 w-full">
       <div>
-        <h2 class="text-[22px] font-bold mb-1">Mapping des champs</h2>
-        <p class="text-[14px] text-gray-500 dark:text-white/50 font-medium">Etape 2 sur 4 - Associez vos colonnes source aux champs de la base</p>
+        <h2 class="text-[22px] font-bold mb-1">{{ title }}</h2>
+        <p class="text-[14px] text-gray-500 dark:text-white/50 font-medium">{{ subtitle }}</p>
         <div class="flex items-center gap-2 mt-4">
           <div class="h-2 rounded-[4px] bg-[#01b574] w-3 transition-all duration-300"></div>
           <div class="h-2 rounded-[4px] bg-[#01b574] w-6 transition-all duration-300"></div>
@@ -66,8 +66,7 @@
          <ng-container *ngFor="let arrow of arrows">
            <g (mouseenter)="hoveredArrow = arrow.targetField"
               (mouseleave)="hoveredArrow = null"
-              style="pointer-events: all; cursor: pointer;"
-              (click)="removeMapping(arrow.targetField)">
+            style="pointer-events: all; cursor: pointer;">
              
              <!-- Drawing path -->
              <path [attr.d]="arrowPath(arrow)"
@@ -76,13 +75,15 @@
                    [attr.stroke-opacity]="hoveredArrow === arrow.targetField ? 1 : 0.85"
                    stroke-linecap="round"
                    marker-end="url(#arrowhead)"
-                   style="transition: stroke-width .15s, stroke-opacity .15s; pointer-events: stroke;"></path>
+             style="transition: stroke-width .15s, stroke-opacity .15s; pointer-events: stroke;"
+             (click)="onArrowDeleteClick($event, arrow.targetField)"></path>
 
              <!-- Invisible fat hit area -->
              <path [attr.d]="arrowPath(arrow)"
-                   fill="none" stroke="transparent"
+             fill="none" stroke="rgba(1,181,116,0.001)"
                    stroke-width="16"
-                   style="cursor:pointer;"></path>
+             style="cursor:pointer; pointer-events: stroke;"
+             (click)="onArrowDeleteClick($event, arrow.targetField)"></path>
 
              <!-- Endpoint dots -->
              <circle [attr.cx]="arrow.x1" [attr.cy]="arrow.y1" r="3.5" fill="#01b574" />
@@ -91,9 +92,10 @@
              <!-- × delete button (visible on hover) -->
              <g *ngIf="hoveredArrow === arrow.targetField"
                 [attr.transform]="'translate(' + midX(arrow) + ',' + midY(arrow) + ')'">
-               <circle r="10" fill="#e53e3e" />
-               <line x1="-4" y1="-4" x2="4" y2="4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-               <line x1="4" y1="-4" x2="-4" y2="4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+               <circle r="12" fill="rgba(229,62,62,0.01)" style="pointer-events: all;" (click)="onArrowDeleteClick($event, arrow.targetField)" />
+               <circle r="9" fill="#e53e3e" style="pointer-events: all;" (click)="onArrowDeleteClick($event, arrow.targetField)" />
+               <line x1="-4" y1="-4" x2="4" y2="4" stroke="white" stroke-width="1.8" stroke-linecap="round" style="pointer-events: all;" (click)="onArrowDeleteClick($event, arrow.targetField)"/>
+               <line x1="4" y1="-4" x2="-4" y2="4" stroke="white" stroke-width="1.8" stroke-linecap="round" style="pointer-events: all;" (click)="onArrowDeleteClick($event, arrow.targetField)"/>
              </g>
            </g>
          </ng-container>
@@ -103,7 +105,7 @@
        <div class="flex flex-col z-10">
          <p class="font-semibold text-gray-400 dark:text-white/25 uppercase tracking-[0.8px] mb-3 pl-1" style="font-size: 11px;">COLONNES SOURCE</p>
          <div *ngFor="let col of fileColumns" 
-              [id]="'source-' + col"
+              [id]="sourceElementId(col)"
               class="field-pill group"
               [class.is-selected]="selectedSource === col"
               [class.is-mapped]="isSourceMapped(col)"
@@ -120,7 +122,7 @@
        <div class="flex flex-col z-10">
          <p class="font-semibold text-gray-400 dark:text-white/25 uppercase tracking-[0.8px] mb-3 pr-1 text-right" style="font-size: 11px;">CHAMPS DE LA BASE</p>
          <div *ngFor="let tgt of targetFields" 
-              [id]="'target-' + tgt"
+              [id]="targetElementId(tgt)"
               class="field-pill flex-row-reverse"
               [class.is-mapped]="isTargetMapped(tgt)"
               [class.target-hoverable]="selectedSource && !isTargetMapped(tgt)"
@@ -146,7 +148,7 @@
      </div>
 
      <button (click)="onContinue()" class="flex items-center gap-2.5 bg-[#01b574] text-white px-8 py-3.5 rounded-[14px] text-[15px] font-bold hover:bg-[#009b63] transition-all shadow-[0_8px_20px_rgba(1,181,116,0.3)] active:scale-[0.98] group">
-      Continuer vers le chargement
+      {{ continueLabel }}
        <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="3" class="group-hover:translate-x-1 transition-transform"></lucide-icon>
      </button>
   </div>
