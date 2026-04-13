@@ -279,6 +279,41 @@
   background: #f8fbff;
 }
 
+.metric-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metric-download-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(1, 181, 116, 0.22);
+  background: rgba(1, 181, 116, 0.1);
+  color: #01b574;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.metric-download-btn:hover {
+  background: rgba(1, 181, 116, 0.18);
+  border-color: rgba(1, 181, 116, 0.38);
+}
+
+.metric-download-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.metric-download-btn.is-loading {
+  animation: pulse 1s ease-in-out infinite;
+}
+
 .metric-item.success {
   border-color: rgba(1, 181, 116, 0.25);
   background: rgba(1, 181, 116, 0.08);
@@ -287,6 +322,17 @@
 :host-context(.dark) .metric-item {
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.03);
+}
+
+:host-context(.dark) .metric-download-btn {
+  border: 1px solid rgba(1, 181, 116, 0.35);
+  background: rgba(1, 181, 116, 0.2);
+  color: #2ce5a1;
+}
+
+:host-context(.dark) .metric-download-btn:hover {
+  border-color: rgba(1, 181, 116, 0.55);
+  background: rgba(1, 181, 116, 0.3);
 }
 
 .metric-item span {
@@ -375,6 +421,16 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
 
 /* Scrollbar */

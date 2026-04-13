@@ -370,14 +370,27 @@
                   </header>
 
                   <div class="metric-list" *ngIf="table.value.quality">
-                    <div *ngFor="let metric of getMetricEntries(table.value.quality)" class="metric-item">
-                      <span>{{ metric.label }}</span>
+                    <div *ngFor="let metric of getMetricEntries(table.key, table.value.quality)" class="metric-item">
+                      <div class="metric-item-head">
+                        <span>{{ metric.label }}</span>
+                        <button
+                          *ngIf="metric.downloadable"
+                          type="button"
+                          class="metric-download-btn"
+                          [class.is-loading]="isDownloadInProgress(table.key, metric.key)"
+                          [disabled]="isDownloadInProgress(table.key, metric.key)"
+                          [attr.aria-label]="'Telecharger ' + metric.label + ' (' + table.key + ')'"
+                          (click)="downloadQualityMetric(table.key, metric.key)"
+                        >
+                          <lucide-icon name="download" [size]="14" [strokeWidth]="2.5"></lucide-icon>
+                        </button>
+                      </div>
                       <strong>{{ metric.value | number }}</strong>
                     </div>
                   </div>
 
                   <div class="metric-list" *ngIf="table.value.transform">
-                    <div *ngFor="let metric of getMetricEntries(table.value.transform)" class="metric-item success">
+                    <div *ngFor="let metric of getMetricEntries(table.key, table.value.transform)" class="metric-item success">
                       <span>{{ metric.label }}</span>
                       <strong>{{ metric.value | number }}</strong>
                     </div>

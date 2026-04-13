@@ -529,6 +529,54 @@ export class EtlApiService {
     );
   }
 
+  async fetchTiersNullCheckList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/tiers/null-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchTiersDuplicateList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/tiers/duplicate/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchTiersTypeCheckList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/tiers/type-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchContratNullCheckList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/contrat/null-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchContratDuplicateList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/contrat/duplicate/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
+  async fetchContratTypeCheckList(): Promise<QualityListResponse> {
+    return this.fetchJson<QualityListResponse>(
+      `${this.BASE}/quality/contrat/type-check/list`,
+      { method: 'GET' },
+      2 * 60 * 1000
+    );
+  }
+
   async qualityCompta(): Promise<QualityComptaResult> {
     return this.fetchJson<QualityComptaResult>(
       `${this.BASE}/quality/compta`,

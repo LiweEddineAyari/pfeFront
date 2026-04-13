@@ -11,6 +11,7 @@ import {
   MappingConfigRow,
   PipelineLoadFromDbResponse,
   PipelineLoadTableResult,
+  QualityListResponse,
   QualityTransformResponse,
   QualityTransformTableResult,
 } from '../../core/services/etl-api.service';
@@ -29,6 +30,13 @@ interface MappingConfigGroupSummary {
   totalMappings: number;
   sourceTables: string[];
   targetTables: string[];
+}
+
+interface MetricEntry {
+  key: string;
+  label: string;
+  value: number;
+  downloadable: boolean;
 }
 
 @Component({
@@ -74,6 +82,7 @@ export class EtlPipelineComponent implements OnDestroy {
   private datamartLoadingInterval: ReturnType<typeof setInterval> | null = null;
   datamartResult: DatamartPipelineResponse | null = null;
   datamartError: string | null = null;
+  private downloadingMetrics = new Set<string>();
 
   readonly steps = [
     {
@@ -355,14 +364,16 @@ export class EtlPipelineComponent implements OnDestroy {
     return Object.keys(tableResult.mappedColumns ?? {}).length;
   }
 
-  getMetricEntries(metrics?: Record<string, number>): Array<{ label: string; value: number }> {
+  getMetricEntries(tableKey: string, metrics?: Record<string, number>): MetricEntry[] {
     if (!metrics) {
       return [];
     }
 
     return Object.entries(metrics).map(([key, value]) => ({
+      key,
       label: this.getMetricLabel(key),
       value,
+      downloadable: this.isQualityMetricDownloadable(tableKey, key),
     }));
   }
 
@@ -389,6 +400,35 @@ export class EtlPipelineComponent implements OnDestroy {
 
   trackByGroup(_: number, group: MappingConfigGroupSummary): number {
     return group.configGroupNumber;
+  }
+
+  isDownloadInProgress(tableKey: string, metricKey: string): boolean {
+    return this.downloadingMetrics.has(this.getMetricDownloadKey(tableKey, metricKey));
+  }
+
+  async downloadQualityMetric(tableKey: string, metricKey: string): Promise<void> {
+    if (!this.isQualityMetricDownloadable(tableKey, metricKey)) {
+      return;
+    }
+
+    const downloadKey = this.getMetricDownloadKey(tableKey, metricKey);
+    if (this.downloadingMetrics.has(downloadKey)) {
+      return;
+    }
+
+    this.downloadingMetrics.add(downloadKey);
+    this.cdr.markForCheck();
+
+    try {
+      const response = await this.fetchQualityList(tableKey, metricKey);
+      const rows = response.rows ?? [];
+      this.downloadCsv(rows, this.buildDownloadFilename(tableKey, metricKey));
+    } catch (err) {
+      console.error('Download quality list failed', err);
+    } finally {
+      this.downloadingMetrics.delete(downloadKey);
+      this.cdr.markForCheck();
+    }
   }
 
   private getMetricLabel(metric: string): string {
@@ -430,6 +470,130 @@ export class EtlPipelineComponent implements OnDestroy {
     return metric
       .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
       .replace(/^./, (char) => char.toUpperCase());
+  }
+
+  private isQualityMetricDownloadable(tableKey: string, metricKey: string): boolean {
+    const normalizedTable = tableKey.toLowerCase();
+
+    if (normalizedTable === 'tiers' || normalizedTable === 'contrat') {
+      return metricKey === 'nullCheckDeleted'
+        || metricKey === 'duplicateDeleted'
+        || metricKey === 'typeCheckDeleted';
+    }
+
+    if (normalizedTable === 'compta') {
+      return metricKey === 'nullCheckCount'
+        || metricKey === 'duplicateCount'
+        || metricKey === 'typeCheckCount'
+        || metricKey === 'contratRelationCheck'
+        || metricKey === 'tiersRelationCheck';
+    }
+
+    return false;
+  }
+
+  private getMetricDownloadKey(tableKey: string, metricKey: string): string {
+    return `${tableKey.toLowerCase()}:${metricKey}`;
+  }
+
+  private async fetchQualityList(tableKey: string, metricKey: string): Promise<QualityListResponse> {
+    const normalizedTable = tableKey.toLowerCase();
+
+    if (normalizedTable === 'tiers') {
+      if (metricKey === 'nullCheckDeleted') {
+        return this.etlApi.fetchTiersNullCheckList();
+      }
+      if (metricKey === 'duplicateDeleted') {
+        return this.etlApi.fetchTiersDuplicateList();
+      }
+      if (metricKey === 'typeCheckDeleted') {
+        return this.etlApi.fetchTiersTypeCheckList();
+      }
+    }
+
+    if (normalizedTable === 'contrat') {
+      if (metricKey === 'nullCheckDeleted') {
+        return this.etlApi.fetchContratNullCheckList();
+      }
+      if (metricKey === 'duplicateDeleted') {
+        return this.etlApi.fetchContratDuplicateList();
+      }
+      if (metricKey === 'typeCheckDeleted') {
+        return this.etlApi.fetchContratTypeCheckList();
+      }
+    }
+
+    if (normalizedTable === 'compta') {
+      if (metricKey === 'nullCheckCount') {
+        return this.etlApi.fetchComptaNullCheckList();
+      }
+      if (metricKey === 'duplicateCount') {
+        return this.etlApi.fetchComptaDuplicateList();
+      }
+      if (metricKey === 'typeCheckCount') {
+        return this.etlApi.fetchComptaTypeCheckList();
+      }
+      if (metricKey === 'contratRelationCheck') {
+        return this.etlApi.fetchComptaContratRelationList();
+      }
+      if (metricKey === 'tiersRelationCheck') {
+        return this.etlApi.fetchComptaTiersRelationList();
+      }
+    }
+
+    throw new Error(`No endpoint configured for ${normalizedTable}/${metricKey}`);
+  }
+
+  private buildDownloadFilename(tableKey: string, metricKey: string): string {
+    const datePart = new Date().toISOString().slice(0, 10);
+    return `${tableKey.toLowerCase()}-${metricKey}-${datePart}`;
+  }
+
+  private downloadCsv(rows: Record<string, any>[], filename: string): void {
+    if (!rows.length) {
+      this.downloadFile('message\nNo data', filename);
+      return;
+    }
+
+    const headerSet = new Set<string>();
+    rows.forEach((row) => {
+      Object.keys(row).forEach((key) => headerSet.add(key));
+    });
+    const headers = Array.from(headerSet);
+
+    const headerLine = headers.map((header) => this.escapeCsvCell(header)).join(',');
+    const lines = rows.map((row) =>
+      headers.map((header) => this.escapeCsvCell(row[header])).join(',')
+    );
+    const content = [headerLine, ...lines].join('\n');
+    this.downloadFile(content, filename);
+  }
+
+  private downloadFile(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `${filename}.csv`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  private escapeCsvCell(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    const raw = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    const escaped = raw.replace(/"/g, '""');
+
+    if (/[",\n\r]/.test(escaped)) {
+      return `"${escaped}"`;
+    }
+
+    return escaped;
   }
 
   private buildMappingGroupSummaries(rows: MappingConfigRow[]): MappingConfigGroupSummary[] {
