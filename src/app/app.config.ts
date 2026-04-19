@@ -11,7 +11,8 @@ import { LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';import { provi
   Home, LayoutGrid, Info, ShoppingBag, ShoppingBasket, RefreshCcw, BusFront,
   Tv, GlassWater, LogOut,
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
-  XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download
+  XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
+  Trash2, ChevronsUpDown
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -25,7 +26,8 @@ const icons = {
   Home, LayoutGrid, Info, ShoppingBag, ShoppingBasket, RefreshCcw, BusFront,
   Tv, GlassWater, LogOut,
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
-  XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download
+  XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
+  Trash2, ChevronsUpDown
 };
 
 export const appConfig: ApplicationConfig = {

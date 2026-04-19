@@ -1,0 +1,53 @@
+<div class="picker-shell" [ngClass]="disabled ? 'is-disabled' : ''">
+  <button type="button" class="picker-trigger" [disabled]="disabled" (click)="togglePanel($event)">
+    <span class="picker-value" [ngClass]="hasValue ? '' : 'placeholder'">{{ selectedLabel }}</span>
+
+    <span class="picker-actions">
+      <span
+        *ngIf="hasValue"
+        class="clear-btn"
+        (click)="clear($event)"
+        (keydown.enter)="clearFromKeyboard($event)"
+        tabindex="0"
+        role="button"
+        aria-label="Effacer le champ selectionne"
+      >
+        <lucide-icon name="x" [size]="12" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <lucide-icon name="chevrons-up-down" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+    </span>
+  </button>
+
+  <section *ngIf="open" class="picker-card" (click)="$event.stopPropagation()">
+    <header class="search-row">
+      <lucide-icon name="search" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+      <input
+        type="text"
+        [ngModel]="searchDraft"
+        (ngModelChange)="onSearchChange($event)"
+        (keydown.enter)="$event.preventDefault(); selectFirstMatch()"
+        placeholder="Rechercher par nom de champ"
+      />
+    </header>
+
+    <div class="option-list custom-scrollbar">
+      <ng-container *ngFor="let group of groupedFilteredOptions; trackBy: trackByGroup">
+        <section class="option-group">
+          <header class="option-group-title">{{ group.label }}</header>
+
+          <button
+            type="button"
+            class="option-row"
+            *ngFor="let option of group.options; trackBy: trackByValue"
+            (click)="selectOption(option)"
+            [ngClass]="option === value ? 'active' : ''"
+          >
+            {{ option }}
+          </button>
+        </section>
+      </ng-container>
+
+      <p *ngIf="noResults" class="empty-note">Aucun champ correspondant.</p>
+    </div>
+  </section>
+</div>

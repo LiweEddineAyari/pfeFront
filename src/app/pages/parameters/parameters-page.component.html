@@ -1,0 +1,283 @@
+<div class="parameters-page">
+  <section class="hero-card">
+    <div>
+      <p class="eyebrow">Moteur de parametres</p>
+      <h2>Parametres analytiques</h2>
+      <p class="subtitle">
+        Workflow premium de creation/modification/consultation avec fenetres popup, constructeur de formule et mode SQL natif.
+      </p>
+    </div>
+
+    <button type="button" class="primary-btn" (click)="openCreateDialog()">
+      <lucide-icon name="plus" [size]="16" [strokeWidth]="3"></lucide-icon>
+      Nouveau parametre
+    </button>
+  </section>
+
+  <section class="toolbar-card">
+    <div class="search-group">
+      <lucide-icon name="search" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      <input
+        type="text"
+        [(ngModel)]="searchDraft"
+        placeholder="Rechercher par code ou libelle"
+        (keydown.enter)="runSearch()"
+      />
+    </div>
+
+    <div class="toolbar-actions">
+      <button type="button" class="ghost-btn" (click)="runSearch()">
+        <lucide-icon name="search" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Rechercher
+      </button>
+      <button type="button" class="ghost-btn" (click)="clearSearch()">
+        <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Reinitialiser
+      </button>
+    </div>
+  </section>
+
+  <section *ngIf="infoMessage" class="info-banner">{{ infoMessage }}</section>
+
+  <section *ngIf="bannerError" class="error-banner">
+    <h4>{{ bannerError.error }} ({{ bannerError.status }})</h4>
+    <p>{{ bannerError.message }}</p>
+    <ul *ngIf="bannerError.details?.length">
+      <li *ngFor="let detail of bannerError.details">{{ detail }}</li>
+    </ul>
+  </section>
+
+  <section class="content-grid">
+    <div class="table-pane">
+      <section class="table-card" *ngIf="!loading; else loadingState">
+        <div class="table-header">
+          <h3>Liste des parametres</h3>
+          <div class="table-meta">
+            <span class="meta-chip">Total {{ totalElements }}</span>
+            <span class="meta-chip">Page {{ page + 1 }}</span>
+          </div>
+        </div>
+
+        <div class="table-wrap" *ngIf="rows.length > 0; else emptyState">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Libelle</th>
+                <th>Version</th>
+                <th>Statut</th>
+                <th>Mis a jour</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of rows; trackBy: trackByCode" (click)="openDetailsDialog(row)">
+                <td>
+                  <span class="code-chip">{{ row.code }}</span>
+                </td>
+                <td>
+                  <strong>{{ row.label }}</strong>
+                </td>
+                <td>{{ row.version }}</td>
+                <td>
+                  <span class="status-chip" [ngClass]="row.isActive ? 'on' : 'off'">
+                    {{ row.isActive ? 'Actif' : 'Inactif' }}
+                  </span>
+                </td>
+                <td>{{ row.updatedAt | date: 'yyyy-MM-dd HH:mm' }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); openDetailsDialog(row)">
+                      <lucide-icon name="file-text" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                      Voir
+                    </button>
+                    <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); openEditDialog(row)">
+                      <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                      Modifier
+                    </button>
+                    <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); deleteFromList(row)">
+                      <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                      Supprimer
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #emptyState>
+          <div class="empty-state">
+            <div class="empty-icon">
+              <lucide-icon name="calculator" [size]="24" [strokeWidth]="2.8"></lucide-icon>
+            </div>
+            <h4>Aucun parametre trouve</h4>
+            <p>Vous pouvez en creer un maintenant, ou ouvrir ses details directement par code.</p>
+
+            <div class="quick-open">
+              <input type="text" [(ngModel)]="quickCodeDraft" placeholder="Code connu (ex : ENCTENG)" />
+              <button type="button" class="primary-btn" (click)="openDetailsByCode()">Ouvrir par code</button>
+            </div>
+          </div>
+        </ng-template>
+
+        <footer class="table-footer">
+          <button type="button" class="ghost-btn" [disabled]="!hasPreviousPage" (click)="previousPage()">
+            <lucide-icon name="arrow-left" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            Precedent
+          </button>
+
+          <button type="button" class="ghost-btn" [disabled]="!hasNextPage" (click)="nextPage()">
+            Suivant
+            <lucide-icon name="arrow-right" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <section class="fields-card">
+      <header class="fields-header">
+        <div>
+          <h3>Champs supportes</h3>
+          <p>Charges depuis l'API et groupes par table source pour une lecture plus claire.</p>
+        </div>
+
+        <div class="fields-actions">
+          <span class="meta-chip" *ngIf="supportedFields.length">{{ supportedFields.length }} champs / {{ supportedTablesCount }} tables</span>
+          <button type="button" class="ghost-btn" [disabled]="loadingSupportedFields" (click)="refreshSupportedFields()">
+            <lucide-icon name="refresh-cw" [size]="13" [strokeWidth]="2.8" [ngClass]="loadingSupportedFields ? 'spin' : ''"></lucide-icon>
+            Actualiser
+          </button>
+        </div>
+      </header>
+
+      <div class="field-search" *ngIf="!loadingSupportedFields && supportedFields.length > 0">
+        <lucide-icon name="search" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        <input
+          type="text"
+          [(ngModel)]="supportedFieldSearchDraft"
+          (ngModelChange)="onSupportedFieldSearchChanged()"
+          placeholder="Rechercher un champ dans les tables groupees"
+        />
+      </div>
+
+      <div *ngIf="loadingSupportedFields" class="fields-loading">
+        <span *ngFor="let _ of [0, 1, 2, 3, 4, 5]" class="field-skeleton"></span>
+      </div>
+
+      <div *ngIf="!loadingSupportedFields && supportedFieldGroups.length" class="table-groups-grid">
+        <article class="table-group-card" *ngFor="let group of pagedSupportedFieldGroups; trackBy: trackBySupportedTable">
+          <header class="table-group-header">
+            <div>
+              <h4>{{ group.displayName }}</h4>
+              <p>{{ group.table }}</p>
+            </div>
+
+            <div class="table-group-actions">
+              <span class="meta-chip">{{ group.fields.length }} champs</span>
+              <button
+                type="button"
+                class="ghost-btn ghost-btn-compact"
+                *ngIf="group.hiddenCount > 0 || group.expanded"
+                (click)="toggleSupportedFieldsVisibility(group.table)"
+              >
+                {{ group.expanded ? 'Voir moins' : 'Voir tout (' + group.hiddenCount + ')' }}
+              </button>
+            </div>
+          </header>
+
+          <div class="field-chip-wrap">
+            <span class="field-chip" *ngFor="let field of group.visibleFields">{{ field }}</span>
+          </div>
+        </article>
+      </div>
+
+      <footer
+        class="table-footer"
+        style="justify-content: space-between; padding: 10px 0 0; border-top-style: dashed;"
+        *ngIf="!loadingSupportedFields && supportedFieldGroups.length > 0"
+      >
+        <div class="table-meta">
+          <span class="meta-chip">Page {{ currentSupportedGroupsPage + 1 }} / {{ supportedFieldGroupsTotalPages }}</span>
+        </div>
+
+        <div class="row-actions">
+          <button type="button" class="ghost-btn" [disabled]="!hasPreviousSupportedGroupsPage" (click)="previousSupportedGroupsPage()">
+            <lucide-icon name="arrow-left" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            Precedent
+          </button>
+
+          <button type="button" class="ghost-btn" [disabled]="!hasNextSupportedGroupsPage" (click)="nextSupportedGroupsPage()">
+            Suivant
+            <lucide-icon name="arrow-right" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+          </button>
+        </div>
+      </footer>
+
+      <div *ngIf="!loadingSupportedFields && !supportedFields.length" class="fields-empty">
+        Aucun champ supporte charge pour le moment.
+      </div>
+
+      <div *ngIf="!loadingSupportedFields && supportedFields.length && supportedFieldGroups.length === 0" class="fields-empty">
+        Aucun champ ne correspond a cette recherche.
+      </div>
+    </section>
+  </section>
+
+  <ng-template #loadingState>
+    <section class="table-card">
+      <div class="skeleton-row" *ngFor="let _ of [0, 1, 2, 3, 4]"></div>
+    </section>
+  </ng-template>
+
+  <section *ngIf="deleteConfirmOpen" class="confirm-overlay" (click)="cancelDeleteConfirmation()">
+    <article class="confirm-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <header class="confirm-header">
+        <div class="confirm-icon-wrap" aria-hidden="true">
+          <lucide-icon name="alert-triangle" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+        </div>
+        <div>
+          <h4 id="delete-title">Confirmer la suppression</h4>
+          <p>Cette action est irreversible.</p>
+        </div>
+      </header>
+
+      <p class="confirm-copy">
+        Voulez-vous vraiment supprimer ce parametre ?
+      </p>
+
+      <div class="confirm-code">{{ deleteConfirmCode }}</div>
+
+      <footer class="confirm-actions">
+        <button type="button" class="ghost-btn" [disabled]="deleteInProgress" (click)="cancelDeleteConfirmation()">
+          Annuler
+        </button>
+        <button type="button" class="danger-btn" [disabled]="deleteInProgress" (click)="confirmDeleteFromPopup()">
+          <lucide-icon *ngIf="!deleteInProgress" name="trash-2" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+          <lucide-icon *ngIf="deleteInProgress" name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin"></lucide-icon>
+          {{ deleteInProgress ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+
+  <app-parameter-form-dialog
+    *ngIf="formDialogOpen"
+    [mode]="formDialogMode"
+    [parameterCode]="formDialogCode"
+    [initialParameter]="formDialogInitial"
+    [supportedFields]="supportedFields"
+    [supportedFieldsByTable]="supportedFieldsByTable"
+    (closed)="closeFormDialog()"
+    (saved)="onFormSaved($event)"
+  ></app-parameter-form-dialog>
+
+  <app-parameter-details-dialog
+    *ngIf="detailsDialogOpen"
+    [parameterCode]="detailsDialogCode"
+    [initialParameter]="detailsDialogInitial"
+    (closed)="closeDetailsDialog()"
+    (editRequested)="onEditRequested($event)"
+    (deleteRequested)="onDeleteRequested($event)"
+  ></app-parameter-details-dialog>
+</div>

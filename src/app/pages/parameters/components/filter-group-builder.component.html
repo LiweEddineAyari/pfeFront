@@ -1,0 +1,162 @@
+<section class="filter-shell">
+  <header class="filter-shell-header">
+    <div>
+      <h4>{{ title }}</h4>
+      <p>Construisez des conditions AND / OR imbriquees avec saisies adaptees aux operateurs.</p>
+    </div>
+
+    <div class="filter-shell-actions" *ngIf="!readonly">
+      <button *ngIf="!group" type="button" class="control-button" (click)="enableGroup()">
+        <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+        Ajouter des filtres
+      </button>
+      <button *ngIf="group" type="button" class="control-button danger" (click)="clearGroup()">
+        <lucide-icon name="x" [size]="14" [strokeWidth]="3"></lucide-icon>
+        Effacer
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="group as rootGroup; else emptyState" class="group-container">
+    <ng-container *ngTemplateOutlet="groupEditor; context: { $implicit: rootGroup, depth: 0 }"></ng-container>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-placeholder">
+      <lucide-icon name="database" [size]="16" [strokeWidth]="2.7"></lucide-icon>
+      <span>Aucun filtre pour le moment.</span>
+    </div>
+  </ng-template>
+
+  <ng-template #groupEditor let-currentGroup let-depth="depth">
+    <article class="group-card" [style.marginLeft.px]="depth * 12">
+      <div class="group-header">
+        <div class="group-title">
+          <span class="depth-chip">Niveau {{ depth + 1 }}</span>
+          <label>
+            Logique
+            <select
+              class="field-input select-input"
+              [disabled]="readonly"
+              [(ngModel)]="currentGroup.logic"
+              (ngModelChange)="emitGroupChanged()"
+            >
+              <option value="AND">AND</option>
+              <option value="OR">OR</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="group-actions" *ngIf="!readonly">
+          <button type="button" class="control-button" (click)="addCondition(currentGroup)">
+            <lucide-icon name="plus" [size]="13" [strokeWidth]="3"></lucide-icon>
+            Condition
+          </button>
+          <button type="button" class="control-button" (click)="addNestedGroup(currentGroup)">
+            <lucide-icon name="layout-grid" [size]="13" [strokeWidth]="3"></lucide-icon>
+            Groupe
+          </button>
+        </div>
+      </div>
+
+      <div class="condition-list" *ngIf="currentGroup.conditions?.length">
+        <div class="condition-row" *ngFor="let condition of currentGroup.conditions; let i = index; trackBy: trackByIndex">
+          <app-field-picker
+            [value]="condition.field"
+            [options]="supportedFields"
+            [groupedOptions]="supportedFieldsByTable"
+            [disabled]="readonly"
+            placeholder="Rechercher et selectionner un champ"
+            (valueChange)="condition.field = $event; emitGroupChanged()"
+          ></app-field-picker>
+
+          <select
+            class="field-input select-input"
+            [disabled]="readonly"
+            [(ngModel)]="condition.operator"
+            (ngModelChange)="onOperatorChange(condition)"
+          >
+            <option *ngFor="let operator of operators" [value]="operator">{{ operator }}</option>
+          </select>
+
+          <div class="value-host">
+            <ng-container *ngIf="isNullOperator(condition.operator); else nonNullOperator">
+              <span class="null-hint">Aucune valeur requise</span>
+            </ng-container>
+
+            <ng-template #nonNullOperator>
+              <ng-container *ngIf="isInOperator(condition.operator); else nonInOperator">
+                <input
+                  type="text"
+                  class="field-input"
+                  [disabled]="readonly"
+                  [ngModel]="getInValue(condition)"
+                  (ngModelChange)="onInValueChange(condition, $event)"
+                  placeholder="val1, val2, val3"
+                />
+              </ng-container>
+
+              <ng-template #nonInOperator>
+                <ng-container *ngIf="isBetweenOperator(condition.operator); else scalarOperator">
+                  <div class="between-wrapper">
+                    <input
+                      type="text"
+                      class="field-input"
+                      [disabled]="readonly"
+                      [ngModel]="getBetweenValue(condition, 0)"
+                      (ngModelChange)="onBetweenValueChange(condition, 0, $event)"
+                      placeholder="de"
+                    />
+                      <span>a</span>
+                    <input
+                      type="text"
+                      class="field-input"
+                      [disabled]="readonly"
+                      [ngModel]="getBetweenValue(condition, 1)"
+                      (ngModelChange)="onBetweenValueChange(condition, 1, $event)"
+                        placeholder="a"
+                    />
+                  </div>
+                </ng-container>
+
+                <ng-template #scalarOperator>
+                  <input
+                    type="text"
+                    class="field-input"
+                    [disabled]="readonly"
+                    [ngModel]="getScalarValue(condition)"
+                    (ngModelChange)="onScalarValueChange(condition, $event)"
+                    placeholder="valeur"
+                  />
+                </ng-template>
+              </ng-template>
+            </ng-template>
+          </div>
+
+          <button
+            *ngIf="!readonly"
+            type="button"
+            class="remove-button"
+            (click)="removeCondition(currentGroup, i)"
+            aria-label="Supprimer la condition"
+          >
+            <lucide-icon name="x" [size]="13" [strokeWidth]="3"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="nested-list" *ngIf="currentGroup.groups?.length">
+        <div class="nested-item" *ngFor="let nested of currentGroup.groups; let groupIndex = index; trackBy: trackByIndex">
+          <div class="nested-toolbar" *ngIf="!readonly">
+            <button type="button" class="control-button danger" (click)="removeNestedGroup(currentGroup, groupIndex)">
+              <lucide-icon name="x" [size]="13" [strokeWidth]="3"></lucide-icon>
+              Supprimer le groupe
+            </button>
+          </div>
+
+          <ng-container *ngTemplateOutlet="groupEditor; context: { $implicit: nested, depth: depth + 1 }"></ng-container>
+        </div>
+      </div>
+    </article>
+  </ng-template>
+</section>

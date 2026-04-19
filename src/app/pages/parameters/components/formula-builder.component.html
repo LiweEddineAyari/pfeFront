@@ -1,0 +1,288 @@
+<div class="formula-shell">
+  <section class="section-card expression-card">
+    <header>
+      <h3>Constructeur d'expression</h3>
+      <p>Construisez des arbres FIELD / VALUE / AGGREGATION / operateurs arithmetiques avec expressions imbriquees.</p>
+    </header>
+
+    <ng-template #nodeEditor let-node let-depth="depth" let-caption="caption">
+      <article class="node-card" [style.marginLeft.px]="depth * 10">
+        <div class="node-head">
+          <span class="node-caption">{{ caption }}</span>
+          <span class="node-depth">Niveau {{ depth + 1 }}</span>
+        </div>
+
+        <div class="node-grid">
+          <label>
+            Type
+            <select
+              class="field-input select-input"
+              [disabled]="readonly"
+              [ngModel]="node.type"
+              (ngModelChange)="onNodeTypeChange(node, $event)"
+            >
+              <option *ngFor="let type of nodeTypes" [value]="type">{{ type }}</option>
+            </select>
+          </label>
+
+          <ng-container *ngIf="node.type === 'FIELD'">
+            <label>
+              Champ
+              <app-field-picker
+                [value]="node.field ?? ''"
+                [options]="supportedFields"
+                [groupedOptions]="supportedFieldsByTable"
+                [disabled]="readonly"
+                placeholder="Rechercher et selectionner un champ"
+                (valueChange)="onNodeFieldChange(node, $event)"
+              ></app-field-picker>
+            </label>
+          </ng-container>
+
+          <ng-container *ngIf="node.type === 'VALUE'">
+            <label>
+              Valeur
+              <input
+                type="text"
+                class="field-input"
+                [disabled]="readonly"
+                [ngModel]="readNodeValue(node)"
+                (ngModelChange)="onNodeValueChange(node, $event)"
+                placeholder="123, EUR, true, null"
+              />
+            </label>
+          </ng-container>
+
+          <ng-container *ngIf="node.type === 'AGGREGATION'">
+            <label>
+              Fonction
+              <select
+                class="field-input select-input"
+                [disabled]="readonly"
+                [ngModel]="node.function"
+                (ngModelChange)="onNodeFunctionChange(node, $event)"
+              >
+                <option *ngFor="let fn of aggregationFunctions" [value]="fn">{{ fn }}</option>
+              </select>
+            </label>
+
+            <div class="operand-toggle">
+              <button
+                type="button"
+                [disabled]="readonly"
+                [ngClass]="usesAggregationExpression(node) ? '' : 'active'"
+                (click)="onAggregationOperandChange(node, 'field')"
+              >
+                Champ
+              </button>
+              <button
+                type="button"
+                [disabled]="readonly"
+                [ngClass]="usesAggregationExpression(node) ? 'active' : ''"
+                (click)="onAggregationOperandChange(node, 'expression')"
+              >
+                Expression
+              </button>
+            </div>
+
+            <label *ngIf="!usesAggregationExpression(node)">
+              Champ operande
+              <app-field-picker
+                [value]="node.field ?? ''"
+                [options]="supportedFields"
+                [groupedOptions]="supportedFieldsByTable"
+                [disabled]="readonly"
+                placeholder="Rechercher et selectionner un champ"
+                (valueChange)="onNodeFieldChange(node, $event)"
+              ></app-field-picker>
+            </label>
+
+            <label class="toggle-check">
+              <input
+                type="checkbox"
+                [disabled]="readonly"
+                [ngModel]="node.distinct"
+                (ngModelChange)="onDistinctChange(node, $event)"
+              />
+              Distinct
+            </label>
+
+            <div *ngIf="usesAggregationExpression(node) && node.expression" class="nested-block">
+              <ng-container
+                *ngTemplateOutlet="nodeEditor; context: { $implicit: node.expression, depth: depth + 1, caption: 'Expression d\'agregation' }"
+              ></ng-container>
+            </div>
+
+            <app-filter-group-builder
+              [group]="node.filters"
+              [supportedFields]="supportedFields"
+              [supportedFieldsByTable]="supportedFieldsByTable"
+              [readonly]="readonly"
+              title="Filtres d'agregation"
+              (groupChange)="onAggregationFilterChange(node, $event)"
+            ></app-filter-group-builder>
+          </ng-container>
+        </div>
+
+        <div
+          class="nested-grid"
+          *ngIf="(node.type === 'ADD' || node.type === 'SUBTRACT' || node.type === 'MULTIPLY' || node.type === 'DIVIDE') && ensureArithmeticChildren(node)"
+        >
+          <ng-container *ngIf="node.left">
+            <ng-container
+              *ngTemplateOutlet="nodeEditor; context: { $implicit: node.left, depth: depth + 1, caption: 'Operande gauche' }"
+            ></ng-container>
+          </ng-container>
+
+          <ng-container *ngIf="node.right">
+            <ng-container
+              *ngTemplateOutlet="nodeEditor; context: { $implicit: node.right, depth: depth + 1, caption: 'Operande droit' }"
+            ></ng-container>
+          </ng-container>
+        </div>
+      </article>
+    </ng-template>
+
+    <ng-container
+      *ngTemplateOutlet="nodeEditor; context: { $implicit: workingModel.expression, depth: 0, caption: 'Expression racine' }"
+    ></ng-container>
+  </section>
+
+  <section class="section-card">
+    <header>
+      <h3>Filtres globaux</h3>
+      <p>Choisissez where / filter / filters puis definissez vos conditions imbriquees.</p>
+    </header>
+
+    <div class="filter-key-tabs">
+      <button type="button" [ngClass]="selectedFilterKey === 'where' ? 'active' : ''" (click)="selectFilterKey('where')">where</button>
+      <button type="button" [ngClass]="selectedFilterKey === 'filter' ? 'active' : ''" (click)="selectFilterKey('filter')">filter</button>
+      <button type="button" [ngClass]="selectedFilterKey === 'filters' ? 'active' : ''" (click)="selectFilterKey('filters')">filters</button>
+    </div>
+
+    <app-filter-group-builder
+      [group]="readSelectedFilterGroup()"
+      [supportedFields]="supportedFields"
+      [supportedFieldsByTable]="supportedFieldsByTable"
+      [readonly]="readonly"
+      [title]="'Niveau racine - ' + selectedFilterKey"
+      (groupChange)="onFilterGroupChange($event)"
+    ></app-filter-group-builder>
+  </section>
+
+  <section class="section-card grid-card">
+    <header>
+      <h3>Groupement, tri, top/limit</h3>
+      <p>Controles adaptes a l'operateur avec exclusivite automatique top/limit.</p>
+    </header>
+
+    <div class="meta-grid">
+      <div class="meta-panel">
+        <div class="panel-head">
+          <h4>groupBy</h4>
+        </div>
+
+        <div class="chip-input">
+          <app-field-picker
+            [value]="groupByFieldDraft"
+            [options]="supportedFields"
+            [groupedOptions]="supportedFieldsByTable"
+            [disabled]="readonly"
+            placeholder="Rechercher et selectionner un champ groupBy"
+            (valueChange)="groupByFieldDraft = $event"
+          ></app-field-picker>
+          <button type="button" class="control-button" [disabled]="readonly" (click)="addGroupByField()">
+            <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+          </button>
+        </div>
+
+        <div class="chip-list" *ngIf="workingModel.groupBy?.length; else noGroupBy">
+          <span class="chip" *ngFor="let field of workingModel.groupBy; let i = index; trackBy: trackByIndex">
+            {{ field }}
+            <button *ngIf="!readonly" type="button" (click)="removeGroupByField(i)">
+              <lucide-icon name="x" [size]="12" [strokeWidth]="3"></lucide-icon>
+            </button>
+          </span>
+        </div>
+
+        <ng-template #noGroupBy>
+          <p class="empty-copy">Aucun champ groupBy selectionne.</p>
+        </ng-template>
+      </div>
+
+      <div class="meta-panel">
+        <div class="panel-head">
+          <h4>orderBy</h4>
+          <button type="button" class="control-button" [disabled]="readonly" (click)="addOrderBy()">
+            <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+            Ligne
+          </button>
+        </div>
+
+        <div class="order-grid" *ngIf="readOrderByRows().length > 0; else noOrderBy">
+          <div class="order-row" *ngFor="let row of readOrderByRows(); let i = index; trackBy: trackByIndex">
+            <app-field-picker
+              class="order-field-picker"
+              [value]="row.field"
+              [options]="supportedFields"
+              [groupedOptions]="supportedFieldsByTable"
+              [disabled]="readonly"
+              placeholder="Rechercher et selectionner un champ de tri"
+              (valueChange)="onOrderFieldChange(i, $event)"
+            ></app-field-picker>
+
+            <select
+              class="field-input select-input"
+              [disabled]="readonly"
+              [ngModel]="row.direction"
+              (ngModelChange)="onOrderDirectionChange(i, $event)"
+            >
+              <option value="ASC">ASC</option>
+              <option value="DESC">DESC</option>
+            </select>
+
+            <button *ngIf="!readonly" type="button" class="remove-button" (click)="removeOrderBy(i)">
+              <lucide-icon name="x" [size]="13" [strokeWidth]="3"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <ng-template #noOrderBy>
+          <p class="empty-copy">Aucune ligne orderBy.</p>
+        </ng-template>
+      </div>
+
+      <div class="meta-panel compact-panel">
+        <div class="limit-grid">
+          <label>
+            limit
+            <input
+              type="number"
+              min="1"
+              class="field-input"
+              [disabled]="readonly"
+              [ngModel]="workingModel.limit ?? null"
+              (ngModelChange)="onLimitChange($event)"
+              placeholder="entier positif"
+            />
+          </label>
+
+          <label>
+            top
+            <input
+              type="number"
+              min="1"
+              class="field-input"
+              [disabled]="readonly"
+              [ngModel]="workingModel.top ?? null"
+              (ngModelChange)="onTopChange($event)"
+              placeholder="entier positif"
+            />
+          </label>
+        </div>
+
+        <p class="limit-note">La saisie de l'un efface automatiquement l'autre.</p>
+      </div>
+    </div>
+  </section>
+</div>

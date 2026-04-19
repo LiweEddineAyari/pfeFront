@@ -1,0 +1,120 @@
+<div class="dialog-layer" (click)="closeDialog()">
+  <section class="dialog-card" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">{{ mode === 'create' ? 'Creer un parametre' : 'Modifier le parametre' }}</p>
+        <h2>{{ mode === 'create' ? 'Nouveau parametre' : code || 'Parametre' }}</h2>
+        <p class="subtitle">Basculez entre le constructeur de formule et l'editeur SQL natif.</p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="mode-toggle"
+          [title]="formMode === 'FORMULA' ? 'Basculer vers SQL natif' : 'Basculer vers constructeur de formule'"
+          (click)="toggleMode()"
+        >
+          <lucide-icon [name]="formMode === 'FORMULA' ? 'file-text' : 'calculator'" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+          <span>{{ formMode === 'FORMULA' ? 'SQL natif' : 'Constructeur de formule' }}</span>
+        </button>
+
+        <button type="button" class="close-btn" (click)="closeDialog()" aria-label="Fermer la fenetre">
+          <lucide-icon name="x" [size]="16" [strokeWidth]="3"></lucide-icon>
+        </button>
+      </div>
+    </header>
+
+    <div *ngIf="loading" class="loading-shell">
+      <div class="skeleton-row" *ngFor="let _ of [0, 1, 2, 3]"></div>
+    </div>
+
+    <div *ngIf="!loading" class="dialog-body custom-scrollbar">
+      <div class="common-fields">
+        <label>
+          Code
+          <input
+            type="text"
+            class="field-input"
+            [(ngModel)]="code"
+            [disabled]="mode === 'edit' || saving"
+            placeholder="ENT10"
+          />
+        </label>
+
+        <label>
+          Libelle
+          <input
+            type="text"
+            class="field-input"
+            [(ngModel)]="label"
+            [disabled]="saving"
+            placeholder="Top 10 expositions"
+          />
+        </label>
+
+        <label class="toggle-label">
+          <span>Statut</span>
+          <button type="button" class="status-toggle" [ngClass]="isActive ? 'on' : ''" [disabled]="saving" (click)="isActive = !isActive">
+            <span class="dot"></span>
+            {{ isActive ? 'Actif' : 'Inactif' }}
+          </button>
+        </label>
+      </div>
+
+      <div *ngIf="formMode === 'FORMULA'">
+        <app-formula-builder
+          [model]="formulaDraft"
+          [supportedFields]="supportedFields"
+          [supportedFieldsByTable]="supportedFieldsByTable"
+          [readonly]="saving"
+          (modelChange)="onFormulaChanged($event)"
+        ></app-formula-builder>
+      </div>
+
+      <div *ngIf="formMode === 'SQL'" class="sql-mode-wrap">
+        <div class="sql-mode-toolbar" *ngIf="mode === 'edit'">
+          <button type="button" class="ghost-btn" [disabled]="loadingCompiledSql" (click)="refreshCompiledSql()">
+            <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8" [ngClass]="loadingCompiledSql ? 'spin' : ''"></lucide-icon>
+            Actualiser le SQL genere
+          </button>
+
+          <span *ngIf="compiledSqlPreview" class="meta-chip">Version {{ compiledSqlPreview.version }}</span>
+          <span *ngIf="compiledSqlPreview?.joins?.length" class="meta-chip">{{ compiledSqlPreview?.joins?.length }} jointures</span>
+          <span *ngIf="compiledSqlPreview?.referencedFields?.length" class="meta-chip">{{ compiledSqlPreview?.referencedFields?.length }} champs</span>
+        </div>
+
+        <app-sql-editor
+          [sql]="nativeSqlDraft"
+          [readonly]="saving"
+          subtitle="Seul un sous-ensemble analytique de SELECT est accepte"
+          (sqlChange)="onSqlChanged($event)"
+        ></app-sql-editor>
+      </div>
+
+      <div *ngIf="validationErrors.length > 0" class="validation-banner">
+        <h4>Details de validation</h4>
+        <ul>
+          <li *ngFor="let issue of validationErrors">{{ issue }}</li>
+        </ul>
+      </div>
+
+      <div *ngIf="apiError" class="api-banner">
+        <h4>{{ apiError.error }} ({{ apiError.status }})</h4>
+        <p>{{ apiError.message }}</p>
+        <ul *ngIf="apiError.details?.length">
+          <li *ngFor="let detail of apiError.details">{{ detail }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer class="dialog-footer">
+      <button type="button" class="ghost-btn" [disabled]="saving" (click)="closeDialog()">Annuler</button>
+      <button type="button" class="ghost-btn" [disabled]="saving" (click)="runValidation()">Valider</button>
+      <button type="button" class="primary-btn" [disabled]="saving" (click)="saveParameter()">
+        <lucide-icon *ngIf="!saving" name="check" [size]="15" [strokeWidth]="3"></lucide-icon>
+        <lucide-icon *ngIf="saving" name="refresh-cw" [size]="15" [strokeWidth]="2.8" class="spin"></lucide-icon>
+        {{ saving ? 'Enregistrement...' : mode === 'create' ? 'Enregistrer le parametre' : 'Mettre a jour le parametre' }}
+      </button>
+    </footer>
+  </section>
+</div>

@@ -1,0 +1,196 @@
+:host {
+  --picker-accent: #2e5fbe;
+  --picker-accent-soft: rgba(46, 95, 190, 0.2);
+  --picker-accent-border: rgba(46, 95, 190, 0.44);
+
+  display: block;
+  position: relative;
+}
+
+.picker-shell {
+  position: relative;
+}
+
+.picker-trigger {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(31, 77, 184, 0.12), rgba(10, 142, 108, 0.08)),
+    rgba(255, 255, 255, 0.92);
+  color: var(--text-primary);
+  padding: 9px 11px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 39px;
+  transition: 0.18s ease;
+}
+
+:host-context(.dark) .picker-trigger {
+  background:
+    linear-gradient(135deg, rgba(31, 77, 184, 0.2), rgba(10, 142, 108, 0.1)),
+    rgba(17, 28, 68, 0.96);
+}
+
+.picker-trigger:hover {
+  border-color: var(--picker-accent-border);
+}
+
+.picker-trigger:focus-visible {
+  outline: none;
+  border-color: var(--picker-accent-border);
+  box-shadow: 0 0 0 2px rgba(31, 77, 184, 0.2);
+}
+
+.picker-shell.is-disabled .picker-trigger {
+  opacity: 0.66;
+  cursor: not-allowed;
+}
+
+.picker-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-weight: 700;
+}
+
+.picker-value.placeholder {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.picker-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+}
+
+.clear-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.picker-card {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(circle at top right, rgba(31, 77, 184, 0.16), transparent 44%),
+    rgba(255, 255, 255, 0.97);
+  box-shadow: 0 16px 36px rgba(11, 20, 55, 0.2);
+  overflow: hidden;
+}
+
+:host-context(.dark) .picker-card {
+  background:
+    radial-gradient(circle at top right, rgba(31, 77, 184, 0.2), transparent 44%),
+    rgba(11, 20, 55, 0.98);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+}
+
+.search-row {
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  padding: 9px 11px;
+}
+
+.search-row input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.option-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.option-group {
+  border: 1px solid rgba(31, 77, 184, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  display: grid;
+  gap: 4px;
+}
+
+:host-context(.dark) .option-group {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(31, 77, 184, 0.3);
+}
+
+.option-group-title {
+  padding: 4px 6px;
+  color: var(--picker-accent);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+:host-context(.dark) .option-group-title {
+  color: #cddfff;
+}
+
+.option-row {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-size: 12px;
+  text-align: left;
+  font-weight: 700;
+  transition: 0.16s ease;
+}
+
+.option-row:hover {
+  border-color: var(--picker-accent-border);
+  background: var(--picker-accent-soft);
+  color: var(--picker-accent);
+}
+
+:host-context(.dark) .option-row:hover {
+  color: #dce9ff;
+}
+
+.option-row.active {
+  border-color: rgba(1, 181, 116, 0.4);
+  background: rgba(1, 181, 116, 0.15);
+  color: #01b574;
+}
+
+.empty-note {
+  margin: 0;
+  padding: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+}

@@ -79,6 +79,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'parameters',
+        title: 'Parametres analytiques',
+        loadComponent: () =>
+          import('./pages/parameters/parameters-page.component').then(
+            (m) => m.ParametersPageComponent
+          ),
+      },
+      {
         path: 'datamart/mapping-config',
         pathMatch: 'full',
         redirectTo: 'mapping/configurations',

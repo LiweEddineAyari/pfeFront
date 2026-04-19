@@ -54,6 +54,35 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## ETL quality CSV downloads
+
+In the ETL pipeline result screen (step 3), quality metric cards include a download icon button for supported metrics.
+Clicking the icon calls a list API and downloads the returned rows as a CSV file.
+
+Implemented endpoint mappings:
+
+TIERS:
+- `/quality/tiers/null-check/list`
+- `/quality/tiers/duplicate/list`
+- `/quality/tiers/type-check/list`
+
+CONTRAT:
+- `/quality/contrat/null-check/list`
+- `/quality/contrat/duplicate/list`
+- `/quality/contrat/type-check/list`
+
+COMPTA:
+- `/quality/compta/null-check/list`
+- `/quality/compta/duplicate/list`
+- `/quality/compta/type-check/list`
+- `/quality/compta/contrat-relation-check/list`
+- `/quality/compta/tiers-relation-check/list`
+
+Notes:
+- Frontend requests are sent through the ETL API base path (`/api/etl`), for example `/api/etl/quality/tiers/null-check/list`.
+- Downloaded file name format is `<table>-<metric>-<YYYY-MM-DD>.csv`.
+- If no rows are returned, an empty CSV payload is still downloaded with a `message` line.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

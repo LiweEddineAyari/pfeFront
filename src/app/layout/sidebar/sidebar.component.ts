@@ -263,6 +263,7 @@ export class SidebarComponent {
         { label: 'Ajouter configuration', icon: 'plus', path: '/mapping/nouvelle-configuration', active: false },
       ],
     },
+    { label: 'Parametres', icon: 'calculator', active: false, path: '/parameters' },
   ];
 
   constructor() {

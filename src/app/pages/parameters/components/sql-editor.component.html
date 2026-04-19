@@ -1,0 +1,25 @@
+<section class="sql-shell">
+  <header>
+    <div>
+      <h3>SQL natif</h3>
+      <p>{{ subtitle }}</p>
+    </div>
+
+    <div class="meta-chip">
+      <lucide-icon name="file-text" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+      {{ lineCount }} lignes
+    </div>
+  </header>
+
+  <textarea
+    class="sql-textarea"
+    [readonly]="readonly"
+    [ngModel]="sql"
+    (ngModelChange)="onSqlInput($event)"
+    placeholder="SELECT ..."
+  ></textarea>
+
+  <footer>
+    <span>Conseil : gardez des alias explicites et evitez SELECT * pour une execution deterministe.</span>
+  </footer>
+</section>
