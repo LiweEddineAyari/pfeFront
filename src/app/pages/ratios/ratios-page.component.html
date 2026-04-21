@@ -1,0 +1,506 @@
+<div class="ratios-page">
+  <section class="hero-card">
+    <div>
+      <p class="eyebrow">Moteur de ratios</p>
+      <h2>Ratios dynamiques</h2>
+      <p class="subtitle">
+        Creation, simulation et execution de ratios avec formule arborescente et references parametriques.
+      </p>
+    </div>
+
+    <button type="button" class="primary-btn" (click)="openCreateDialog()">
+      <lucide-icon name="plus" [size]="16" [strokeWidth]="3"></lucide-icon>
+      Nouveau ratio
+    </button>
+  </section>
+
+  <section class="toolbar-card">
+    <div class="search-group">
+      <lucide-icon name="search" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      <input
+        type="text"
+        [(ngModel)]="searchDraft"
+        placeholder="Rechercher par code ou libelle"
+        (keydown.enter)="runSearch()"
+      />
+    </div>
+
+    <div class="toolbar-actions">
+      <button type="button" class="ghost-btn" (click)="runSearch()">
+        <lucide-icon name="search" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Rechercher
+      </button>
+      <button type="button" class="ghost-btn" (click)="clearSearch()">
+        <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Reinitialiser
+      </button>
+    </div>
+  </section>
+
+  <section *ngIf="infoMessage" class="info-banner">{{ infoMessage }}</section>
+
+  <section *ngIf="bannerError" class="error-banner">
+    <h4>{{ bannerError.error }} ({{ bannerError.status }})</h4>
+    <p>{{ bannerError.message }}</p>
+    <ul *ngIf="bannerError.details?.length">
+      <li *ngFor="let detail of bannerError.details">{{ detail }}</li>
+    </ul>
+  </section>
+
+  <section class="lookup-grid">
+    <article class="lookup-card">
+      <header class="lookup-header">
+        <div>
+          <h3>Liste des categories</h3>
+          <p>References categories utilisables dans categorieId.</p>
+        </div>
+
+        <div class="lookup-actions">
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="addLookupItem('category')">
+            <lucide-icon name="plus" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            Ajouter
+          </button>
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="loadLookups()">
+            <lucide-icon name="refresh-cw" [size]="13" [strokeWidth]="2.8" [ngClass]="loadingLookups ? 'spin' : ''"></lucide-icon>
+            Actualiser
+          </button>
+        </div>
+      </header>
+
+      <div class="field-search">
+        <lucide-icon name="search" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        <input type="text" [(ngModel)]="categorySearchDraft" (ngModelChange)="onCategorySearchChanged()" placeholder="Filtrer categories" />
+      </div>
+
+      <div class="lookup-table-wrap" *ngIf="categoryRows.length > 0; else noCategoryState">
+        <table class="lookup-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Libelle</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pagedCategoryRows; trackBy: trackByLookup">
+              <td>#{{ row.id }}</td>
+              <td>{{ row.name }}</td>
+              <td>
+                <div class="row-actions table-compact-actions">
+                  <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="lookupMutationInProgress" (click)="editLookupItem('category', row)">
+                    <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Modifier
+                  </button>
+                  <button type="button" class="ghost-btn ghost-btn-compact danger-ghost-btn" [disabled]="lookupMutationInProgress" (click)="deleteLookupItem('category', row)">
+                    <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="lookup-footer" *ngIf="categoryRows.length > 0">
+        <span class="meta-chip">Page {{ currentCategoryPage + 1 }} / {{ categoryTotalPages }}</span>
+        <div class="row-actions">
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="!hasPreviousCategoryPage" (click)="previousCategoryPage()">Prev</button>
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="!hasNextCategoryPage" (click)="nextCategoryPage()">Suiv</button>
+        </div>
+      </footer>
+
+      <ng-template #noCategoryState>
+        <p class="lookup-empty">Aucune categorie disponible.</p>
+      </ng-template>
+    </article>
+
+    <article class="lookup-card">
+      <header class="lookup-header">
+        <div>
+          <h3>Liste des familles</h3>
+          <p>References familles utilisables dans familleId.</p>
+        </div>
+
+        <div class="lookup-actions">
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="addLookupItem('family')">
+            <lucide-icon name="plus" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            Ajouter
+          </button>
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="loadLookups()">
+            <lucide-icon name="refresh-cw" [size]="13" [strokeWidth]="2.8" [ngClass]="loadingLookups ? 'spin' : ''"></lucide-icon>
+            Actualiser
+          </button>
+        </div>
+      </header>
+
+      <div class="field-search">
+        <lucide-icon name="search" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        <input type="text" [(ngModel)]="familySearchDraft" (ngModelChange)="onFamilySearchChanged()" placeholder="Filtrer familles" />
+      </div>
+
+      <div class="lookup-table-wrap" *ngIf="familyRows.length > 0; else noFamilyState">
+        <table class="lookup-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Libelle</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pagedFamilyRows; trackBy: trackByLookup">
+              <td>#{{ row.id }}</td>
+              <td>{{ row.name }}</td>
+              <td>
+                <div class="row-actions table-compact-actions">
+                  <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="lookupMutationInProgress" (click)="editLookupItem('family', row)">
+                    <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Modifier
+                  </button>
+                  <button type="button" class="ghost-btn ghost-btn-compact danger-ghost-btn" [disabled]="lookupMutationInProgress" (click)="deleteLookupItem('family', row)">
+                    <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="lookup-footer" *ngIf="familyRows.length > 0">
+        <span class="meta-chip">Page {{ currentFamilyPage + 1 }} / {{ familyTotalPages }}</span>
+        <div class="row-actions">
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="!hasPreviousFamilyPage" (click)="previousFamilyPage()">Prev</button>
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="!hasNextFamilyPage" (click)="nextFamilyPage()">Suiv</button>
+        </div>
+      </footer>
+
+      <ng-template #noFamilyState>
+        <p class="lookup-empty">Aucune famille disponible.</p>
+      </ng-template>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <section class="table-card" *ngIf="!loading; else loadingState">
+      <div class="table-header">
+        <h3>Liste des ratios</h3>
+        <div class="table-meta">
+          <span class="meta-chip">Total {{ totalElements }}</span>
+          <span class="meta-chip">Page {{ page + 1 }}</span>
+        </div>
+      </div>
+
+      <div class="table-wrap" *ngIf="rows.length > 0; else emptyState">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Libelle</th>
+              <th>Famille</th>
+              <th>Categorie</th>
+              <th>Statut</th>
+              <th>Mis a jour</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows; trackBy: trackByCode" (click)="openDetailsDialog(row)">
+              <td>
+                <span class="code-chip">{{ row.code }}</span>
+              </td>
+              <td><strong>{{ row.label }}</strong></td>
+              <td>
+                <span
+                  class="lookup-name-badge"
+                  [ngClass]="familyBadgeTone(row.familleId)"
+                  [attr.title]="familyLabel(row.familleId)"
+                >
+                  {{ familyLabel(row.familleId) }}
+                </span>
+              </td>
+              <td>
+                <span
+                  class="lookup-name-badge"
+                  [ngClass]="categoryBadgeTone(row.categorieId)"
+                  [attr.title]="categoryLabel(row.categorieId)"
+                >
+                  {{ categoryLabel(row.categorieId) }}
+                </span>
+              </td>
+              <td>
+                <span class="status-chip" [ngClass]="row.isActive ? 'on' : 'off'">
+                  {{ row.isActive ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>{{ row.updatedAt | date: 'yyyy-MM-dd HH:mm' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); openDetailsDialog(row)">
+                    <lucide-icon name="file-text" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Voir
+                  </button>
+                  <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); openEditDialog(row)">
+                    <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Modifier
+                  </button>
+                  <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); deleteFromList(row)">
+                    <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <lucide-icon name="percent" [size]="24" [strokeWidth]="2.8"></lucide-icon>
+          </div>
+          <h4>Aucun ratio trouve</h4>
+          <p>Vous pouvez en creer un maintenant, ou ouvrir ses details directement par code.</p>
+
+          <div class="quick-open">
+            <input type="text" [(ngModel)]="quickCodeDraft" placeholder="Code connu (ex : RS)" />
+            <button type="button" class="primary-btn" (click)="openDetailsByCode()">Ouvrir par code</button>
+          </div>
+        </div>
+      </ng-template>
+
+      <footer class="table-footer">
+        <button type="button" class="ghost-btn" [disabled]="!hasPreviousPage" (click)="previousPage()">
+          <lucide-icon name="arrow-left" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+          Precedent
+        </button>
+
+        <button type="button" class="ghost-btn" [disabled]="!hasNextPage" (click)="nextPage()">
+          Suivant
+          <lucide-icon name="arrow-right" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+        </button>
+      </footer>
+    </section>
+
+    <section class="parameters-card">
+      <header class="parameters-header">
+        <div>
+          <h3>Parametres disponibles</h3>
+          <p>Codes disponibles pour les noeuds PARAM dans les formules de ratios.</p>
+        </div>
+
+        <div class="parameters-actions">
+          <span class="meta-chip" *ngIf="parameterCodes.length">{{ parameterCodes.length }} codes</span>
+          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingParameters" (click)="loadParameters()">
+            <lucide-icon name="refresh-cw" [size]="13" [strokeWidth]="2.8" [ngClass]="loadingParameters ? 'spin' : ''"></lucide-icon>
+            Actualiser
+          </button>
+        </div>
+      </header>
+
+      <div class="field-search" *ngIf="!loadingParameters && parametersRows.length > 0">
+        <lucide-icon name="search" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        <input
+          type="text"
+          [(ngModel)]="parameterSearchDraft"
+          (ngModelChange)="onParameterSearchChanged()"
+          placeholder="Rechercher un parametre"
+        />
+      </div>
+
+      <div *ngIf="loadingParameters" class="fields-loading">
+        <span *ngFor="let _ of [0, 1, 2, 3, 4, 5]" class="field-skeleton"></span>
+      </div>
+
+      <div class="parameters-table-wrap" *ngIf="!loadingParameters && pagedParameters.length > 0">
+        <table class="lookup-table parameters-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Libelle</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pagedParameters; trackBy: trackByParameterCode">
+              <td><span class="code-chip">{{ row.code }}</span></td>
+              <td>{{ row.label }}</td>
+              <td>
+                <span class="status-chip" [ngClass]="row.isActive ? 'on' : 'off'">
+                  {{ row.isActive ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer
+        class="table-footer"
+        style="justify-content: space-between; padding: 10px 0 0; border-top-style: dashed;"
+        *ngIf="!loadingParameters && filteredParameters.length > 0"
+      >
+        <div class="table-meta">
+          <span class="meta-chip">Page {{ currentParameterPage + 1 }} / {{ parameterTotalPages }}</span>
+        </div>
+
+        <div class="row-actions">
+          <button type="button" class="ghost-btn" [disabled]="!hasPreviousParameterPage" (click)="previousParameterPage()">
+            <lucide-icon name="arrow-left" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            Precedent
+          </button>
+
+          <button type="button" class="ghost-btn" [disabled]="!hasNextParameterPage" (click)="nextParameterPage()">
+            Suivant
+            <lucide-icon name="arrow-right" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+          </button>
+        </div>
+      </footer>
+
+      <div *ngIf="!loadingParameters && parametersRows.length === 0" class="fields-empty">
+        Aucun parametre disponible pour le moment.
+      </div>
+
+      <div *ngIf="!loadingParameters && parametersRows.length > 0 && filteredParameters.length === 0" class="fields-empty">
+        Aucun parametre ne correspond a cette recherche.
+      </div>
+    </section>
+  </section>
+
+  <ng-template #loadingState>
+    <section class="table-card">
+      <div class="skeleton-row" *ngFor="let _ of [0, 1, 2, 3, 4]"></div>
+    </section>
+  </ng-template>
+
+  <section *ngIf="deleteConfirmOpen" class="confirm-overlay" (click)="cancelDeleteConfirmation()">
+    <article class="confirm-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <header class="confirm-header">
+        <div class="confirm-icon-wrap" aria-hidden="true">
+          <lucide-icon name="alert-triangle" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+        </div>
+        <div>
+          <h4 id="delete-title">Confirmer la suppression</h4>
+          <p>Cette action est irreversible.</p>
+        </div>
+      </header>
+
+      <p class="confirm-copy">
+        Voulez-vous vraiment supprimer ce ratio ?
+      </p>
+
+      <div class="confirm-code">{{ deleteConfirmCode }}</div>
+
+      <footer class="confirm-actions">
+        <button type="button" class="ghost-btn" [disabled]="deleteInProgress" (click)="cancelDeleteConfirmation()">
+          Annuler
+        </button>
+        <button type="button" class="danger-btn" [disabled]="deleteInProgress" (click)="confirmDeleteFromPopup()">
+          <lucide-icon *ngIf="!deleteInProgress" name="trash-2" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+          <lucide-icon *ngIf="deleteInProgress" name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin"></lucide-icon>
+          {{ deleteInProgress ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+
+  <section *ngIf="lookupEditorOpen" class="lookup-editor-overlay" (click)="closeLookupEditor()">
+    <article class="lookup-editor-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="lookup-editor-title">
+      <header class="lookup-editor-header">
+        <div class="lookup-editor-icon-wrap" aria-hidden="true">
+          <lucide-icon name="sparkles" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+        </div>
+        <div>
+          <h4 id="lookup-editor-title">
+            {{ lookupEditorMode === 'create' ? 'Ajouter' : 'Modifier' }}
+            {{ lookupEditorType === 'family' ? 'une famille' : 'une categorie' }}
+          </h4>
+          <p>Edition premium des references de lookup pour les ratios.</p>
+        </div>
+      </header>
+
+      <div class="lookup-editor-body">
+        <label class="lookup-editor-label">
+          Libelle
+          <input
+            type="text"
+            class="lookup-editor-input"
+            [(ngModel)]="lookupEditorNameDraft"
+            [disabled]="lookupMutationInProgress"
+            placeholder="Saisir un libelle"
+          />
+        </label>
+
+        <p class="lookup-editor-error" *ngIf="lookupEditorError">{{ lookupEditorError }}</p>
+      </div>
+
+      <footer class="lookup-editor-footer">
+        <button type="button" class="ghost-btn" [disabled]="lookupMutationInProgress" (click)="closeLookupEditor()">Annuler</button>
+        <button type="button" class="primary-btn" [disabled]="lookupMutationInProgress" (click)="submitLookupEditor()">
+          <lucide-icon *ngIf="!lookupMutationInProgress" name="check" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+          <lucide-icon *ngIf="lookupMutationInProgress" name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin"></lucide-icon>
+          {{ lookupMutationInProgress ? 'Enregistrement...' : lookupEditorMode === 'create' ? 'Ajouter' : 'Enregistrer' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+
+  <section *ngIf="lookupDeleteOpen" class="confirm-overlay" (click)="closeLookupDeletePopup()">
+    <article class="confirm-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="lookup-delete-title">
+      <header class="confirm-header">
+        <div class="confirm-icon-wrap" aria-hidden="true">
+          <lucide-icon name="alert-triangle" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+        </div>
+        <div>
+          <h4 id="lookup-delete-title">Confirmer la suppression</h4>
+          <p>Cette action est irreversible.</p>
+        </div>
+      </header>
+
+      <p class="confirm-copy">
+        Voulez-vous vraiment supprimer cette {{ lookupDeleteTypeLabel }} ?
+      </p>
+
+      <div class="confirm-code">
+        {{ lookupDeleteItem?.name || '-' }}
+        <span *ngIf="lookupDeleteItem">#{{ lookupDeleteItem.id }}</span>
+      </div>
+
+      <footer class="confirm-actions">
+        <button type="button" class="ghost-btn" [disabled]="lookupMutationInProgress" (click)="closeLookupDeletePopup()">
+          Annuler
+        </button>
+        <button type="button" class="danger-btn" [disabled]="lookupMutationInProgress" (click)="confirmLookupDeleteFromPopup()">
+          <lucide-icon *ngIf="!lookupMutationInProgress" name="trash-2" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+          <lucide-icon *ngIf="lookupMutationInProgress" name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin"></lucide-icon>
+          {{ lookupMutationInProgress ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+
+  <app-ratio-form-dialog
+    *ngIf="formDialogOpen"
+    [mode]="formDialogMode"
+    [ratioCode]="formDialogCode"
+    [initialRatio]="formDialogInitial"
+    [families]="lookupFamiliesForDialog"
+    [categories]="lookupCategoriesForDialog"
+    [parameterCodes]="parameterCodes"
+    [groupedParameterCodes]="groupedParameterCodes"
+    (closed)="closeFormDialog()"
+    (saved)="onFormSaved($event)"
+  ></app-ratio-form-dialog>
+
+  <app-ratio-details-dialog
+    *ngIf="detailsDialogOpen"
+    [ratioCode]="detailsDialogCode"
+    [initialRatio]="detailsDialogInitial"
+    (closed)="closeDetailsDialog()"
+    (editRequested)="onEditRequested($event)"
+    (deleteRequested)="onDeleteRequested($event)"
+  ></app-ratio-details-dialog>
+</div>

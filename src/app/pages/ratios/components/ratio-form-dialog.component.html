@@ -1,0 +1,175 @@
+<div class="dialog-layer" (click)="closeDialog()">
+  <section class="dialog-card" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">{{ mode === 'create' ? 'Creer un ratio' : 'Modifier le ratio' }}</p>
+        <h2>{{ mode === 'create' ? 'Nouveau ratio' : code || 'Ratio' }}</h2>
+        <p class="subtitle">Configuration complete avec formule JSON arborescente, seuils et simulation.</p>
+      </div>
+
+      <button type="button" class="close-btn" (click)="closeDialog()" aria-label="Fermer la fenetre">
+        <lucide-icon name="x" [size]="16" [strokeWidth]="3"></lucide-icon>
+      </button>
+    </header>
+
+    <div *ngIf="loading" class="loading-shell">
+      <div class="skeleton-row" *ngFor="let _ of [0, 1, 2, 3]"></div>
+    </div>
+
+    <div *ngIf="!loading" class="dialog-body custom-scrollbar">
+      <div class="common-fields">
+        <label>
+          Code
+          <input
+            type="text"
+            class="field-input"
+            [(ngModel)]="code"
+            [disabled]="mode === 'edit' || saving"
+            placeholder="RS"
+          />
+        </label>
+
+        <label>
+          Libelle
+          <input
+            type="text"
+            class="field-input"
+            [(ngModel)]="label"
+            [disabled]="saving"
+            placeholder="Ratio de Solvabilite"
+          />
+        </label>
+
+        <label class="toggle-label">
+          <span>Statut</span>
+          <button type="button" class="status-toggle" [ngClass]="isActive ? 'on' : ''" [disabled]="saving" (click)="isActive = !isActive">
+            <span class="dot"></span>
+            {{ isActive ? 'Actif' : 'Inactif' }}
+          </button>
+        </label>
+      </div>
+
+      <div class="lookup-grid">
+        <section class="lookup-card">
+          <header>
+            <h4>Famille</h4>
+            <span class="meta-chip" *ngIf="families.length">{{ families.length }} references</span>
+          </header>
+
+          <label>
+            Famille
+            <app-field-picker
+              [value]="selectedFamilyName"
+              [options]="familyNames"
+              [groupedOptions]="groupedFamilyNames"
+              [disabled]="saving"
+              placeholder="Rechercher et selectionner une famille"
+              (valueChange)="onFamilyNameChanged($event)"
+            ></app-field-picker>
+          </label>
+        </section>
+
+        <section class="lookup-card">
+          <header>
+            <h4>Categorie</h4>
+            <span class="meta-chip" *ngIf="categories.length">{{ categories.length }} references</span>
+          </header>
+
+          <label>
+            Categorie
+            <app-field-picker
+              [value]="selectedCategoryName"
+              [options]="categoryNames"
+              [groupedOptions]="groupedCategoryNames"
+              [disabled]="saving"
+              placeholder="Rechercher et selectionner une categorie"
+              (valueChange)="onCategoryNameChanged($event)"
+            ></app-field-picker>
+          </label>
+        </section>
+      </div>
+
+      <div class="threshold-grid">
+        <label>
+          Seuil tolerance
+          <input type="number" step="any" class="field-input" [(ngModel)]="seuilTolerance" [disabled]="saving" placeholder="0.10" />
+        </label>
+
+        <label>
+          Seuil alerte
+          <input type="number" step="any" class="field-input" [(ngModel)]="seuilAlerte" [disabled]="saving" placeholder="0.09" />
+        </label>
+
+        <label>
+          Seuil appetence
+          <input type="number" step="any" class="field-input" [(ngModel)]="seuilAppetence" [disabled]="saving" placeholder="0.12" />
+        </label>
+      </div>
+
+      <label>
+        Description
+        <textarea
+          class="field-input text-area"
+          rows="2"
+          [(ngModel)]="description"
+          [disabled]="saving"
+          placeholder="Description metier du ratio"
+        ></textarea>
+      </label>
+
+      <app-ratio-formula-builder
+        [model]="formulaDraft"
+        [parameterCodes]="parameterCodes"
+        [groupedParameterCodes]="groupedParameterCodes"
+        [readonly]="saving"
+        (modelChange)="onFormulaChanged($event)"
+      ></app-ratio-formula-builder>
+
+      <section class="simulate-card">
+        <div class="simulate-toolbar">
+          <h4>Simulation ad-hoc</h4>
+
+          <button type="button" class="ghost-btn" [disabled]="simulating || saving" (click)="simulateFormula()">
+            <lucide-icon name="flask-conical" [size]="14" [strokeWidth]="2.8" *ngIf="!simulating"></lucide-icon>
+            <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin" *ngIf="simulating"></lucide-icon>
+            {{ simulating ? 'Simulation...' : 'Simuler la formule' }}
+          </button>
+        </div>
+
+        <div class="simulate-content" *ngIf="simulationResult">
+          <div class="meta-row">
+            <span class="meta-chip">Valeur: {{ simulationResult.value }}</span>
+            <span class="meta-chip">{{ simulationResult.referencedParameters.length }} parametres references</span>
+          </div>
+
+          <pre>{{ simulationResult | json }}</pre>
+        </div>
+      </section>
+
+      <div *ngIf="validationErrors.length > 0" class="validation-banner">
+        <h4>Details de validation</h4>
+        <ul>
+          <li *ngFor="let issue of validationErrors">{{ issue }}</li>
+        </ul>
+      </div>
+
+      <div *ngIf="apiError" class="api-banner">
+        <h4>{{ apiError.error }} ({{ apiError.status }})</h4>
+        <p>{{ apiError.message }}</p>
+        <ul *ngIf="apiError.details?.length">
+          <li *ngFor="let detail of apiError.details">{{ detail }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer class="dialog-footer">
+      <button type="button" class="ghost-btn" [disabled]="saving" (click)="closeDialog()">Annuler</button>
+      <button type="button" class="ghost-btn" [disabled]="saving" (click)="runValidation()">Valider</button>
+      <button type="button" class="primary-btn" [disabled]="saving" (click)="saveRatio()">
+        <lucide-icon *ngIf="!saving" name="check" [size]="15" [strokeWidth]="3"></lucide-icon>
+        <lucide-icon *ngIf="saving" name="refresh-cw" [size]="15" [strokeWidth]="2.8" class="spin"></lucide-icon>
+        {{ saving ? 'Enregistrement...' : mode === 'create' ? 'Enregistrer le ratio' : 'Mettre a jour le ratio' }}
+      </button>
+    </footer>
+  </section>
+</div>

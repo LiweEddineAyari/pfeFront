@@ -264,6 +264,7 @@ export class SidebarComponent {
       ],
     },
     { label: 'Parametres', icon: 'calculator', active: false, path: '/parameters' },
+    { label: 'Ratios', icon: 'percent', active: false, path: '/ratios' },
   ];
 
   constructor() {

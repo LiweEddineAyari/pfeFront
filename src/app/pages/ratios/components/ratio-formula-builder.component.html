@@ -1,0 +1,96 @@
+<div class="formula-shell">
+  <section class="section-card expression-card">
+    <header>
+      <h3>Constructeur de formule ratio</h3>
+      <p>Composez une expression arithmetique avec PARAM, CONSTANT et operateurs binaires.</p>
+    </header>
+
+    <div class="preview-chip">
+      <lucide-icon name="sparkles" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+      <span>{{ expressionPreview() }}</span>
+    </div>
+
+    <ng-template #nodeEditor let-node let-depth="depth" let-caption="caption">
+      <article class="node-card" [style.marginLeft.px]="depth * 10">
+        <div class="node-head">
+          <span class="node-caption">{{ caption }}</span>
+          <span class="node-depth">Niveau {{ depth + 1 }}</span>
+        </div>
+
+        <div class="node-grid">
+          <label>
+            Type
+            <select
+              class="field-input select-input"
+              [disabled]="readonly"
+              [ngModel]="node.type"
+              (ngModelChange)="onNodeTypeChange(node, $event)"
+            >
+              <option *ngFor="let type of nodeTypes" [value]="type">{{ type }}</option>
+            </select>
+          </label>
+
+          <ng-container *ngIf="node.type === 'PARAM'">
+            <label>
+              Code parametre
+              <ng-container *ngIf="parameterCodes.length > 0; else manualCodeInput">
+                <app-field-picker
+                  [value]="node.code ?? ''"
+                  [options]="parameterCodes"
+                  [groupedOptions]="groupedOptions()"
+                  [disabled]="readonly"
+                  placeholder="Rechercher et selectionner un parametre"
+                  (valueChange)="onParamCodeChange(node, $event)"
+                ></app-field-picker>
+              </ng-container>
+
+              <ng-template #manualCodeInput>
+                <input
+                  type="text"
+                  class="field-input"
+                  [disabled]="readonly"
+                  [ngModel]="node.code ?? ''"
+                  (ngModelChange)="onParamCodeChange(node, $event)"
+                  placeholder="Ex: FONDS_PROPRES"
+                />
+              </ng-template>
+            </label>
+          </ng-container>
+
+          <ng-container *ngIf="node.type === 'CONSTANT'">
+            <label>
+              Valeur constante
+              <input
+                type="number"
+                step="any"
+                class="field-input"
+                [disabled]="readonly"
+                [ngModel]="readConstant(node)"
+                (ngModelChange)="onConstantChange(node, $event)"
+                placeholder="0"
+              />
+            </label>
+          </ng-container>
+        </div>
+
+        <div class="nested-grid" *ngIf="ensureBinaryChildren(node) && (node.type === 'ADD' || node.type === 'SUBTRACT' || node.type === 'MULTIPLY' || node.type === 'DIVIDE')">
+          <ng-container *ngIf="node.left">
+            <ng-container
+              *ngTemplateOutlet="nodeEditor; context: { $implicit: node.left, depth: depth + 1, caption: 'Operande gauche' }"
+            ></ng-container>
+          </ng-container>
+
+          <ng-container *ngIf="node.right">
+            <ng-container
+              *ngTemplateOutlet="nodeEditor; context: { $implicit: node.right, depth: depth + 1, caption: 'Operande droit' }"
+            ></ng-container>
+          </ng-container>
+        </div>
+      </article>
+    </ng-template>
+
+    <ng-container
+      *ngTemplateOutlet="nodeEditor; context: { $implicit: workingModel, depth: 0, caption: 'Expression racine' }"
+    ></ng-container>
+  </section>
+</div>

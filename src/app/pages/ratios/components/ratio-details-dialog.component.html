@@ -1,0 +1,102 @@
+<div class="dialog-layer" (click)="closeDialog()">
+  <section class="dialog-card" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">Details du ratio</p>
+        <h2>{{ ratio?.code || 'Ratio' }}</h2>
+        <p class="subtitle">{{ ratio?.label || 'Chargement...' }}</p>
+      </div>
+
+      <div class="header-actions">
+        <span class="status-chip" [ngClass]="ratio?.isActive ? 'on' : 'off'">
+          {{ ratio?.isActive ? 'Actif' : 'Inactif' }}
+        </span>
+
+        <button type="button" class="close-btn" (click)="closeDialog()" aria-label="Fermer la fenetre">
+          <lucide-icon name="x" [size]="16" [strokeWidth]="3"></lucide-icon>
+        </button>
+      </div>
+    </header>
+
+    <div *ngIf="loading" class="loading-shell">
+      <div class="skeleton-row" *ngFor="let _ of [0, 1, 2]"></div>
+    </div>
+
+    <div *ngIf="!loading" class="dialog-body custom-scrollbar">
+      <div *ngIf="ratio" class="meta-strip">
+        <span class="meta-chip">Famille #{{ ratio.familleId }}</span>
+        <span class="meta-chip">Categorie #{{ ratio.categorieId }}</span>
+        <span class="meta-chip">Version {{ ratio.version }}</span>
+        <span class="meta-chip" *ngIf="ratio.seuilTolerance !== null && ratio.seuilTolerance !== undefined">Tol: {{ ratio.seuilTolerance }}</span>
+        <span class="meta-chip" *ngIf="ratio.seuilAlerte !== null && ratio.seuilAlerte !== undefined">Alerte: {{ ratio.seuilAlerte }}</span>
+        <span class="meta-chip" *ngIf="ratio.seuilAppetence !== null && ratio.seuilAppetence !== undefined">Appetence: {{ ratio.seuilAppetence }}</span>
+      </div>
+
+      <div class="tab-row">
+        <button type="button" [ngClass]="activeTab === 'formula' ? 'active' : ''" (click)="selectTab('formula')">Formule JSON</button>
+        <button type="button" [ngClass]="activeTab === 'execute' ? 'active' : ''" (click)="selectTab('execute')">Execution</button>
+        <button type="button" [ngClass]="activeTab === 'simulate' ? 'active' : ''" (click)="selectTab('simulate')">Simulation</button>
+      </div>
+
+      <section *ngIf="activeTab === 'formula'" class="tab-content">
+        <h3>Expression du ratio</h3>
+        <pre *ngIf="ratio">{{ ratio.formula | json }}</pre>
+      </section>
+
+      <section *ngIf="activeTab === 'execute'" class="tab-content">
+        <div class="tab-toolbar">
+          <h3>Executer a date de reference</h3>
+
+          <div class="execute-actions">
+            <input type="date" class="field-input" [(ngModel)]="referenceDate" [disabled]="executeLoading || !ratio" />
+            <button type="button" class="ghost-btn" [disabled]="executeLoading || !ratio || !referenceDate" (click)="executeAtDate()">
+              <lucide-icon name="calendar" [size]="14" [strokeWidth]="2.8" *ngIf="!executeLoading"></lucide-icon>
+              <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin" *ngIf="executeLoading"></lucide-icon>
+              {{ executeLoading ? 'Execution...' : 'Executer' }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="executionResult" class="execute-preview">
+          <pre>{{ executionResult | json }}</pre>
+        </div>
+      </section>
+
+      <section *ngIf="activeTab === 'simulate'" class="tab-content">
+        <div class="tab-toolbar">
+          <h3>Simuler la formule</h3>
+
+          <button type="button" class="ghost-btn" [disabled]="simulateLoading || !ratio" (click)="simulateCurrentFormula()">
+            <lucide-icon name="flask-conical" [size]="14" [strokeWidth]="2.8" *ngIf="!simulateLoading"></lucide-icon>
+            <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin" *ngIf="simulateLoading"></lucide-icon>
+            {{ simulateLoading ? 'Simulation...' : 'Relancer simulation' }}
+          </button>
+        </div>
+
+        <div *ngIf="simulationResult" class="execute-preview">
+          <pre>{{ simulationResult | json }}</pre>
+        </div>
+      </section>
+
+      <section *ngIf="apiError" class="error-banner">
+        <h4>{{ apiError.error }} ({{ apiError.status }})</h4>
+        <p>{{ apiError.message }}</p>
+        <ul *ngIf="apiError.details?.length">
+          <li *ngFor="let detail of apiError.details">{{ detail }}</li>
+        </ul>
+      </section>
+    </div>
+
+    <footer class="dialog-footer">
+      <button type="button" class="ghost-btn" [disabled]="!ratio" (click)="requestEdit()">
+        <lucide-icon name="settings" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Modifier le ratio
+      </button>
+      <button type="button" class="ghost-btn" [disabled]="!ratio" (click)="requestDelete()">
+        <lucide-icon name="trash-2" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Supprimer
+      </button>
+      <button type="button" class="primary-btn" (click)="closeDialog()">Fermer</button>
+    </footer>
+  </section>
+</div>

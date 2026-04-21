@@ -87,6 +87,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'ratios',
+        title: 'Ratios dynamiques',
+        loadComponent: () =>
+          import('./pages/ratios/ratios-page.component').then(
+            (m) => m.RatiosPageComponent
+          ),
+      },
+      {
         path: 'datamart/mapping-config',
         pathMatch: 'full',
         redirectTo: 'mapping/configurations',

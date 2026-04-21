@@ -4,8 +4,7 @@
       <p class="eyebrow">Moteur de parametres</p>
       <h2>Parametres analytiques</h2>
       <p class="subtitle">
-        Workflow premium de creation/modification/consultation avec fenetres popup, constructeur de formule et mode SQL natif.
-      </p>
+Création, compilation et exécution de paramètres via un moteur de formules et un builder SQL natif.      </p>
     </div>
 
     <button type="button" class="primary-btn" (click)="openCreateDialog()">
@@ -137,13 +136,15 @@
 
     <section class="fields-card">
       <header class="fields-header">
-        <div>
+        <div class="fields-heading">
           <h3>Champs supportes</h3>
-          <p>Charges depuis l'API et groupes par table source pour une lecture plus claire.</p>
+          <p class="fields-subtitle">Par table source</p>
         </div>
 
         <div class="fields-actions">
-          <span class="meta-chip" *ngIf="supportedFields.length">{{ supportedFields.length }} champs / {{ supportedTablesCount }} tables</span>
+          <span class="meta-chip fields-summary" *ngIf="supportedFields.length">
+            {{ supportedFields.length }} champs • {{ supportedTablesCount }} tables
+          </span>
           <button type="button" class="ghost-btn" [disabled]="loadingSupportedFields" (click)="refreshSupportedFields()">
             <lucide-icon name="refresh-cw" [size]="13" [strokeWidth]="2.8" [ngClass]="loadingSupportedFields ? 'spin' : ''"></lucide-icon>
             Actualiser
@@ -157,7 +158,7 @@
           type="text"
           [(ngModel)]="supportedFieldSearchDraft"
           (ngModelChange)="onSupportedFieldSearchChanged()"
-          placeholder="Rechercher un champ dans les tables groupees"
+          placeholder="Rechercher un champ"
         />
       </div>
 

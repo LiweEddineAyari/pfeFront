@@ -2,7 +2,9 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';import { provideHttpClient } from '@angular/common/http';import {
+import { LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { provideHttpClient } from '@angular/common/http';
+import {
   LayoutDashboard, Image, FileText, Lock,
   Building2, Car, GraduationCap, Bus, ShoppingCart, Pill, Coffee,
   RefreshCw, Plus, DollarSign, MoreHorizontal,
@@ -12,7 +14,7 @@ import { LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';import { provi
   Tv, GlassWater, LogOut,
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
-  Trash2, ChevronsUpDown
+  Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -27,7 +29,7 @@ const icons = {
   Tv, GlassWater, LogOut,
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
-  Trash2, ChevronsUpDown
+  Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical
 };
 
 export const appConfig: ApplicationConfig = {

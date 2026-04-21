@@ -98,12 +98,14 @@ h2 {
 .fields-card {
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(31, 77, 184, 0.08), rgba(31, 77, 184, 0.01)),
-    var(--bg-card);
+  background: #ffffff;
   padding: 12px;
   display: grid;
   gap: 10px;
+  box-shadow: 0 10px 24px rgba(17, 28, 68, 0.06);
+  min-width: 0;
+  overflow: hidden;
+  container-type: inline-size;
 }
 
 :host-context(.dark) .fields-card {
@@ -116,6 +118,12 @@ h2 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fields-heading {
+  flex: 1 1 180px;
+  min-width: 0;
 }
 
 .fields-header h3 {
@@ -131,10 +139,25 @@ h2 {
   font-size: 14px;
 }
 
+.fields-subtitle {
+  margin: 3px 0 0;
+  font-size: 12px;
+}
+
 .fields-actions {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  flex: 1 1 220px;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.fields-summary {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .field-search {
@@ -207,6 +230,7 @@ h2 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .table-group-header h4 {
@@ -220,6 +244,7 @@ h2 {
   margin: 4px 0 0;
   color: #6780b6;
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 :host-context(.dark) .table-group-header p {
@@ -230,6 +255,13 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.table-group-actions .ghost-btn {
+  padding: 7px 10px;
+  font-size: 12px;
 }
 
 .field-chip-wrap {
@@ -683,11 +715,12 @@ tbody tr:hover {
 
   .fields-header {
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .fields-actions {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   .table-group-header {
@@ -706,5 +739,63 @@ tbody tr:hover {
 
   .quick-open input {
     width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .fields-summary {
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+
+  .fields-subtitle {
+    display: none;
+  }
+}
+
+@container (max-width: 430px) {
+  .fields-header {
+    gap: 8px;
+  }
+
+  .fields-header h3 {
+    font-size: 16px;
+  }
+
+  .fields-subtitle {
+    font-size: 11px;
+  }
+
+  .fields-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fields-summary {
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+
+  .fields-actions .ghost-btn {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+
+  .field-search {
+    padding: 7px 10px;
+  }
+
+  .table-group-header {
+    flex-direction: column;
+  }
+
+  .table-group-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .field-chip {
+    font-size: 12px;
+    padding: 6px 9px;
   }
 }
