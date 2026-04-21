@@ -52,40 +52,76 @@
       <div class="filters-grid">
         <label class="filter-field" for="ratio-code-filter">
           <span>Code ratio</span>
-          <div class="input-shell">
-            <lucide-icon name="search" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+          <div class="input-shell" [class.focused]="showCodeDropdown">
+            <lucide-icon name="search" [size]="18" [strokeWidth]="2.4" class="leading-icon"></lucide-icon>
             <input
               id="ratio-code-filter"
               type="text"
               [ngModel]="ratioCodeFilter"
               (ngModelChange)="onCodeFilterChange($event)"
-              list="ratio-code-options"
+              (focus)="showCodeDropdown = true"
+              (blur)="onCodeBlur()"
               placeholder="Ex: RS, RNPL, TECH"
+              autocomplete="off"
             />
             <button
               type="button"
               *ngIf="ratioCodeFilter"
               class="clear-filter"
               aria-label="Effacer le filtre code"
-              (click)="clearCodeFilter()"
+              (mousedown)="clearCodeFilter(); $event.preventDefault(); $event.stopPropagation()"
             >
-              <lucide-icon name="x" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+              <lucide-icon name="x" [size]="15" [strokeWidth]="2.8"></lucide-icon>
             </button>
+            <lucide-icon *ngIf="!ratioCodeFilter" name="chevron-down" [size]="18" [strokeWidth]="2.4" class="dropdown-chevron"></lucide-icon>
+            
+            <div class="custom-dropdown-panel" *ngIf="showCodeDropdown">
+               <div class="dropdown-list">
+                 <button type="button" 
+                         class="dropdown-option" 
+                         *ngFor="let option of filteredCodeOptions"
+                         (mousedown)="selectCodeOption(option.code); $event.preventDefault()">
+                   <span class="option-desc" *ngIf="option.label">{{ option.label }}</span>
+                   <span class="option-code">{{ option.code }}</span>
+                 </button>
+                 <div class="dropdown-empty" *ngIf="filteredCodeOptions.length === 0">
+                   Aucun résultat
+                 </div>
+               </div>
+            </div>
           </div>
         </label>
 
         <label class="filter-field" for="ratio-date-filter">
           <span>Date de reference</span>
-          <div class="select-shell">
-            <lucide-icon name="calendar" [size]="16" [strokeWidth]="2.6"></lucide-icon>
-            <select
+          <div class="input-shell" [class.focused]="showDateDropdown">
+            <lucide-icon name="calendar" [size]="18" [strokeWidth]="2.4" class="leading-icon"></lucide-icon>
+            <input
               id="ratio-date-filter"
-              [ngModel]="selectedDate"
-              (ngModelChange)="onDateChange($event)"
-            >
-              <option value="">Toutes les dates</option>
-              <option *ngFor="let date of availableDates" [value]="date">{{ date }}</option>
-            </select>
+              type="text"
+              readonly
+              [value]="selectedDate || 'Toutes les dates'"
+              (focus)="showDateDropdown = true"
+              (blur)="onDateBlur()"
+              style="cursor: pointer;"
+            />
+            <lucide-icon name="chevron-down" [size]="18" [strokeWidth]="2.4" class="dropdown-chevron"></lucide-icon>
+            
+            <div class="custom-dropdown-panel" *ngIf="showDateDropdown">
+               <div class="dropdown-list">
+                 <button type="button" 
+                         class="dropdown-option" 
+                         (mousedown)="selectDateOption(''); $event.preventDefault()">
+                   <span class="option-desc">Toutes les dates</span>
+                 </button>
+                 <button type="button" 
+                         class="dropdown-option" 
+                         *ngFor="let date of availableDates"
+                         (mousedown)="selectDateOption(date); $event.preventDefault()">
+                   <span class="option-desc">{{ date }}</span>
+                 </button>
+               </div>
+            </div>
           </div>
         </label>
       </div>
@@ -154,99 +190,107 @@
           <div class="gauge-shell">
             <svg class="half-gauge" viewBox="0 0 240 160" aria-hidden="true" focusable="false">
               <defs>
-                <linearGradient id="dashToneCriticalDark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#8f111a"></stop>
-                  <stop offset="100%" stop-color="#ff2f37"></stop>
+                <linearGradient id="dashTone1" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#991b1b"></stop>
+                  <stop offset="100%" stop-color="#b91c1c"></stop>
                 </linearGradient>
-                <linearGradient id="dashToneCriticalLight" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ff8d95"></stop>
-                  <stop offset="100%" stop-color="#ffd7da"></stop>
+                <linearGradient id="dashTone2" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#dc2626"></stop>
+                  <stop offset="100%" stop-color="#ef4444"></stop>
                 </linearGradient>
-                <linearGradient id="dashToneAlertDark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#bd5f00"></stop>
-                  <stop offset="100%" stop-color="#ff971f"></stop>
+                <linearGradient id="dashTone3" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#ea580c"></stop>
+                  <stop offset="100%" stop-color="#f97316"></stop>
                 </linearGradient>
-                <linearGradient id="dashToneAlertLight" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ffd18e"></stop>
-                  <stop offset="100%" stop-color="#ffe9c8"></stop>
+                <linearGradient id="dashTone4" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#eab308"></stop>
+                  <stop offset="100%" stop-color="#facc15"></stop>
                 </linearGradient>
-                <linearGradient id="dashToneGoodDark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#1f9157"></stop>
-                  <stop offset="100%" stop-color="#4fd488"></stop>
+                <linearGradient id="dashTone5" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#16a34a"></stop>
+                  <stop offset="100%" stop-color="#22c55e"></stop>
                 </linearGradient>
-                <linearGradient id="dashToneGoodLight" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#84e4b9"></stop>
-                  <stop offset="100%" stop-color="#ddfff0"></stop>
+                <linearGradient id="dashTone6" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#4ade80"></stop>
+                  <stop offset="100%" stop-color="#86efac"></stop>
                 </linearGradient>
-                <linearGradient id="dashNeedleBody" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#18244d"></stop>
-                  <stop offset="55%" stop-color="#27396f"></stop>
-                  <stop offset="100%" stop-color="#10193a"></stop>
-                </linearGradient>
-                <radialGradient id="dashNeedleHub" cx="50%" cy="40%" r="60%">
-                  <stop offset="0%" stop-color="#2ef3c5"></stop>
-                  <stop offset="100%" stop-color="#11c08f"></stop>
-                </radialGradient>
               </defs>
-
-              <path class="gauge-track" [attr.d]="gaugeArcPath" pathLength="100"></path>
 
               <path
                 class="gauge-segment"
                 *ngFor="let segment of ratioRow.gauge.segments; let segmentIndex = index"
-                [attr.d]="segmentPath(segment)"
+                [attr.d]="segmentPath(segment, segmentIndex)"
                 [attr.stroke]="gaugeSegmentStroke(segmentIndex)"
               ></path>
 
+              <!-- Dashed drops for markers -->
+              <line class="threshold-dash"
+                    [attr.x1]="phaseMarkerX('tol', 92)"
+                    [attr.y1]="phaseMarkerY('tol', 92)"
+                    [attr.x2]="phaseMarkerX('tol', 56)"
+                    [attr.y2]="phaseMarkerY('tol', 56)"></line>
+              <line class="threshold-dash"
+                    [attr.x1]="phaseMarkerX('ale', 92)"
+                    [attr.y1]="phaseMarkerY('ale', 92)"
+                    [attr.x2]="phaseMarkerX('ale', 56)"
+                    [attr.y2]="phaseMarkerY('ale', 56)"></line>
+              <line class="threshold-dash"
+                    [attr.x1]="phaseMarkerX('app', 92)"
+                    [attr.y1]="phaseMarkerY('app', 92)"
+                    [attr.x2]="phaseMarkerX('app', 56)"
+                    [attr.y2]="phaseMarkerY('app', 56)"></line>
+
+              <!-- Threshold Dots -->
               <circle
                 class="threshold-dot threshold-tol"
-                [attr.cx]="phaseMarkerX('tol')"
-                [attr.cy]="phaseMarkerY('tol')"
-                r="3.4"
+                [attr.cx]="phaseMarkerX('tol', 92)"
+                [attr.cy]="phaseMarkerY('tol', 92)"
+                r="4"
               ></circle>
               <circle
                 class="threshold-dot threshold-alert"
-                [attr.cx]="phaseMarkerX('ale')"
-                [attr.cy]="phaseMarkerY('ale')"
-                r="3.4"
+                [attr.cx]="phaseMarkerX('ale', 92)"
+                [attr.cy]="phaseMarkerY('ale', 92)"
+                r="4"
               ></circle>
               <circle
                 class="threshold-dot threshold-appetite"
-                [attr.cx]="phaseMarkerX('app')"
-                [attr.cy]="phaseMarkerY('app')"
-                r="3.4"
+                [attr.cx]="phaseMarkerX('app', 92)"
+                [attr.cy]="phaseMarkerY('app', 92)"
+                r="4"
               ></circle>
 
-              <path class="gauge-needle" [attr.d]="needlePath(ratioRow.gauge)"></path>
-              <path class="gauge-needle-sheen" [attr.d]="needleSheenPath(ratioRow.gauge)"></path>
-              <circle class="gauge-needle-hub-outer" [attr.cx]="gaugeCenterX" [attr.cy]="gaugeCenterY" r="6.4"></circle>
-              <circle class="gauge-needle-hub-inner" [attr.cx]="gaugeCenterX" [attr.cy]="gaugeCenterY" r="3.2"></circle>
+              <g class="needle-group" [style.transform]="'rotate(' + (-ratioRow.currentAngle) + 'deg)'">
+                <path class="gauge-needle" [attr.d]="needlePath()"></path>
+                <circle class="gauge-needle-hub" [attr.cx]="gaugeCenterX" [attr.cy]="gaugeCenterY" r="8"></circle>
+              </g>
 
+              <!-- Threshold Labels -->
               <text
                 class="threshold-label"
-                [attr.x]="phaseMarkerX('tol', gaugeRadius + 22)"
-                [attr.y]="phaseMarkerY('tol', gaugeRadius + 22)"
+                [attr.x]="phaseMarkerX('tol', 110)"
+                [attr.y]="phaseMarkerY('tol', 110)"
               >
                 Tol
               </text>
               <text
                 class="threshold-label"
-                [attr.x]="phaseMarkerX('ale', gaugeRadius + 22)"
-                [attr.y]="phaseMarkerY('ale', gaugeRadius + 22)"
+                [attr.x]="phaseMarkerX('ale', 110)"
+                [attr.y]="phaseMarkerY('ale', 110)"
               >
                 Ale
               </text>
               <text
                 class="threshold-label"
-                [attr.x]="phaseMarkerX('app', gaugeRadius + 22)"
-                [attr.y]="phaseMarkerY('app', gaugeRadius + 22)"
+                [attr.x]="phaseMarkerX('app', 110)"
+                [attr.y]="phaseMarkerY('app', 110)"
               >
                 App
               </text>
             </svg>
 
             <div class="gauge-value-wrap">
-              <div class="gauge-value">{{ ratioRow.valueLabel }}</div>
+              <div class="gauge-value">{{ ratioRow.currentValueLabel }}</div>
               <p class="gauge-tone">{{ toneLabel(ratioRow.gauge.tone) }}</p>
             </div>
           </div>
@@ -262,6 +306,3 @@
   </ng-container>
 </div>
 
-<datalist id="ratio-code-options">
-  <option *ngFor="let ratioCode of ratioCodeOptions; trackBy: trackByCode" [value]="ratioCode"></option>
-</datalist>

@@ -30,8 +30,10 @@ interface GaugeModel {
 interface DashboardRatioCard extends DashboardRowResponseDTO {
   familyName: string;
   categoryName: string;
-  valueLabel: string;
   gauge: GaugeModel;
+  currentAngle: number;
+  currentValue: number;
+  currentValueLabel: string;
 }
 
 interface DashboardFamilyGroup {
@@ -63,24 +65,25 @@ export class DashboardComponent implements OnInit {
 
   availableDates: string[] = [];
   categoryOptions: RatioLookupItem[] = [];
-  ratioCodeOptions: string[] = [];
+  ratioCodeOptions: { code: string; label: string }[] = [];
+  showCodeDropdown = false;
+  showDateDropdown = false;
 
   private allRows: DashboardRatioCard[] = [];
   groupedRows: DashboardFamilyGroup[] = [];
   visibleRatios = 0;
 
   readonly gaugeCenterX = 120;
-  readonly gaugeCenterY = 112;
-  readonly gaugeRadius = 82;
-  readonly gaugeNeedleRadius = 72;
-  readonly gaugeArcPath = `M ${this.gaugeCenterX - this.gaugeRadius} ${this.gaugeCenterY} A ${this.gaugeRadius} ${this.gaugeRadius} 0 0 1 ${this.gaugeCenterX + this.gaugeRadius} ${this.gaugeCenterY}`;
+  readonly gaugeCenterY = 130;
+  readonly gaugeRadius = 70;
+  readonly gaugeNeedleRadius = 60;
   readonly gaugeStrokePalette = [
-    'url(#dashToneCriticalDark)',
-    'url(#dashToneCriticalLight)',
-    'url(#dashToneAlertDark)',
-    'url(#dashToneAlertLight)',
-    'url(#dashToneGoodDark)',
-    'url(#dashToneGoodLight)',
+    'url(#dashTone1)',
+    'url(#dashTone2)',
+    'url(#dashTone3)',
+    'url(#dashTone4)',
+    'url(#dashTone5)',
+    'url(#dashTone6)',
   ];
 
   private numberFormatter = new Intl.NumberFormat('fr-FR', {
@@ -129,6 +132,35 @@ export class DashboardComponent implements OnInit {
     this.applyFilters();
   }
 
+  get filteredCodeOptions() {
+    const filter = this.ratioCodeFilter.trim().toLowerCase();
+    if (!filter) return this.ratioCodeOptions;
+    return this.ratioCodeOptions.filter(opt => 
+      opt.code.toLowerCase().includes(filter) || 
+      opt.label.toLowerCase().includes(filter)
+    );
+  }
+
+  onCodeBlur(): void {
+    this.showCodeDropdown = false;
+  }
+
+  selectCodeOption(code: string): void {
+    this.ratioCodeFilter = code;
+    this.showCodeDropdown = false;
+    this.applyFilters();
+  }
+
+  onDateBlur(): void {
+    this.showDateDropdown = false;
+  }
+
+  selectDateOption(date: string): void {
+    this.selectedDate = date;
+    this.showDateDropdown = false;
+    this.onDateChange(date);
+  }
+
   thresholdLabel(value: number | null): string {
     if (value === null || !Number.isFinite(value)) {
       return '-';
@@ -137,9 +169,16 @@ export class DashboardComponent implements OnInit {
     return this.numberFormatter.format(value);
   }
 
-  segmentPath(segment: GaugeSegment): string {
-    const startAngle = this.percentToAngle(segment.startPercent);
-    const endAngle = this.percentToAngle(segment.endPercent);
+  segmentPath(segment: GaugeSegment, segmentIndex: number): string {
+    const isFirst = segmentIndex === 0;
+    const isLast = segmentIndex === 5;
+    const gap = 0.008;
+
+    const startP = segment.startPercent + (isFirst ? 0 : gap);
+    const endP = segment.endPercent - (isLast ? 0 : gap);
+
+    const startAngle = this.percentToAngle(startP);
+    const endAngle = this.percentToAngle(endP);
     const start = this.pointOnGauge(this.gaugeRadius, startAngle);
     const end = this.pointOnGauge(this.gaugeRadius, endAngle);
 
@@ -160,79 +199,20 @@ export class DashboardComponent implements OnInit {
     return point.y;
   }
 
-  needlePath(gauge: GaugeModel): string {
-    const radians = (gauge.needleAngle * Math.PI) / 180;
-    const ux = Math.cos(radians);
-    const uy = -Math.sin(radians);
-    const px = -uy;
-    const py = ux;
-
+  needlePath(): string {
     const centerX = this.gaugeCenterX;
     const centerY = this.gaugeCenterY;
-    const tipLength = this.gaugeNeedleRadius + 3;
-    const shaftStart = 4;
-    const neckLength = Math.max(18, this.gaugeNeedleRadius - 12);
-    const tailLength = 10;
+    const tipLength = this.gaugeNeedleRadius;
+    const baseHalfWidth = 4.5;
 
-    const tailRadius = 3.8;
-    const bodyHalfWidth = 1.7;
-    const neckHalfWidth = 0.9;
+    const tipX = centerX + tipLength;
+    const tipY = centerY;
+    const baseLeftX = centerX;
+    const baseLeftY = centerY + baseHalfWidth;
+    const baseRightX = centerX;
+    const baseRightY = centerY - baseHalfWidth;
 
-    const tipX = centerX + ux * tipLength;
-    const tipY = centerY + uy * tipLength;
-    const shaftCenterX = centerX + ux * shaftStart;
-    const shaftCenterY = centerY + uy * shaftStart;
-    const neckCenterX = centerX + ux * neckLength;
-    const neckCenterY = centerY + uy * neckLength;
-    const tailCenterX = centerX - ux * tailLength;
-    const tailCenterY = centerY - uy * tailLength;
-
-    const tailLeftX = tailCenterX + px * tailRadius;
-    const tailLeftY = tailCenterY + py * tailRadius;
-    const bodyLeftX = shaftCenterX + px * bodyHalfWidth;
-    const bodyLeftY = shaftCenterY + py * bodyHalfWidth;
-    const neckLeftX = neckCenterX + px * neckHalfWidth;
-    const neckLeftY = neckCenterY + py * neckHalfWidth;
-
-    const tailRightX = tailCenterX - px * tailRadius;
-    const tailRightY = tailCenterY - py * tailRadius;
-    const bodyRightX = shaftCenterX - px * bodyHalfWidth;
-    const bodyRightY = shaftCenterY - py * bodyHalfWidth;
-    const neckRightX = neckCenterX - px * neckHalfWidth;
-    const neckRightY = neckCenterY - py * neckHalfWidth;
-
-    const tipCtrlDistance = 7;
-    const tipLeftCtrlX = tipX - ux * tipCtrlDistance + px * 0.5;
-    const tipLeftCtrlY = tipY - uy * tipCtrlDistance + py * 0.5;
-    const tipRightCtrlX = tipX - ux * tipCtrlDistance - px * 0.5;
-    const tipRightCtrlY = tipY - uy * tipCtrlDistance - py * 0.5;
-
-    const format = (value: number) => value.toFixed(2);
-
-    return [
-      `M ${format(tailLeftX)} ${format(tailLeftY)}`,
-      `L ${format(bodyLeftX)} ${format(bodyLeftY)}`,
-      `L ${format(neckLeftX)} ${format(neckLeftY)}`,
-      `Q ${format(tipLeftCtrlX)} ${format(tipLeftCtrlY)} ${format(tipX)} ${format(tipY)}`,
-      `Q ${format(tipRightCtrlX)} ${format(tipRightCtrlY)} ${format(neckRightX)} ${format(neckRightY)}`,
-      `L ${format(bodyRightX)} ${format(bodyRightY)}`,
-      `L ${format(tailRightX)} ${format(tailRightY)}`,
-      `Q ${format(tailCenterX)} ${format(tailCenterY)} ${format(tailLeftX)} ${format(tailLeftY)}`,
-      'Z',
-    ].join(' ');
-  }
-
-  needleSheenPath(gauge: GaugeModel): string {
-    const radians = (gauge.needleAngle * Math.PI) / 180;
-    const ux = Math.cos(radians);
-    const uy = -Math.sin(radians);
-
-    const startX = this.gaugeCenterX + ux * 4;
-    const startY = this.gaugeCenterY + uy * 4;
-    const endX = this.gaugeCenterX + ux * (this.gaugeNeedleRadius - 7);
-    const endY = this.gaugeCenterY + uy * (this.gaugeNeedleRadius - 7);
-
-    return `M ${startX.toFixed(2)} ${startY.toFixed(2)} L ${endX.toFixed(2)} ${endY.toFixed(2)}`;
+    return `M ${baseLeftX.toFixed(2)} ${baseLeftY.toFixed(2)} L ${tipX.toFixed(2)} ${tipY.toFixed(2)} L ${baseRightX.toFixed(2)} ${baseRightY.toFixed(2)} Z`;
   }
 
   markerX(gauge: GaugeModel, value: number, radius = this.gaugeRadius + 8): number {
@@ -319,10 +299,22 @@ export class DashboardComponent implements OnInit {
       }
 
       this.categoryOptions = this.buildCategoryOptions(this.allRows, categoryMap);
-      this.ratioCodeOptions = Array.from(new Set(this.allRows.map((row) => row.code)))
-        .sort((a, b) => a.localeCompare(b));
+      
+      const codeMap = new Map<string, string>();
+      this.allRows.forEach((row) => {
+        if (!codeMap.has(row.code)) {
+          codeMap.set(row.code, row.label || row.description || '');
+        }
+      });
+      this.ratioCodeOptions = Array.from(codeMap.entries())
+        .map(([code, label]) => ({ code, label }))
+        .sort((a, b) => a.code.localeCompare(b.code));
 
       this.applyFilters();
+      
+      setTimeout(() => {
+        this.animateCards();
+      }, 50);
     } catch (error) {
       this.groupedRows = [];
       this.visibleRatios = 0;
@@ -332,6 +324,45 @@ export class DashboardComponent implements OnInit {
       this.refreshing = false;
       this.cdr.markForCheck();
     }
+  }
+
+  private animateCards(): void {
+    const duration = 1500;
+    const startTime = performance.now();
+
+    this.allRows.forEach(row => {
+      row.currentAngle = row.gauge.needleAngle;
+    });
+    this.cdr.markForCheck();
+
+    const animateNumber = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 4);
+      let needsAnotherFrame = false;
+
+      this.allRows.forEach(row => {
+        const targetValue = Number.isFinite(row.value) ? row.value : 0;
+        if (row.currentValue !== targetValue) {
+          row.currentValue = row.gauge.alert + (targetValue - row.gauge.alert) * easeOut;
+          row.currentValueLabel = this.formatValue(row.currentValue);
+          if (progress < 1) {
+            needsAnotherFrame = true;
+          } else {
+            row.currentValue = targetValue;
+            row.currentValueLabel = this.formatValue(targetValue);
+          }
+        }
+      });
+
+      this.cdr.markForCheck();
+
+      if (needsAnotherFrame) {
+        requestAnimationFrame(animateNumber);
+      }
+    };
+
+    requestAnimationFrame(animateNumber);
   }
 
   private applyFilters(): void {
@@ -397,13 +428,18 @@ export class DashboardComponent implements OnInit {
       row.categorieCode,
       'Categorie'
     );
+    
+    const gauge = this.createGaugeModel(row);
+    const aleAngle = 90;
 
     return {
       ...row,
       familyName,
       categoryName,
-      valueLabel: this.formatValue(row.value),
-      gauge: this.createGaugeModel(row),
+      gauge,
+      currentAngle: aleAngle,
+      currentValue: gauge.alert,
+      currentValueLabel: this.formatValue(gauge.alert),
     };
   }
 
@@ -523,11 +559,11 @@ export class DashboardComponent implements OnInit {
 
     const rawStops = [
       min,
+      tolerance - thresholdSpan * 0.5,
       tolerance,
-      tolerance + (alert - tolerance) * 0.5,
       alert,
-      alert + (appetite - alert) * 0.5,
       appetite,
+      appetite + thresholdSpan * 0.5,
       max,
     ];
 
@@ -583,7 +619,6 @@ export class DashboardComponent implements OnInit {
     if (value <= stops[5]) {
       return 'good';
     }
-
     return 'excellent';
   }
 
