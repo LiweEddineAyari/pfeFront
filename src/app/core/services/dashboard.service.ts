@@ -1,125 +1,381 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { Transaction } from '../models/transaction.model';
+import { Injectable, NgZone } from '@angular/core';
+
+import { DashboardRowResponseDTO } from '../models/dashboard.model';
+import { ApiErrorResponse, RatioLookupItem } from '../models/ratio.model';
+
+export class DashboardApiHttpError extends Error {
+  constructor(
+    public status: number,
+    public apiError: ApiErrorResponse
+  ) {
+    super(apiError.message);
+    this.name = 'DashboardApiHttpError';
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private revenueLabels = new BehaviorSubject<string[]>([
-    'SEP', 'OCT', 'NOV', 'DEC', 'JAN', 'FEB',
-  ]);
-  private revenueDataset1 = new BehaviorSubject<number[]>([
-    15000, 30000, 18000, 39000, 20000, 42000,
-  ]);
-  private revenueDataset2 = new BehaviorSubject<number[]>([
-    10000, 20000, 11000, 30000, 14000, 32000,
-  ]);
+  private readonly dashboardBase = '/api/dashboard';
+  private readonly familiesPath = '/api/ratios/families';
+  private readonly categoriesPath = '/api/ratios/categories';
 
-  private trafficLabels = new BehaviorSubject<string[]>([
-    '00', '04', '08', '12', '14', '16', '18',
-  ]);
-  private trafficData = new BehaviorSubject<number[]>([
-    20, 45, 52, 65, 80, 70, 55,
-  ]);
+  constructor(private zone: NgZone) {}
 
-  private projectStatusLabels = new BehaviorSubject<string[]>([
-    'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thr', 'Fri',
-  ]);
-  private projectStatusData = new BehaviorSubject<number[]>([
-    35, 28, 42, 55, 48, 62, 71,
-  ]);
+  async listRows(date?: string): Promise<DashboardRowResponseDTO[]> {
+    const normalizedDate = (date ?? '').trim();
 
-  private creditTransactions = new BehaviorSubject<Transaction[]>([
-    {
-      id: '1',
-      icon: 'building-2',
-      iconBg: 'bg-[#ebf8ff] dark:bg-[#ebf8ff]/10',
-      iconColor: 'text-[#4299e1]',
-      title: 'Bill & Taxes',
-      date: 'Today, 16:36',
-      amount: -154.50,
-      type: 'debit',
-    },
-    {
-      id: '2',
-      icon: 'car',
-      iconBg: 'bg-[#e6fffa] dark:bg-[#e6fffa]/10',
-      iconColor: 'text-[#38b2ac]',
-      title: 'Car Energy',
-      date: '23 Jun, 13:06',
-      amount: -40.50,
-      type: 'debit',
-    },
-    {
-      id: '3',
-      icon: 'graduation-cap',
-      iconBg: 'bg-[#fffaf0] dark:bg-[#fffaf0]/10',
-      iconColor: 'text-[#ed8936]',
-      title: 'Design Course',
-      date: '21 Jun, 19:04',
-      amount: -70.00,
-      type: 'debit',
-    },
-  ]);
+    if (!normalizedDate) {
+      const payload = await this.fetchJson<unknown>(this.dashboardBase, { method: 'GET' });
+      return this.normalizeRowsPayload(payload, this.dashboardBase);
+    }
 
-  private rightPanelTransactions = new BehaviorSubject<Transaction[]>([
-    {
-      id: '4',
-      icon: 'bus',
-      iconBg: 'bg-blue-100 dark:bg-indigo-500/15',
-      iconColor: 'text-blue-500',
-      title: 'Public Transport',
-      date: '22 September 2022',
-      amount: -15.50,
-      type: 'debit',
-    },
-    {
-      id: '5',
-      icon: 'shopping-cart',
-      iconBg: 'bg-green-100 dark:bg-green-500/15',
-      iconColor: 'text-green-500',
-      title: 'Grocery Store',
-      date: '18 September 2022',
-      amount: -42.28,
-      type: 'debit',
-    },
-    {
-      id: '6',
-      icon: 'pill',
-      iconBg: 'bg-red-100 dark:bg-red-500/15',
-      iconColor: 'text-red-500',
-      title: 'Pharmacy',
-      date: '15 September 2022',
-      amount: -22.90,
-      type: 'debit',
-    },
-    {
-      id: '7',
-      icon: 'coffee',
-      iconBg: 'bg-amber-100 dark:bg-amber-500/15',
-      iconColor: 'text-amber-500',
-      title: 'Coffee Shop',
-      date: '12 September 2022',
-      amount: -8.40,
-      type: 'debit',
-    },
-  ]);
+    const queryPath = `${this.dashboardBase}?date=${encodeURIComponent(normalizedDate)}`;
 
-  private sparklineLabels = new BehaviorSubject<string[]>([
-    'Sat', 'Sun', 'Mon', 'Tue', 'Wed',
-  ]);
-  private sparklineData = new BehaviorSubject<number[]>([
-    30, 45, 35, 50, 45,
-  ]);
+    try {
+      const payload = await this.fetchJson<unknown>(queryPath, { method: 'GET' });
+      return this.normalizeRowsPayload(payload, queryPath);
+    } catch (error) {
+      if (!(error instanceof DashboardApiHttpError) || ![404, 405, 501].includes(error.status)) {
+        throw error;
+      }
 
-  revenueLabels$ = this.revenueLabels.asObservable();
-  revenueDataset1$ = this.revenueDataset1.asObservable();
-  revenueDataset2$ = this.revenueDataset2.asObservable();
-  trafficLabels$ = this.trafficLabels.asObservable();
-  trafficData$ = this.trafficData.asObservable();
-  projectStatusLabels$ = this.projectStatusLabels.asObservable();
-  projectStatusData$ = this.projectStatusData.asObservable();
-  creditTransactions$ = this.creditTransactions.asObservable();
-  rightPanelTransactions$ = this.rightPanelTransactions.asObservable();
-  sparklineLabels$ = this.sparklineLabels.asObservable();
-  sparklineData$ = this.sparklineData.asObservable();
+      const datePath = `${this.dashboardBase}/date/${encodeURIComponent(normalizedDate)}`;
+      const payload = await this.fetchJson<unknown>(datePath, { method: 'GET' });
+      return this.normalizeRowsPayload(payload, datePath);
+    }
+  }
+
+  async listFamilies(): Promise<RatioLookupItem[]> {
+    const payload = await this.fetchJson<unknown>(this.familiesPath, { method: 'GET' });
+    return this.normalizeLookupPayload(payload, 'Famille');
+  }
+
+  async listCategories(): Promise<RatioLookupItem[]> {
+    const payload = await this.fetchJson<unknown>(this.categoriesPath, { method: 'GET' });
+    return this.normalizeLookupPayload(payload, 'Categorie');
+  }
+
+  private normalizeRowsPayload(payload: unknown, path: string): DashboardRowResponseDTO[] {
+    const entries = this.extractArrayPayload(payload);
+    const rows = entries
+      .map((entry) => this.normalizeRow(entry))
+      .filter((entry): entry is DashboardRowResponseDTO => entry !== null);
+
+    if (rows.length > 0) {
+      return rows;
+    }
+
+    if (entries.length === 0) {
+      return [];
+    }
+
+    throw new DashboardApiHttpError(
+      502,
+      this.buildApiError(502, payload, path, 'Reponse dashboard invalide. Tableau de lignes attendu.')
+    );
+  }
+
+  private normalizeRow(entry: unknown): DashboardRowResponseDTO | null {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+
+    const source = entry as Record<string, unknown>;
+    const idRatios = this.toNumber(
+      source['idRatios']
+      ?? source['idRatio']
+      ?? source['ratioId']
+      ?? source['ratiosId']
+    );
+    const code = this.safeString(source['code']).trim();
+    const date = this.safeString(source['date'] ?? source['referenceDate']).trim();
+
+    if (!idRatios || !code || !date) {
+      return null;
+    }
+
+    return {
+      id: this.toNumber(source['id']),
+      idRatios,
+      code,
+      label: this.normalizeHumanText(source['label'] ?? source['libelle']) || code,
+      description: this.normalizeHumanText(source['description']),
+      familleId: this.toNumber(source['familleId'] ?? source['familyId']),
+      categorieId: this.toNumber(source['categorieId'] ?? source['categoryId']),
+      familleCode: this.normalizeHumanText(source['familleCode'] ?? source['familyCode']),
+      categorieCode: this.normalizeHumanText(source['categorieCode'] ?? source['categoryCode']),
+      seuilTolerance: this.toNullableNumber(source['seuilTolerance'] ?? source['thresholdTolerance']),
+      seuilAlerte: this.toNullableNumber(source['seuilAlerte'] ?? source['thresholdAlert']),
+      seuilAppetence: this.toNullableNumber(source['seuilAppetence'] ?? source['thresholdAppetite']),
+      value: this.toNumber(source['value']),
+      date,
+    };
+  }
+
+  private normalizeLookupPayload(payload: unknown, fallbackLabel: string): RatioLookupItem[] {
+    const entries = this.extractArrayPayload(payload);
+    const map = new Map<number, RatioLookupItem>();
+
+    entries.forEach((entry) => {
+      const normalized = this.normalizeLookupItem(entry, fallbackLabel);
+      if (!normalized) {
+        return;
+      }
+
+      map.set(normalized.id, normalized);
+    });
+
+    return Array.from(map.values()).sort((a, b) => a.id - b.id);
+  }
+
+  private normalizeLookupItem(entry: unknown, fallbackLabel: string): RatioLookupItem | null {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+
+    const source = entry as Record<string, unknown>;
+    const id = this.toNumber(
+      source['id']
+      ?? source['value']
+      ?? source['familleId']
+      ?? source['categorieId']
+      ?? source['familyId']
+      ?? source['categoryId']
+    );
+
+    if (!id) {
+      return null;
+    }
+
+    const name = this.normalizeHumanText(
+      source['name']
+      ?? source['label']
+      ?? source['libelle']
+      ?? source['nom']
+      ?? source['nomFamille']
+      ?? source['nomCategorie']
+      ?? source['libelleFamille']
+      ?? source['libelleCategorie']
+    ) || `${fallbackLabel} ${id}`;
+
+    return {
+      id,
+      name,
+    };
+  }
+
+  private extractArrayPayload(payload: unknown): unknown[] {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    if (payload && typeof payload === 'object') {
+      const asObject = payload as Record<string, unknown>;
+      const candidateKeys = ['items', 'content', 'rows', 'data', 'results'];
+
+      for (const key of candidateKeys) {
+        const value = asObject[key];
+        if (Array.isArray(value)) {
+          return value;
+        }
+      }
+
+      return [asObject];
+    }
+
+    return [];
+  }
+
+  private async fetchJson<T>(url: string, options: RequestInit = {}, timeoutMs = 120000): Promise<T> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      return await this.runOutsideZone(async () => {
+        const headers = new Headers(options.headers ?? {});
+        if (!headers.has('Accept')) {
+          headers.set('Accept', 'application/json');
+        }
+
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          cache: options.cache ?? 'no-store',
+          signal: controller.signal,
+        });
+
+        const payloadText = await response.text();
+        const payload = this.parsePayload(payloadText);
+
+        if (!response.ok) {
+          throw new DashboardApiHttpError(response.status, this.buildApiError(response.status, payload, url));
+        }
+
+        if (typeof payload === 'string' && payload.trim().length > 0) {
+          throw new DashboardApiHttpError(
+            502,
+            this.buildApiError(502, payload, url, 'Reponse invalide. Objet JSON attendu.')
+          );
+        }
+
+        return payload as T;
+      });
+    } catch (error: unknown) {
+      if (error instanceof DashboardApiHttpError) {
+        throw error;
+      }
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new DashboardApiHttpError(
+          408,
+          this.buildApiError(408, null, url, 'Delai d\'attente de la requete depasse')
+        );
+      }
+
+      throw new DashboardApiHttpError(
+        0,
+        this.buildApiError(0, null, url, 'Erreur reseau lors de l\'appel API')
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  private parsePayload(payloadText: string): unknown {
+    if (!payloadText.trim()) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(payloadText);
+    } catch {
+      return payloadText;
+    }
+  }
+
+  private buildApiError(
+    status: number,
+    payload: unknown,
+    path: string,
+    fallbackMessage?: string
+  ): ApiErrorResponse {
+    if (payload && typeof payload === 'object') {
+      const candidate = payload as Partial<ApiErrorResponse>;
+
+      if (typeof candidate.message === 'string') {
+        return {
+          timestamp: candidate.timestamp ?? new Date().toISOString(),
+          status: candidate.status ?? status,
+          error: candidate.error ?? `HTTP_${status}`,
+          message: candidate.message,
+          details: Array.isArray(candidate.details) ? candidate.details : [],
+          path: candidate.path ?? path,
+        };
+      }
+    }
+
+    return {
+      timestamp: new Date().toISOString(),
+      status,
+      error: `HTTP_${status}`,
+      message: fallbackMessage
+        ?? (typeof payload === 'string' && payload.trim().length > 0
+          ? payload
+          : `La requete a echoue avec le statut ${status}`),
+      details: [],
+      path,
+    };
+  }
+
+  private safeString(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value === undefined || value === null) {
+      return '';
+    }
+
+    return String(value);
+  }
+
+  private normalizeHumanText(value: unknown): string {
+    const raw = this.safeString(value);
+    if (!raw) {
+      return '';
+    }
+
+    const compact = raw
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[\t\r\n]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!compact) {
+      return '';
+    }
+
+    if (!this.looksMojibake(compact)) {
+      return compact;
+    }
+
+    const decoded = this.tryDecodeUtf8FromLatin1(compact);
+    return decoded || compact;
+  }
+
+  private looksMojibake(value: string): boolean {
+    return /Ã.|Â.|â.|�/.test(value);
+  }
+
+  private tryDecodeUtf8FromLatin1(value: string): string {
+    try {
+      const bytes = new Uint8Array(Array.from(value, (char) => char.charCodeAt(0) & 0xff));
+      const decoded = new TextDecoder('utf-8').decode(bytes)
+        .replace(/[\t\r\n]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (!decoded || this.looksMojibake(decoded)) {
+        return '';
+      }
+
+      return decoded;
+    } catch {
+      return '';
+    }
+  }
+
+  private toNumber(value: unknown): number {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return 0;
+  }
+
+  private toNullableNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const parsed = this.toNumber(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private runOutsideZone<T>(work: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.zone.runOutsideAngular(() => {
+        work()
+          .then((value) => this.zone.run(() => resolve(value)))
+          .catch((error) => this.zone.run(() => reject(error)));
+      });
+    });
+  }
 }

@@ -1,180 +1,267 @@
-<div class="flex gap-4 lg:gap-5 w-full h-full xl:max-w-none flex-col xl:flex-row">
-  <!-- MAIN AREA (Columns 1 & 2) -->
-  <div class="flex-1 min-w-0 grid gap-5 grid-cols-1 lg:grid-cols-[2fr_1fr]">
-    <!-- COLUMN 1 (~70% of Main Area) -->
-    <div class="flex flex-col gap-4 min-w-0">
-      <!-- Revenue Chart Card -->
-      <div class="w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px] h-auto sm:h-[415px]" @fadeInUp>
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <p class="text-[34px] font-[800] text-text-primary leading-none">$37.5K</p>
-                <p class="text-brand-green font-bold text-[13px] flex items-center gap-0.5">
-                  <lucide-icon name="arrow-up" [size]="14" [strokeWidth]="3"></lucide-icon>
-                  +2.45%
-                </p>
-              </div>
-              <p class="text-[13px] text-text-secondary font-medium">Revenu global</p>
-            </div>
-            <div class="flex items-center">
-              <button class="flex items-center gap-1.5 text-[14px] font-bold text-text-secondary hover:text-text-primary transition-colors bg-transparent px-2 py-2 rounded-xl"
-                      aria-label="Selectionner la periode">
-                Mensuel
-                <lucide-icon name="chevron-down" [size]="18" [strokeWidth]="2.5"></lucide-icon>
-              </button>
-            </div>
-          </div>
-          <div class="flex-1 min-h-[0px] -mx-2 mt-2" *ngIf="revenueConfig$ | async as config">
-            <canvas baseChart class="!w-full !h-full"
-              [datasets]="config.datasets"
-              [labels]="config.labels"
-              [options]="config.options || revenueOptions"
-              type="line"
-            ></canvas>
-          </div>
-      </div>
-      <!-- BOTTOM ROW in Column 1: Daily Traffic & Project Status -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:h-[380px]">
-        <!-- Daily Traffic Card -->
-        <div class="h-auto sm:h-[430px] w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px]" @fadeInUp>
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Trafic quotidien</p>
-            <p class="text-[#01b574] font-bold text-[13px] flex items-center gap-0.5">
-              <lucide-icon name="arrow-up" [size]="14" [strokeWidth]="3"></lucide-icon>
-              +2.45%
-            </p>
-          </div>
-          <div class="mb-5 flex items-baseline gap-1.5">
-            <span class="text-[34px] font-[800] text-[#1b2559] dark:text-white leading-none" id="traffic-counter">{{ trafficCount }}</span>
-            <span class="text-[14px] text-[#a3aed0] dark:text-white/70 font-medium">Visiteurs</span>
-          </div>
-          <div class="flex-1 min-h-[0px]" *ngIf="trafficConfig$ | async as config">
-            <canvas baseChart class="!w-full !h-full"
-              [datasets]="config.datasets"
-              [labels]="config.labels"
-              [options]="config.options || trafficOptions"
-              type="bar"
-            ></canvas>
-          </div>
+<div class="dashboard-shell" @fadeInUp>
+  <section class="hero-grid">
+    <article class="hero-card hero-insight">
+      <div class="hero-title-row">
+        <div class="hero-icon-wrap">
+          <lucide-icon name="sparkles" [size]="20" [strokeWidth]="2.4"></lucide-icon>
         </div>
-        <!-- Project Status Card -->
-        <div class="h-auto sm:h-[430px] w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-6 py-5 shadow-[var(--shadow-card)] flex flex-col transition-all duration-200 hover:-translate-y-[3px]" @fadeInUp>
-          <div class="flex items-center justify-between mb-5">
-            <p class="text-[18px] font-extrabold text-[#1b2559] dark:text-white">Statut du projet</p>
-            <button class="w-[34px] h-[34px] rounded-xl bg-page dark:bg-page/10 text-[#01b574] flex justify-center items-center hover:bg-page/80 transition-colors" aria-label="Plus d'options">
-              <lucide-icon name="more-horizontal" [size]="18" [strokeWidth]="3"></lucide-icon>
-            </button>
-          </div>
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full border border-border-color bg-page flex items-center justify-center shadow-sm shrink-0">
-                <lucide-icon name="shopping-basket" [size]="20" [strokeWidth]="2.5" class="text-brand-primary"></lucide-icon>
-              </div>
-              <div>
-                <p class="text-[16px] font-bold text-text-primary">eCommerce</p>
-                <p class="text-[13px] text-text-secondary font-medium mt-0.5">Conception UI</p>
-              </div>
-            </div>
-            <p class="text-[20px] font-extrabold text-text-primary shrink-0">71<span class="text-[14px] font-normal">%</span></p>
-          </div>
-          <div class="flex-1 min-h-[0px] -mx-1" *ngIf="projectConfig$ | async as config">
-            <canvas baseChart class="!w-full !h-full"
-              [datasets]="config.datasets"
-              [labels]="config.labels"
-              [options]="config.options || projectOptions"
-              type="line"
-            ></canvas>
-          </div>
+        <div>
+          <p class="hero-kicker">Vue globale</p>
+          <h1>Dashboard des ratios</h1>
         </div>
       </div>
-    </div>
-    <!-- COLUMN 2 (~30% of Main Area) -->
-    <div class="flex flex-col gap-5 min-w-0">
-      <!-- Unified Credit Balance & Recent Transactions Card -->
-      <div class="w-full bg-card rounded-[var(--radius-card)] px-4 sm:px-5 py-5 shadow-[var(--shadow-card)] flex flex-col gap-4 h-auto sm:h-[415px]" @fadeInUp>
-        <!-- Inner Credit Balance Card -->
-        <div class="w-full bg-[#00412a] dark:bg-[#111c44] rounded-[20px] p-6 flex flex-col relative overflow-hidden transition-all duration-300">
-          <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          
-          <div class="flex items-center justify-between mb-2 relative z-10">
-            <span class="text-[14px] font-[500] text-white/65">Solde de credit</span>
-            <button class="text-white/70 hover:text-white transition-colors" aria-label="Plus d'options">
-              <lucide-icon name="more-horizontal" [size]="20" [strokeWidth]="3"></lucide-icon>
-            </button>
-          </div>
-          
-          <p class="text-[34px] font-[800] text-white leading-none mb-6 relative z-10 tracking-tighter">$3942.58</p>
-          
-          <!-- Compact Squiggle Wave SVG (CSS-only theme transition) -->
-          <svg class="credit-wave" width="80" height="32" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg"
-               style="position:absolute; bottom:12px; right:14px; pointer-events:none; user-select:none;">
-            <path d="M4 18 C10 8, 16 8, 22 16 C28 24, 34 24, 40 16 C46 8, 52 8, 58 16 C64 24, 70 24, 76 18"
-                  stroke="white" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          </svg>
-        </div>
-        <!-- Recent Section -->
-        <div class="flex flex-col flex-1 min-h-[0px]">
-          <p class="text-[16px] text-text-secondary font-bold mb-4 px-1">Recents</p>
-          <div class="space-y-1 overflow-y-auto pr-1 custom-scrollbar">
-            <ng-container *ngIf="creditTransactions$ | async as transactions">
-              <div *ngFor="let t of transactions; trackBy: trackById"
-                   class="flex items-center gap-4 py-3 px-2 hover:bg-page rounded-2xl transition-all duration-200 group cursor-pointer">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 border border-transparent transition-transform group-hover:scale-110"
-                     [ngClass]="t.iconBg">
-                  <lucide-icon [name]="t.icon" [size]="20" [strokeWidth]="2.5" [ngClass]="t.iconColor"></lucide-icon>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-[15px] font-[800] text-text-primary truncate">{{ t.title }}</p>
-                  <p class="text-[13px] text-text-secondary font-bold mt-0.5 truncate">{{ t.date }}</p>
-                </div>
-                <p class="text-[16px] font-[800] text-text-primary whitespace-nowrap">
-                  -${{ getAbsAmount(t.amount) }}
-                </p>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-      </div>
-      <!-- Profit Estimation Card (Vertical centered layout) -->
-      <div class="w-full bg-card flex flex-col items-center justify-between rounded-[var(--radius-card)] p-4 sm:p-[22px] shadow-[var(--shadow-card)] border border-transparent h-auto sm:h-[415px]" @fadeInUp>
-        
-        <!-- Header Text -->
-        <div class="text-center">
-          <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white mb-1 tracking-tight">Estimation du profit</p>
-          <p class="text-[13px] text-[#a3aed0] dark:text-[#a3aed0] font-medium leading-[1.5]">Decouvrez votre profit, et apprenez<br>davantage sur votre activite</p>
-        </div>
-        
-        <!-- Centered Donut -->
-        <div class="relative flex justify-center items-center">
-          <app-progress-ring
-            [percent]="66"
-            [size]="135"
-            [strokeWidth]="14"
-            color="#01b574"
-            [trackColor]="(themeService.isDark$ | async) ? 'rgba(255,255,255,0.05)' : '#f4f7fe'"
-          ></app-progress-ring>
-          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
-             <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-medium mb-0.5 tracking-wide">Conversion</p>
-             <p class="text-[26px] font-[800] text-[#1b2559] dark:text-white leading-none">66%</p>
-          </div>
-        </div>
 
-        <!-- Horizontal Stats Row below donut (Floating Pill) -->
-        <div class="w-full bg-white dark:bg-transparent rounded-[20px] py-[15px] px-2 flex items-center shadow-[0_12px_24px_rgba(112,144,176,0.12)] border border-transparent dark:border-white/10 dark:shadow-none">
-          <div class="flex-1 text-center flex flex-col justify-center">
-            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Ventes estimees</p>
-            <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white leading-none">{{ salesCount }}</p>
-          </div>
-          <div class="w-[1px] h-9 bg-[#e2e8f0] dark:bg-white/10 mx-2"></div>
-          <div class="flex-1 text-center flex flex-col justify-center">
-            <p class="text-[12px] text-[#a3aed0] dark:text-[#a3aed0] font-[700] mb-1.5">Profit estime</p>
-            <p class="text-[18px] font-[800] text-[#1b2559] dark:text-white leading-none">${{ profitCount | number:'1.3-3' }}</p>
-          </div>
+      <p class="hero-subtitle">
+        Affichage par date, categorie et code avec regroupement automatique par familles.
+      </p>
+
+      <div class="hero-stats-grid">
+        <div class="hero-stat-tile">
+          <p class="tile-label">Date active</p>
+          <p class="tile-value">{{ selectedDate || latestDate }}</p>
         </div>
-        
+        <div class="hero-stat-tile">
+          <p class="tile-label">Ratios visibles</p>
+          <p class="tile-value">{{ visibleRatios }}</p>
+        </div>
+        <div class="hero-stat-tile">
+          <p class="tile-label">Familles visibles</p>
+          <p class="tile-value">{{ groupedRows.length }}</p>
+        </div>
       </div>
-    </div>
-  </div>
-  <!-- COLUMN 3 (~28% of total width) -->
-  <app-right-panel class="shrink-0 w-full xl:w-[350px] 2xl:w-[380px]" />
+    </article>
+
+    <article class="hero-card hero-filters">
+      <div class="filters-header">
+        <div>
+          <p class="hero-kicker">Filtrage intelligent</p>
+          <h2>Code, date, categorie</h2>
+        </div>
+        <button
+          type="button"
+          class="refresh-button"
+          (click)="refreshDashboard()"
+          [disabled]="loading || refreshing"
+          aria-label="Rafraichir le dashboard"
+        >
+          <lucide-icon name="refresh-ccw" [size]="17" [strokeWidth]="2.5" [class.spin]="refreshing"></lucide-icon>
+          <span>Actualiser</span>
+        </button>
+      </div>
+
+      <div class="filters-grid">
+        <label class="filter-field" for="ratio-code-filter">
+          <span>Code ratio</span>
+          <div class="input-shell">
+            <lucide-icon name="search" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+            <input
+              id="ratio-code-filter"
+              type="text"
+              [ngModel]="ratioCodeFilter"
+              (ngModelChange)="onCodeFilterChange($event)"
+              list="ratio-code-options"
+              placeholder="Ex: RS, RNPL, TECH"
+            />
+            <button
+              type="button"
+              *ngIf="ratioCodeFilter"
+              class="clear-filter"
+              aria-label="Effacer le filtre code"
+              (click)="clearCodeFilter()"
+            >
+              <lucide-icon name="x" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+            </button>
+          </div>
+        </label>
+
+        <label class="filter-field" for="ratio-date-filter">
+          <span>Date de reference</span>
+          <div class="select-shell">
+            <lucide-icon name="calendar" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+            <select
+              id="ratio-date-filter"
+              [ngModel]="selectedDate"
+              (ngModelChange)="onDateChange($event)"
+            >
+              <option value="">Toutes les dates</option>
+              <option *ngFor="let date of availableDates" [value]="date">{{ date }}</option>
+            </select>
+          </div>
+        </label>
+      </div>
+
+      <div class="category-switches" role="tablist" aria-label="Filtrer par categorie">
+        <button
+          type="button"
+          class="switch-pill"
+          [class.active]="selectedCategoryId === 'all'"
+          (click)="onCategorySelect('all')"
+        >
+          Toutes
+        </button>
+        <button
+          type="button"
+          class="switch-pill"
+          *ngFor="let category of categoryOptions; trackBy: trackByCategory"
+          [class.active]="selectedCategoryId === category.id"
+          (click)="onCategorySelect(category.id)"
+        >
+          {{ category.name }}
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <section class="dashboard-error" *ngIf="errorMessage as message" @fadeInUp>
+    <lucide-icon name="alert-circle" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+    <p>{{ message }}</p>
+  </section>
+
+  <section class="dashboard-loading" *ngIf="loading" @fadeInUp>
+    <div class="loading-dot"></div>
+    <p>Chargement des ratios dashboard...</p>
+  </section>
+
+  <section class="dashboard-empty" *ngIf="!loading && !errorMessage && groupedRows.length === 0" @fadeInUp>
+    <lucide-icon name="info" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+    <p>Aucun ratio ne correspond au filtre actuel.</p>
+  </section>
+
+  <ng-container *ngIf="!loading && !errorMessage && groupedRows.length > 0">
+    <section class="family-section" *ngFor="let familyGroup of groupedRows; trackBy: trackByFamily" @fadeInUp>
+      <header class="family-header">
+        <div>
+          <p class="family-kicker">Famille</p>
+          <h2>{{ familyGroup.familyName }}</h2>
+        </div>
+        <span class="family-count">{{ familyGroup.rows.length }} ratio(s)</span>
+      </header>
+
+      <div class="ratio-grid" @staggerList>
+        <article
+          class="ratio-card"
+          *ngFor="let ratioRow of familyGroup.rows; trackBy: trackByRatio"
+          [ngClass]="toneClass(ratioRow.gauge.tone)"
+        >
+          <div class="ratio-meta-row">
+            <span class="code-pill">{{ ratioRow.code }}</span>
+            <span class="category-pill">{{ ratioRow.categoryName }}</span>
+          </div>
+
+          <h3>{{ ratioRow.label }}</h3>
+          <p class="ratio-description">{{ ratioRow.description || 'Aucune description' }}</p>
+
+          <div class="gauge-shell">
+            <svg class="half-gauge" viewBox="0 0 240 160" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="dashToneCriticalDark" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#8f111a"></stop>
+                  <stop offset="100%" stop-color="#ff2f37"></stop>
+                </linearGradient>
+                <linearGradient id="dashToneCriticalLight" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ff8d95"></stop>
+                  <stop offset="100%" stop-color="#ffd7da"></stop>
+                </linearGradient>
+                <linearGradient id="dashToneAlertDark" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#bd5f00"></stop>
+                  <stop offset="100%" stop-color="#ff971f"></stop>
+                </linearGradient>
+                <linearGradient id="dashToneAlertLight" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ffd18e"></stop>
+                  <stop offset="100%" stop-color="#ffe9c8"></stop>
+                </linearGradient>
+                <linearGradient id="dashToneGoodDark" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1f9157"></stop>
+                  <stop offset="100%" stop-color="#4fd488"></stop>
+                </linearGradient>
+                <linearGradient id="dashToneGoodLight" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#84e4b9"></stop>
+                  <stop offset="100%" stop-color="#ddfff0"></stop>
+                </linearGradient>
+                <linearGradient id="dashNeedleBody" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#18244d"></stop>
+                  <stop offset="55%" stop-color="#27396f"></stop>
+                  <stop offset="100%" stop-color="#10193a"></stop>
+                </linearGradient>
+                <radialGradient id="dashNeedleHub" cx="50%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="#2ef3c5"></stop>
+                  <stop offset="100%" stop-color="#11c08f"></stop>
+                </radialGradient>
+              </defs>
+
+              <path class="gauge-track" [attr.d]="gaugeArcPath" pathLength="100"></path>
+
+              <path
+                class="gauge-segment"
+                *ngFor="let segment of ratioRow.gauge.segments; let segmentIndex = index"
+                [attr.d]="segmentPath(segment)"
+                [attr.stroke]="gaugeSegmentStroke(segmentIndex)"
+              ></path>
+
+              <circle
+                class="threshold-dot threshold-tol"
+                [attr.cx]="phaseMarkerX('tol')"
+                [attr.cy]="phaseMarkerY('tol')"
+                r="3.4"
+              ></circle>
+              <circle
+                class="threshold-dot threshold-alert"
+                [attr.cx]="phaseMarkerX('ale')"
+                [attr.cy]="phaseMarkerY('ale')"
+                r="3.4"
+              ></circle>
+              <circle
+                class="threshold-dot threshold-appetite"
+                [attr.cx]="phaseMarkerX('app')"
+                [attr.cy]="phaseMarkerY('app')"
+                r="3.4"
+              ></circle>
+
+              <path class="gauge-needle" [attr.d]="needlePath(ratioRow.gauge)"></path>
+              <path class="gauge-needle-sheen" [attr.d]="needleSheenPath(ratioRow.gauge)"></path>
+              <circle class="gauge-needle-hub-outer" [attr.cx]="gaugeCenterX" [attr.cy]="gaugeCenterY" r="6.4"></circle>
+              <circle class="gauge-needle-hub-inner" [attr.cx]="gaugeCenterX" [attr.cy]="gaugeCenterY" r="3.2"></circle>
+
+              <text
+                class="threshold-label"
+                [attr.x]="phaseMarkerX('tol', gaugeRadius + 22)"
+                [attr.y]="phaseMarkerY('tol', gaugeRadius + 22)"
+              >
+                Tol
+              </text>
+              <text
+                class="threshold-label"
+                [attr.x]="phaseMarkerX('ale', gaugeRadius + 22)"
+                [attr.y]="phaseMarkerY('ale', gaugeRadius + 22)"
+              >
+                Ale
+              </text>
+              <text
+                class="threshold-label"
+                [attr.x]="phaseMarkerX('app', gaugeRadius + 22)"
+                [attr.y]="phaseMarkerY('app', gaugeRadius + 22)"
+              >
+                App
+              </text>
+            </svg>
+
+            <div class="gauge-value-wrap">
+              <div class="gauge-value">{{ ratioRow.valueLabel }}</div>
+              <p class="gauge-tone">{{ toneLabel(ratioRow.gauge.tone) }}</p>
+            </div>
+          </div>
+
+          <div class="threshold-strip">
+            <span><strong>Tol</strong> {{ thresholdLabel(ratioRow.seuilTolerance) }}</span>
+            <span><strong>Ale</strong> {{ thresholdLabel(ratioRow.seuilAlerte) }}</span>
+            <span><strong>App</strong> {{ thresholdLabel(ratioRow.seuilAppetence) }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </ng-container>
 </div>
+
+<datalist id="ratio-code-options">
+  <option *ngFor="let ratioCode of ratioCodeOptions; trackBy: trackByCode" [value]="ratioCode"></option>
+</datalist>

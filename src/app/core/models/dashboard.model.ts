@@ -1,31 +1,22 @@
-export interface StatCard {
-  title: string;
-  value: string;
-  change: number;
-  icon: string;
-  color: string;
+export interface DashboardCreateRequestDTO {
+  idRatios: number;
+  value: number;
+  date: string;
 }
 
-export interface RevenueData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    borderColor: string;
-    backgroundColor: string;
-  }[];
-}
-
-export interface TrafficData {
-  labels: string[];
-  data: number[];
-}
-
-export interface ProjectStatus {
-  icon: string;
-  title: string;
-  subtitle: string;
-  percentage: number;
-  chartLabels: string[];
-  chartData: number[];
+export interface DashboardRowResponseDTO {
+  id: number;
+  idRatios: number;
+  code: string;
+  label: string;
+  description: string;
+  familleId: number;
+  categorieId: number;
+  familleCode: string;
+  categorieCode: string;
+  seuilTolerance: number | null;
+  seuilAlerte: number | null;
+  seuilAppetence: number | null;
+  value: number;
+  date: string;
 }

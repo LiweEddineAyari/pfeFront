@@ -21,6 +21,17 @@
     }
   },
 
+  "/api/dashboard": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "timeout": 600000,
+    "pathRewrite": {
+      "^/api/dashboard": "/dashboard"
+    }
+  },
+
   "/api": {
     "target": "http://localhost:8081",
     "secure": false,
@@ -28,6 +39,7 @@
     "logLevel": "debug",
     "timeout": 600000,
     "pathRewrite": {
+      "^/api/dashboard": "/dashboard",
       "^/api/ratios": "/ratios",
       "^/api/parameters": "/parameters"
     }
