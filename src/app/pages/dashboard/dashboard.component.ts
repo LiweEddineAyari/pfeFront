@@ -108,8 +108,8 @@ export class DashboardComponent implements OnInit {
     return found?.name ?? `Categorie ${this.selectedCategoryId}`;
   }
 
-  async refreshDashboard(): Promise<void> {
-    await this.loadDashboard(true);
+  refreshDashboard(): void {
+    window.location.reload();
   }
 
   onDateChange(nextDate: string): void {

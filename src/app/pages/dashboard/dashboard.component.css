@@ -537,6 +537,7 @@
   flex-direction: column;
   gap: 0.62rem;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  overflow: hidden;
 }
 
 .ratio-card:hover {
@@ -575,6 +576,10 @@
   color: #0b7e5a;
   background: color-mix(in srgb, #b3f5da 70%, transparent);
   border-color: color-mix(in srgb, #13b57d 44%, var(--dash-border));
+}
+
+:host-context(html.dark) .code-pill {
+  color: #ffffff;
 }
 
 .category-pill {
