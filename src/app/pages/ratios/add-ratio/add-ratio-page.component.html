@@ -1,0 +1,251 @@
+<div class="add-ratio-page">
+  <!-- Breadcrumb & Back -->
+  <nav class="breadcrumb-bar">
+    <button type="button" class="back-btn" (click)="goBack()">
+      <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+    </button>
+    <div class="breadcrumb-trail">
+      <span class="breadcrumb-item" (click)="goBack()">Ratios</span>
+      <lucide-icon name="chevron-right" [size]="14" [strokeWidth]="2.5" class="breadcrumb-sep"></lucide-icon>
+      <span class="breadcrumb-current">Nouveau ratio</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero-section">
+    <div class="hero-text">
+      <p class="eyebrow">
+        <lucide-icon name="sparkles" [size]="14" [strokeWidth]="2.5"></lucide-icon>
+        Creer un ratio
+      </p>
+      <h1>Nouveau ratio</h1>
+      <p class="subtitle">Configuration complete avec formule JSON arborescente, seuils et simulation.</p>
+    </div>
+  </section>
+
+  <!-- Success Banner -->
+  <section *ngIf="successMessage" class="success-banner">
+    <lucide-icon name="check-circle" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+    {{ successMessage }}
+  </section>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-shell">
+    <div class="skeleton-row" *ngFor="let _ of [0, 1, 2, 3, 4]"></div>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <!-- General Info -->
+    <section class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <lucide-icon name="settings-2" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+        <div>
+          <h3>Informations generales</h3>
+          <p>Code unique, libelle descriptif et statut du ratio.</p>
+        </div>
+      </div>
+
+      <div class="common-fields">
+        <label>
+          <span class="field-label">Code</span>
+          <input type="text" class="field-input" [(ngModel)]="code" [disabled]="saving" placeholder="RS" />
+        </label>
+
+        <label>
+          <span class="field-label">Libelle</span>
+          <input type="text" class="field-input" [(ngModel)]="label" [disabled]="saving" placeholder="Ratio de Solvabilite" />
+        </label>
+
+        <label class="toggle-label">
+          <span class="field-label">Statut</span>
+          <button type="button" class="status-toggle" [ngClass]="isActive ? 'on' : ''" [disabled]="saving" (click)="isActive = !isActive">
+            <span class="dot"></span>
+            {{ isActive ? 'Actif' : 'Inactif' }}
+          </button>
+        </label>
+      </div>
+    </section>
+
+    <!-- Lookups: Famille & Categorie -->
+    <div class="lookup-row">
+      <section class="form-card lookup-card">
+        <div class="form-card-header">
+          <div class="form-card-icon lookup-icon-family">
+            <lucide-icon name="folder" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+          </div>
+          <div>
+            <h3>Famille</h3>
+            <span class="meta-chip" *ngIf="families.length">{{ families.length }} references</span>
+          </div>
+        </div>
+
+        <label>
+          <span class="field-label">Famille</span>
+          <app-field-picker
+            [value]="selectedFamilyName"
+            [options]="familyNames"
+            [groupedOptions]="groupedFamilyNames"
+            [disabled]="saving"
+            placeholder="Rechercher et selectionner une famille"
+            (valueChange)="onFamilyNameChanged($event)"
+          ></app-field-picker>
+        </label>
+      </section>
+
+      <section class="form-card lookup-card">
+        <div class="form-card-header">
+          <div class="form-card-icon lookup-icon-category">
+            <lucide-icon name="tag" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+          </div>
+          <div>
+            <h3>Categorie</h3>
+            <span class="meta-chip" *ngIf="categories.length">{{ categories.length }} references</span>
+          </div>
+        </div>
+
+        <label>
+          <span class="field-label">Categorie</span>
+          <app-field-picker
+            [value]="selectedCategoryName"
+            [options]="categoryNames"
+            [groupedOptions]="groupedCategoryNames"
+            [disabled]="saving"
+            placeholder="Rechercher et selectionner une categorie"
+            (valueChange)="onCategoryNameChanged($event)"
+          ></app-field-picker>
+        </label>
+      </section>
+    </div>
+
+    <!-- Thresholds -->
+    <section class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon threshold-icon">
+          <lucide-icon name="gauge" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+        <div>
+          <h3>Seuils & Description</h3>
+          <p>Configurez les seuils de tolerance, d'alerte et d'appetence.</p>
+        </div>
+      </div>
+
+      <div class="threshold-grid">
+        <label>
+          <span class="field-label">Seuil tolerance</span>
+          <input type="number" step="any" class="field-input" [(ngModel)]="seuilTolerance" [disabled]="saving" placeholder="0.10" />
+        </label>
+
+        <label>
+          <span class="field-label">Seuil alerte</span>
+          <input type="number" step="any" class="field-input" [(ngModel)]="seuilAlerte" [disabled]="saving" placeholder="0.09" />
+        </label>
+
+        <label>
+          <span class="field-label">Seuil appetence</span>
+          <input type="number" step="any" class="field-input" [(ngModel)]="seuilAppetence" [disabled]="saving" placeholder="0.12" />
+        </label>
+      </div>
+
+      <label>
+        <span class="field-label">Description</span>
+        <textarea
+          class="field-input text-area"
+          rows="3"
+          [(ngModel)]="description"
+          [disabled]="saving"
+          placeholder="Description metier du ratio"
+        ></textarea>
+      </label>
+    </section>
+
+    <!-- Formula Builder -->
+    <section class="form-card builder-card">
+      <div class="form-card-header">
+        <div class="form-card-icon builder-icon">
+          <lucide-icon name="braces" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+        <div>
+          <h3>Constructeur de formule ratio</h3>
+          <p>Composez une expression arithmetique avec PARAM, CONSTANT et operateurs binaires.</p>
+        </div>
+      </div>
+
+      <app-ratio-formula-builder
+        [model]="formulaDraft"
+        [parameterCodes]="parameterCodes"
+        [groupedParameterCodes]="groupedParameterCodes"
+        [readonly]="saving"
+        (modelChange)="onFormulaChanged($event)"
+      ></app-ratio-formula-builder>
+    </section>
+
+    <!-- Simulation -->
+    <section class="form-card simulate-card">
+      <div class="form-card-header">
+        <div class="form-card-icon simulate-icon">
+          <lucide-icon name="flask-conical" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+        <div class="simulate-header-text">
+          <h3>Simulation ad-hoc</h3>
+        </div>
+        <button type="button" class="ghost-btn simulate-btn" [disabled]="simulating || saving" (click)="simulateFormula()">
+          <lucide-icon name="flask-conical" [size]="14" [strokeWidth]="2.8" *ngIf="!simulating"></lucide-icon>
+          <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="2.8" class="spin" *ngIf="simulating"></lucide-icon>
+          {{ simulating ? 'Simulation...' : 'Simuler la formule' }}
+        </button>
+      </div>
+
+      <div class="simulate-content" *ngIf="simulationResult">
+        <div class="meta-row">
+          <span class="meta-chip">Valeur: {{ simulationResult.value }}</span>
+          <span class="meta-chip">{{ simulationResult.referencedParameters.length }} parametres references</span>
+        </div>
+        <pre>{{ simulationResult | json }}</pre>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- Validation Errors -->
+  <section *ngIf="validationErrors.length > 0" class="validation-banner">
+    <lucide-icon name="alert-triangle" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+    <div>
+      <h4>Details de validation</h4>
+      <ul>
+        <li *ngFor="let issue of validationErrors">{{ issue }}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- API Error -->
+  <section *ngIf="apiError" class="api-banner">
+    <lucide-icon name="alert-circle" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+    <div>
+      <h4>{{ apiError.error }} ({{ apiError.status }})</h4>
+      <p>{{ apiError.message }}</p>
+      <ul *ngIf="apiError.details?.length">
+        <li *ngFor="let detail of apiError.details">{{ detail }}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Footer Actions -->
+  <footer class="page-footer">
+    <button type="button" class="ghost-btn" [disabled]="saving" (click)="goBack()">
+      <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+      Annuler
+    </button>
+    <div class="footer-right">
+      <button type="button" class="ghost-btn" [disabled]="saving" (click)="runValidation()">
+        <lucide-icon name="check-check" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Valider
+      </button>
+      <button type="button" class="primary-btn" [disabled]="saving" (click)="saveRatio()">
+        <lucide-icon *ngIf="!saving" name="check" [size]="15" [strokeWidth]="3"></lucide-icon>
+        <lucide-icon *ngIf="saving" name="refresh-cw" [size]="15" [strokeWidth]="2.8" class="spin"></lucide-icon>
+        {{ saving ? 'Enregistrement...' : 'Enregistrer le ratio' }}
+      </button>
+    </div>
+  </footer>
+</div>

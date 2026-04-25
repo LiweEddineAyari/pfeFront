@@ -5,17 +5,22 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class LayoutService {
-  private sidebarCollapsed = new BehaviorSubject<boolean>(false);
+  private sidebarCollapsed = new BehaviorSubject<boolean>(
+    localStorage.getItem('sidebarCollapsed') === 'true'
+  );
   isSidebarCollapsed$ = this.sidebarCollapsed.asObservable();
 
   private mobileMenuOpen = new BehaviorSubject<boolean>(false);
   isMobileMenuOpen$ = this.mobileMenuOpen.asObservable();
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.next(!this.sidebarCollapsed.value);
+    const newState = !this.sidebarCollapsed.value;
+    localStorage.setItem('sidebarCollapsed', String(newState));
+    this.sidebarCollapsed.next(newState);
   }
 
   setSidebarCollapsed(collapsed: boolean): void {
+    localStorage.setItem('sidebarCollapsed', String(collapsed));
     this.sidebarCollapsed.next(collapsed);
   }
 

@@ -14,7 +14,8 @@ import {
   Tv, GlassWater, LogOut,
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
-  Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical
+  Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical,
+  List, Folder, Tag, Gauge, Settings2, Braces, FileCode, CheckCheck
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -29,7 +30,8 @@ const icons = {
   Tv, GlassWater, LogOut,
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
-  Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical
+  Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical,
+  List, Folder, Tag, Gauge, Settings2, Braces, FileCode, CheckCheck
 };
 
 export const appConfig: ApplicationConfig = {

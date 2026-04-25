@@ -87,11 +87,27 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'parameters/nouveau',
+        title: 'Nouveau parametre',
+        loadComponent: () =>
+          import('./pages/parameters/add-parameter/add-parameter-page.component').then(
+            (m) => m.AddParameterPageComponent
+          ),
+      },
+      {
         path: 'ratios',
         title: 'Ratios dynamiques',
         loadComponent: () =>
           import('./pages/ratios/ratios-page.component').then(
             (m) => m.RatiosPageComponent
+          ),
+      },
+      {
+        path: 'ratios/nouveau',
+        title: 'Nouveau ratio',
+        loadComponent: () =>
+          import('./pages/ratios/add-ratio/add-ratio-page.component').then(
+            (m) => m.AddRatioPageComponent
           ),
       },
       {

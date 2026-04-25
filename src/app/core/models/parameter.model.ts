@@ -33,7 +33,10 @@ export type FilterOperator =
   | 'LTE'
   | 'NOT_IN'
   | 'IS_NULL'
-  | 'IS_NOT_NULL';
+  | 'IS_NOT_NULL'
+  | 'STARTS_WITH'
+  | 'ENDS_WITH'
+  | 'CONTAINS';
 
 export interface FormulaNode {
   type: FormulaNodeType;
@@ -173,6 +176,9 @@ export const FILTER_OPERATORS: FilterOperator[] = [
   'BETWEEN',
   'IS NULL',
   'IS NOT NULL',
+  'STARTS_WITH',
+  'ENDS_WITH',
+  'CONTAINS',
   'EQ',
   'NE',
   'GT',

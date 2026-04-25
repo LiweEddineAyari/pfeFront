@@ -1,0 +1,166 @@
+<div class="add-parameter-page">
+  <!-- Breadcrumb & Back -->
+  <nav class="breadcrumb-bar">
+    <button type="button" class="back-btn" (click)="goBack()">
+      <lucide-icon name="arrow-left" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+    </button>
+    <div class="breadcrumb-trail">
+      <span class="breadcrumb-item" (click)="goBack()">Parametres</span>
+      <lucide-icon name="chevron-right" [size]="14" [strokeWidth]="2.5" class="breadcrumb-sep"></lucide-icon>
+      <span class="breadcrumb-current">Nouveau parametre</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero-section">
+    <div class="hero-text">
+      <p class="eyebrow">
+        <lucide-icon name="sparkles" [size]="14" [strokeWidth]="2.5"></lucide-icon>
+        Creer un parametre
+      </p>
+      <h1>Nouveau parametre</h1>
+      <p class="subtitle">Basculez entre le constructeur de formule et l'editeur SQL natif.</p>
+    </div>
+
+    <div class="hero-actions">
+      <button
+        type="button"
+        class="mode-toggle"
+        [title]="formMode === 'FORMULA' ? 'Basculer vers SQL natif' : 'Basculer vers constructeur de formule'"
+        (click)="toggleMode()"
+      >
+        <lucide-icon [name]="formMode === 'FORMULA' ? 'file-text' : 'calculator'" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+        <span>{{ formMode === 'FORMULA' ? 'SQL natif' : 'Constructeur de formule' }}</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Success Banner -->
+  <section *ngIf="successMessage" class="success-banner">
+    <lucide-icon name="check-circle" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+    {{ successMessage }}
+  </section>
+
+  <!-- Common Fields -->
+  <section class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-icon">
+        <lucide-icon name="settings-2" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+      </div>
+      <div>
+        <h3>Informations generales</h3>
+        <p>Code unique, libelle descriptif et statut du parametre.</p>
+      </div>
+    </div>
+
+    <div class="common-fields">
+      <label>
+        <span class="field-label">Code</span>
+        <input
+          type="text"
+          class="field-input"
+          [(ngModel)]="code"
+          [disabled]="saving"
+          placeholder="ENT10"
+        />
+      </label>
+
+      <label>
+        <span class="field-label">Libelle</span>
+        <input
+          type="text"
+          class="field-input"
+          [(ngModel)]="label"
+          [disabled]="saving"
+          placeholder="Top 10 expositions"
+        />
+      </label>
+
+      <label class="toggle-label">
+        <span class="field-label">Statut</span>
+        <button type="button" class="status-toggle" [ngClass]="isActive ? 'on' : ''" [disabled]="saving" (click)="isActive = !isActive">
+          <span class="dot"></span>
+          {{ isActive ? 'Actif' : 'Inactif' }}
+        </button>
+      </label>
+    </div>
+  </section>
+
+  <!-- Formula / SQL Builder -->
+  <section class="form-card builder-card">
+    <div class="form-card-header">
+      <div class="form-card-icon builder-icon">
+        <lucide-icon [name]="formMode === 'FORMULA' ? 'braces' : 'file-code'" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+      </div>
+      <div>
+        <h3>{{ formMode === 'FORMULA' ? 'Constructeur d\'expression' : 'SQL natif' }}</h3>
+        <p>{{ formMode === 'FORMULA' ? 'Construisez des arbres FIELD / VALUE / AGGREGATION / operateurs arithmetiques avec expressions imbriquees.' : 'Seul un sous-ensemble analytique de SELECT est accepte' }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="loadingSupportedFields" class="loading-shell">
+      <div class="skeleton-row" *ngFor="let _ of [0, 1, 2]"></div>
+    </div>
+
+    <div *ngIf="!loadingSupportedFields && formMode === 'FORMULA'">
+      <app-formula-builder
+        [model]="formulaDraft"
+        [supportedFields]="supportedFields"
+        [supportedFieldsByTable]="supportedFieldsByTable"
+        [readonly]="saving"
+        (modelChange)="onFormulaChanged($event)"
+      ></app-formula-builder>
+    </div>
+
+    <div *ngIf="!loadingSupportedFields && formMode === 'SQL'" class="sql-mode-wrap">
+      <app-sql-editor
+        [sql]="nativeSqlDraft"
+        [readonly]="saving"
+        subtitle="Seul un sous-ensemble analytique de SELECT est accepte"
+        (sqlChange)="onSqlChanged($event)"
+      ></app-sql-editor>
+    </div>
+  </section>
+
+  <!-- Validation Errors -->
+  <section *ngIf="validationErrors.length > 0" class="validation-banner">
+    <lucide-icon name="alert-triangle" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+    <div>
+      <h4>Details de validation</h4>
+      <ul>
+        <li *ngFor="let issue of validationErrors">{{ issue }}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- API Error -->
+  <section *ngIf="apiError" class="api-banner">
+    <lucide-icon name="alert-circle" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+    <div>
+      <h4>{{ apiError.error }} ({{ apiError.status }})</h4>
+      <p>{{ apiError.message }}</p>
+      <ul *ngIf="apiError.details?.length">
+        <li *ngFor="let detail of apiError.details">{{ detail }}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Footer Actions -->
+  <footer class="page-footer">
+    <button type="button" class="ghost-btn" [disabled]="saving" (click)="goBack()">
+      <lucide-icon name="arrow-left" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+      Annuler
+    </button>
+    <div class="footer-right">
+      <button type="button" class="ghost-btn" [disabled]="saving" (click)="runValidation()">
+        <lucide-icon name="check-check" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Valider
+      </button>
+      <button type="button" class="primary-btn" [disabled]="saving" (click)="saveParameter()">
+        <lucide-icon *ngIf="!saving" name="check" [size]="15" [strokeWidth]="3"></lucide-icon>
+        <lucide-icon *ngIf="saving" name="refresh-cw" [size]="15" [strokeWidth]="2.8" class="spin"></lucide-icon>
+        {{ saving ? 'Enregistrement...' : 'Enregistrer le parametre' }}
+      </button>
+    </div>
+  </footer>
+</div>
