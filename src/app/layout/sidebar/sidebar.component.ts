@@ -319,6 +319,7 @@ export class SidebarComponent implements OnDestroy {
         { label: 'Nouveau ratio', icon: 'plus', path: '/ratios/nouveau', active: false },
       ],
     },
+    { label: 'Stress test', icon: 'flask-conical', active: false, path: '/stress-test' },
   ];
 
   constructor() {

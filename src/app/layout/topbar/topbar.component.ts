@@ -110,6 +110,7 @@ export class TopbarComponent {
     if (normalizedPath === '/datamart/contrat') return 'Donnees contrats';
     if (normalizedPath === '/datamart/balance') return 'Donnees balance';
     if (normalizedPath === '/parameters') return 'Parametres analytiques';
+    if (normalizedPath === '/stress-test') return 'Simulation stress test';
 
     return normalizedPath
       .split('/')

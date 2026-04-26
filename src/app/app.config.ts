@@ -15,7 +15,11 @@ import {
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
   Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical,
-  List, Folder, Tag, Gauge, Settings2, Braces, FileCode, CheckCheck
+  List, Folder, Tag, Gauge, Settings2, Braces, FileCode, CheckCheck,
+  ArrowDown, TrendingDown, Filter, Hash, Zap, BarChart3, Target, SlidersHorizontal,
+  ListChecks, Activity, Eye, Equal, Pencil, Wand2, Scale, Minus, ArrowUpRight, ArrowDownRight,
+  Beaker, Atom, GitCompareArrows, Loader2,
+  Lightbulb, Copy
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -31,7 +35,11 @@ const icons = {
   Server, ShieldCheck, Database, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Play, Calendar,
   XCircle, CheckCircle, AlertTriangle, FileUp, Calculator, Users, DatabaseBackup, Check, Download,
   Trash2, ChevronsUpDown, Percent, Sparkles, FlaskConical,
-  List, Folder, Tag, Gauge, Settings2, Braces, FileCode, CheckCheck
+  List, Folder, Tag, Gauge, Settings2, Braces, FileCode, CheckCheck,
+  ArrowDown, TrendingDown, Filter, Hash, Zap, BarChart3, Target, SlidersHorizontal,
+  ListChecks, Activity, Eye, Equal, Pencil, Wand2, Scale, Minus, ArrowUpRight, ArrowDownRight,
+  Beaker, Atom, GitCompareArrows, Loader2,
+  Lightbulb, Copy
 };
 
 export const appConfig: ApplicationConfig = {

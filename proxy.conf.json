@@ -32,6 +32,17 @@
     }
   },
 
+  "/api/stress-test": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "timeout": 600000,
+    "pathRewrite": {
+      "^/api/stress-test": "/stress-test"
+    }
+  },
+
   "/api": {
     "target": "http://localhost:8081",
     "secure": false,
@@ -41,7 +52,8 @@
     "pathRewrite": {
       "^/api/dashboard": "/dashboard",
       "^/api/ratios": "/ratios",
-      "^/api/parameters": "/parameters"
+      "^/api/parameters": "/parameters",
+      "^/api/stress-test": "/stress-test"
     }
   }
 }

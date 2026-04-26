@@ -1,0 +1,118 @@
+<section class="adjustments">
+  <header class="adjustments-header">
+    <div class="title">
+      <span class="title-icon">
+        <lucide-icon name="scale" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <div>
+        <h3>Ajustements de balance</h3>
+        <p>Definissez les operations ligne par ligne. Le total positif doit egaler le total negatif.</p>
+      </div>
+    </div>
+
+    <button type="button" class="add-row-btn" (click)="addRow('ADD')">
+      <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+      Ajouter un ajustement
+    </button>
+  </header>
+
+  <div class="row-list">
+    <article
+      *ngFor="let row of rowsArray.controls; let i = index; trackBy: trackByRow"
+      class="adjustment-row"
+    >
+        <div class="row-grid" [formGroup]="row">
+          <!-- Index pill -->
+          <div class="row-index">#{{ i + 1 }}</div>
+
+          <!-- Operation pill buttons -->
+          <div class="op-group" role="radiogroup" aria-label="Operation">
+            <button
+              *ngFor="let op of operations"
+              type="button"
+              class="op-pill"
+              [class.is-selected]="row.controls.operation.value === op.value"
+              [class.op-add]="op.value === 'ADD'"
+              [class.op-subtract]="op.value === 'SUBTRACT'"
+              [class.op-set]="op.value === 'SET'"
+              role="radio"
+              [attr.aria-checked]="row.controls.operation.value === op.value"
+              (click)="setOperation(row, op.value)"
+              [title]="op.description"
+            >
+              <lucide-icon [name]="op.icon" [size]="12" [strokeWidth]="3"></lucide-icon>
+              {{ op.label }}
+            </button>
+          </div>
+
+          <!-- Field selector -->
+          <label class="row-field">
+            <span class="row-label">Champ</span>
+            <select class="control-input" formControlName="field">
+              <option *ngFor="let f of balanceFields" [value]="f.value">
+                {{ f.label }} ({{ f.value }})
+              </option>
+            </select>
+          </label>
+
+          <!-- Value input -->
+          <label class="row-value">
+            <span class="row-label">Valeur</span>
+            <input
+              type="number"
+              step="any"
+              class="control-input"
+              formControlName="value"
+              placeholder="0.00"
+              inputmode="decimal"
+            />
+          </label>
+
+          <!-- Toolbar -->
+          <div class="row-toolbar">
+            <button
+              type="button"
+              class="toolbar-btn"
+              [class.is-active]="row.controls.filtersExpanded.value"
+              (click)="toggleFiltersExpanded(row)"
+              [attr.aria-expanded]="row.controls.filtersExpanded.value"
+            >
+              <lucide-icon name="filter" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+              Filtres
+              <lucide-icon
+                [name]="row.controls.filtersExpanded.value ? 'chevron-down' : 'chevron-right'"
+                [size]="12"
+                [strokeWidth]="2.8"
+              ></lucide-icon>
+            </button>
+
+            <button
+              type="button"
+              class="toolbar-btn danger"
+              (click)="removeRow(i)"
+              aria-label="Supprimer cette ligne"
+              [disabled]="rowsArray.length === 1"
+            >
+              <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Expandable filters -->
+        <div class="filters-shell" *ngIf="row.controls.filtersExpanded.value">
+          <app-filter-group-builder
+            [group]="row.controls.filters.value || undefined"
+            [supportedFields]="supportedFields"
+            [supportedFieldsByTable]="supportedFieldsByTable"
+            title="Conditions de selection des lignes"
+            (groupChange)="onFiltersChanged(row, $event)"
+          ></app-filter-group-builder>
+        </div>
+      </article>
+
+    <button type="button" class="ghost-add-row" (click)="addRow('ADD')">
+      <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+      Ajouter un ajustement
+    </button>
+  </div>
+</section>

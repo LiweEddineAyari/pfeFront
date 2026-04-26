@@ -1,0 +1,277 @@
+<section class="results" *ngIf="response" [@fadeInUp]>
+  <!-- Impact summary header -->
+  <header class="impact-summary">
+    <div class="metric-card">
+      <span class="metric-icon" style="--icon-tint: 99, 102, 241">
+        <lucide-icon name="database" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+      </span>
+      <div class="metric-body">
+        <p class="metric-label">Lignes chargees</p>
+        <p class="metric-value">{{ response.factRowsLoaded | number }}</p>
+        <p class="metric-sub">Lignes de fait pour {{ response.referenceDate }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-icon" style="--icon-tint: 1, 181, 116">
+        <lucide-icon name="zap" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+      </span>
+      <div class="metric-body">
+        <p class="metric-label">Lignes impactees</p>
+        <p class="metric-value">{{ response.factRowsImpacted | number }}</p>
+        <p class="metric-sub">Apres application des ajustements</p>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-icon" style="--icon-tint: 245, 158, 11">
+        <lucide-icon name="calculator" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+      </span>
+      <div class="metric-body">
+        <p class="metric-label">Parametres affectes</p>
+        <p class="metric-value">{{ response.affectedParameters.length }}</p>
+        <p class="metric-sub">Codes propages par graphe de dependance</p>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-icon" style="--icon-tint: 6, 182, 212">
+        <lucide-icon name="percent" [size]="16" [strokeWidth]="2.6"></lucide-icon>
+      </span>
+      <div class="metric-body">
+        <p class="metric-label">Ratios affectes</p>
+        <p class="metric-value">{{ response.affectedRatios.length }}</p>
+        <p class="metric-sub">Ratios recalcules a partir des deltas</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Affected fields (compact pill row) -->
+  <div class="affected-fields" *ngIf="response.affectedFields?.length">
+    <span class="affected-label">Champs touches</span>
+    <span class="field-pill" *ngFor="let f of response.affectedFields">{{ f }}</span>
+  </div>
+
+  <!-- Two-column expandable sections -->
+  <div class="impact-grid">
+    <!-- Parameters Impact -->
+    <section class="impact-section" [@fadeIn]>
+      <header class="section-head">
+        <button type="button" class="section-toggle" (click)="toggleParams()" [attr.aria-expanded]="paramsExpanded">
+          <span class="section-icon" style="--icon-tint: 1, 181, 116">
+            <lucide-icon name="calculator" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+          </span>
+          <span class="section-title">
+            <strong>Parametres impactes</strong>
+            <small>{{ filteredParameters.length }} / {{ response.parameters.length }}</small>
+          </span>
+          <lucide-icon
+            [name]="paramsExpanded ? 'chevron-down' : 'chevron-right'"
+            [size]="14"
+            [strokeWidth]="2.8"
+            class="section-chevron"
+          ></lucide-icon>
+        </button>
+      </header>
+
+      <div class="section-controls" *ngIf="paramsExpanded">
+        <label class="search-input">
+          <lucide-icon name="search" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+          <input type="text" [(ngModel)]="paramSearch" placeholder="Rechercher code ou libelle" />
+        </label>
+
+        <select class="control-select" [(ngModel)]="paramSort">
+          <option value="impact-desc">Tri : impact decroissant</option>
+          <option value="impact-asc">Tri : impact croissant</option>
+          <option value="code-asc">Tri : code A->Z</option>
+        </select>
+
+        <label class="check-pill">
+          <input type="checkbox" [(ngModel)]="paramOnlyImpacted" />
+          <span>Impactes uniquement</span>
+        </label>
+      </div>
+
+      <div class="impact-cards" *ngIf="paramsExpanded" [@staggerList]="filteredParameters.length">
+        <article
+          class="impact-card"
+          *ngFor="let p of filteredParameters; trackBy: trackByCode"
+          [class.is-increase]="getImpact(p.code).isIncrease"
+          [class.is-decrease]="getImpact(p.code).isDecrease"
+        >
+          <header class="impact-card-head">
+            <span class="code-badge">{{ p.code }}</span>
+            <h4 class="impact-label">{{ p.label }}</h4>
+
+            <span
+              class="impact-pill"
+              [class.up]="getImpact(p.code).isIncrease"
+              [class.down]="getImpact(p.code).isDecrease"
+              [style.opacity]="0.55 + 0.45 * getImpact(p.code).magnitude"
+            >
+              <lucide-icon
+                *ngIf="getImpact(p.code).isIncrease"
+                name="arrow-up-right"
+                [size]="12"
+                [strokeWidth]="3"
+              ></lucide-icon>
+              <lucide-icon
+                *ngIf="getImpact(p.code).isDecrease"
+                name="arrow-down-right"
+                [size]="12"
+                [strokeWidth]="3"
+              ></lucide-icon>
+              {{ formatPercent(p.impactPercent) }}
+            </span>
+          </header>
+
+          <div class="impact-values">
+            <div class="value-block">
+              <span class="value-label">Original</span>
+              <span class="value-num">{{ p.original | number: smartDecimalsFormat(p.original) }}</span>
+            </div>
+            <span class="value-arrow"><lucide-icon name="arrow-right" [size]="11" [strokeWidth]="3"></lucide-icon></span>
+            <div class="value-block highlight">
+              <span class="value-label">Simule</span>
+              <span class="value-num">{{ p.simulated | number: smartDecimalsFormat(p.simulated) }}</span>
+            </div>
+            <div class="delta-block">
+              <span class="value-label">Delta</span>
+              <span
+                class="value-num"
+                [class.up]="getImpact(p.code).isIncrease"
+                [class.down]="getImpact(p.code).isDecrease"
+              >
+                {{ p.delta > 0 ? '+' : '' }}{{ p.delta | number: smartDecimalsFormat(p.delta) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="impact-bar">
+            <span
+              class="impact-bar-fill"
+              [class.up]="getImpact(p.code).isIncrease"
+              [class.down]="getImpact(p.code).isDecrease"
+              [style.width.%]="getImpact(p.code).barWidthPercent"
+            ></span>
+          </div>
+        </article>
+
+        <div class="empty-impact" *ngIf="filteredParameters.length === 0">
+          <lucide-icon name="search" [size]="20" [strokeWidth]="2.4"></lucide-icon>
+          <span>Aucun parametre ne correspond aux filtres.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ratios Impact -->
+    <section class="impact-section" [@fadeIn]>
+      <header class="section-head">
+        <button type="button" class="section-toggle" (click)="toggleRatios()" [attr.aria-expanded]="ratiosExpanded">
+          <span class="section-icon" style="--icon-tint: 6, 182, 212">
+            <lucide-icon name="gauge" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+          </span>
+          <span class="section-title">
+            <strong>Ratios impactes</strong>
+            <small>{{ filteredRatios.length }} / {{ response.ratios.length }}</small>
+          </span>
+          <lucide-icon
+            [name]="ratiosExpanded ? 'chevron-down' : 'chevron-right'"
+            [size]="14"
+            [strokeWidth]="2.8"
+            class="section-chevron"
+          ></lucide-icon>
+        </button>
+      </header>
+
+      <div class="section-controls" *ngIf="ratiosExpanded">
+        <label class="search-input">
+          <lucide-icon name="search" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+          <input type="text" [(ngModel)]="ratioSearch" placeholder="Rechercher code ou libelle" />
+        </label>
+
+        <select class="control-select" [(ngModel)]="ratioSort">
+          <option value="impact-desc">Tri : impact decroissant</option>
+          <option value="impact-asc">Tri : impact croissant</option>
+          <option value="code-asc">Tri : code A->Z</option>
+        </select>
+
+        <label class="check-pill">
+          <input type="checkbox" [(ngModel)]="ratioOnlyImpacted" />
+          <span>Impactes uniquement</span>
+        </label>
+      </div>
+
+      <div class="impact-cards" *ngIf="ratiosExpanded" [@staggerList]="filteredRatios.length">
+        <article
+          class="impact-card ratio-card"
+          *ngFor="let r of filteredRatios; trackBy: trackByCode"
+          [class.is-increase]="getImpact(r.code).isIncrease"
+          [class.is-decrease]="getImpact(r.code).isDecrease"
+        >
+          <header class="impact-card-head">
+            <span class="code-badge ratio-badge">{{ r.code }}</span>
+            <h4 class="impact-label">{{ r.label }}</h4>
+
+            <span
+              class="impact-pill"
+              [class.up]="getImpact(r.code).isIncrease"
+              [class.down]="getImpact(r.code).isDecrease"
+              [style.opacity]="0.55 + 0.45 * getImpact(r.code).magnitude"
+            >
+              <lucide-icon
+                *ngIf="getImpact(r.code).isIncrease"
+                name="arrow-up-right"
+                [size]="12"
+                [strokeWidth]="3"
+              ></lucide-icon>
+              <lucide-icon
+                *ngIf="getImpact(r.code).isDecrease"
+                name="arrow-down-right"
+                [size]="12"
+                [strokeWidth]="3"
+              ></lucide-icon>
+              {{ formatPercent(r.impactPercent) }}
+            </span>
+          </header>
+
+          <div class="ratio-values">
+            <div class="ratio-value-block">
+              <span class="value-label">Original</span>
+              <span class="value-num">{{ r.original | number: smartDecimalsFormat(r.original) }}</span>
+            </div>
+            <span class="value-arrow"><lucide-icon name="arrow-right" [size]="11" [strokeWidth]="3"></lucide-icon></span>
+            <div class="ratio-value-block highlight">
+              <span class="value-label">Simule</span>
+              <span class="value-num">{{ r.simulated | number: smartDecimalsFormat(r.simulated) }}</span>
+            </div>
+            <div class="delta-block">
+              <span class="value-label">Delta</span>
+              <span
+                class="value-num"
+                [class.up]="getImpact(r.code).isIncrease"
+                [class.down]="getImpact(r.code).isDecrease"
+              >
+                {{ r.delta > 0 ? '+' : '' }}{{ r.delta | number: smartDecimalsFormat(r.delta) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="impact-bar">
+            <span
+              class="impact-bar-fill"
+              [class.up]="getImpact(r.code).isIncrease"
+              [class.down]="getImpact(r.code).isDecrease"
+              [style.width.%]="getImpact(r.code).barWidthPercent"
+            ></span>
+          </div>
+        </article>
+
+        <div class="empty-impact" *ngIf="filteredRatios.length === 0">
+          <lucide-icon name="search" [size]="20" [strokeWidth]="2.4"></lucide-icon>
+          <span>Aucun ratio ne correspond aux filtres.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

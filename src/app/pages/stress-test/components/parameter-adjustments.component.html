@@ -1,0 +1,125 @@
+<section class="adjustments">
+  <header class="adjustments-header">
+    <div class="title">
+      <span class="title-icon">
+        <lucide-icon name="sliders-horizontal" [size]="16" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <div>
+        <h3>Overrides de parametres</h3>
+        <p>Surcharge directe d'un parametre par operation scalaire ou par formule complete.</p>
+      </div>
+    </div>
+
+    <button type="button" class="add-row-btn" (click)="addRow('MULTIPLY')">
+      <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+      Ajouter un parametre
+    </button>
+  </header>
+
+  <div class="row-list">
+    <article
+      *ngFor="let row of rowsArray.controls; let i = index; trackBy: trackByRow"
+      class="adjustment-row"
+    >
+      <div class="row-header">
+        <span class="row-index">#{{ i + 1 }}</span>
+
+        <div class="row-code">
+          <span class="row-label">Code parametre</span>
+          <app-code-autocomplete
+            [value]="row.controls.code.value"
+            [options]="parameterOptions"
+            placeholder="Code parametre (ex : ENCTENG)"
+            (valueChange)="onCodeChanged(row, $event)"
+          ></app-code-autocomplete>
+        </div>
+
+        <div class="row-op">
+          <span class="row-label">Operation</span>
+          <div class="op-group" role="radiogroup" aria-label="Operation">
+            <button
+              *ngFor="let op of operations"
+              type="button"
+              class="op-pill"
+              [class.is-selected]="row.controls.operation.value === op.value"
+              [attr.data-op]="op.value"
+              role="radio"
+              [attr.aria-checked]="row.controls.operation.value === op.value"
+              (click)="setOperation(row, op.value)"
+              [title]="op.description"
+            >
+              <lucide-icon [name]="op.icon" [size]="11" [strokeWidth]="3"></lucide-icon>
+              {{ op.label }}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="remove-btn"
+          (click)="removeRow(i)"
+          [disabled]="rowsArray.length === 1"
+          aria-label="Supprimer cette ligne"
+        >
+          <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Scalar value input -->
+      <div class="row-value-block" *ngIf="!isFormulaOp(row)">
+        <span class="row-label">Valeur</span>
+        <input
+          type="number"
+          step="any"
+          class="control-input"
+          [formControl]="row.controls.value"
+          placeholder="0.00"
+          inputmode="decimal"
+        />
+        <p class="hint" *ngIf="row.controls.operation.value === 'MULTIPLY'">
+          Calcul : <strong>simule = baseline * value</strong>
+        </p>
+        <p class="hint" *ngIf="row.controls.operation.value === 'ADD'">
+          Calcul : <strong>simule = baseline + value</strong>
+        </p>
+        <p class="hint" *ngIf="row.controls.operation.value === 'REPLACE'">
+          Calcul : <strong>simule = value</strong> (remplacement direct)
+        </p>
+      </div>
+
+      <!-- Formula JSON editor -->
+      <div class="row-formula-block" *ngIf="isFormulaOp(row)">
+        <div class="formula-header">
+          <span class="row-label">
+            <lucide-icon name="braces" [size]="11" [strokeWidth]="3"></lucide-icon>
+            Formule JSON
+          </span>
+          <span class="formula-status" [class.is-valid]="isFormulaJsonValid(row)" [class.is-invalid]="!isFormulaJsonValid(row)">
+            <lucide-icon
+              [name]="isFormulaJsonValid(row) ? 'check-circle-2' : 'alert-circle'"
+              [size]="11"
+              [strokeWidth]="2.8"
+            ></lucide-icon>
+            {{ isFormulaJsonValid(row) ? 'JSON valide' : 'JSON invalide' }}
+          </span>
+        </div>
+        <textarea
+          class="formula-editor"
+          [formControl]="row.controls.formulaText"
+          [placeholder]="formulaPlaceholder"
+          spellcheck="false"
+          rows="10"
+        ></textarea>
+        <p class="hint">
+          La formule remplace l'evaluation du parametre. Reference : grammaire
+          <strong>FormulaJson</strong> (sections AGGREGATION, FIELD, ADD, etc.).
+        </p>
+      </div>
+    </article>
+
+    <button type="button" class="ghost-add-row" (click)="addRow('MULTIPLY')">
+      <lucide-icon name="plus" [size]="14" [strokeWidth]="3"></lucide-icon>
+      Ajouter un parametre
+    </button>
+  </div>
+</section>

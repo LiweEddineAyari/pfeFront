@@ -111,6 +111,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'stress-test',
+        title: 'Stress test',
+        loadComponent: () =>
+          import('./pages/stress-test/stress-test-page.component').then(
+            (m) => m.StressTestPageComponent
+          ),
+      },
+      {
         path: 'datamart/mapping-config',
         pathMatch: 'full',
         redirectTo: 'mapping/configurations',

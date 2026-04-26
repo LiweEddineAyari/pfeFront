@@ -1,0 +1,405 @@
+<div class="stress-page">
+  <!-- ===================== HERO ===================== -->
+  <section class="hero-card">
+    <div class="hero-text">
+      <p class="eyebrow">
+        <lucide-icon name="flask-conical" [size]="11" [strokeWidth]="3"></lucide-icon>
+        Moteur de simulation
+      </p>
+      <h2>Stress test &amp; what-if</h2>
+      <p class="subtitle">
+        Simulez en memoire l'impact d'un choc sur la balance ou sur vos parametres analytiques.
+        Aucune ecriture en base, retour instantane des deltas et des ratios recalcules.
+      </p>
+    </div>
+
+    <div class="hero-meta" *ngIf="diagnostics">
+      <div class="meta-tile">
+        <span class="meta-tile-label">Total fact rows</span>
+        <span class="meta-tile-value">{{ diagnostics.totalFactRows | number }}</span>
+      </div>
+      <div class="meta-tile">
+        <span class="meta-tile-label">Lignes a la date</span>
+        <span class="meta-tile-value">{{ diagnostics.rowCountForReferenceDate | number }}</span>
+      </div>
+      <div class="meta-tile">
+        <span class="meta-tile-label">Dates disponibles</span>
+        <span class="meta-tile-value">{{ diagnostics.availableReferenceDates.length }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ZONE 1 - METHOD SELECTOR ===================== -->
+  <section class="zone-card">
+    <header class="zone-card-header">
+      <span class="zone-icon" style="--icon-tint: 1, 181, 116">
+        <lucide-icon name="layout-grid" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <div>
+        <h3>Choisir une methode</h3>
+        <p>Determine quelle famille d'ajustements sera disponible dans le formulaire ci-dessous.</p>
+      </div>
+    </header>
+
+    <div class="zone-card-body">
+      <app-stress-method-selector [value]="method" (valueChange)="onMethodChange($event)"></app-stress-method-selector>
+    </div>
+  </section>
+
+  <!-- ===================== ZONE 1B - REFERENCE DATE ===================== -->
+  <section class="zone-card">
+    <header class="zone-card-header">
+      <span class="zone-icon" style="--icon-tint: 99, 102, 241">
+        <lucide-icon name="calendar" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <div>
+        <h3>Date de reference</h3>
+        <p>Periode sur laquelle la simulation sera evaluee. Les diagnostics aident a choisir une date avec donnees.</p>
+      </div>
+    </header>
+
+    <div class="zone-card-body date-row">
+      <label class="date-input">
+        <lucide-icon name="calendar" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        <input
+          type="date"
+          [ngModel]="referenceDate"
+          (ngModelChange)="onReferenceDateChange($event)"
+        />
+      </label>
+
+      <div class="available-dates" *ngIf="diagnostics?.availableReferenceDates?.length">
+        <span class="available-label">Dates disponibles</span>
+        <button
+          *ngFor="let d of diagnostics?.availableReferenceDates"
+          type="button"
+          class="available-date-pill"
+          [class.is-selected]="d === referenceDate"
+          (click)="pickAvailableDate(d)"
+        >
+          {{ d }}
+        </button>
+      </div>
+
+      <div *ngIf="diagnosticsLoading" class="diagnostics-loader">
+        <lucide-icon name="refresh-cw" [size]="13" [strokeWidth]="2.8" class="spin"></lucide-icon>
+        Diagnostics en cours...
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ZONE 1C - METHOD-AWARE FORM ===================== -->
+  <section class="zone-card">
+    <header class="zone-card-header">
+      <span class="zone-icon" style="--icon-tint: 1, 181, 116">
+        <lucide-icon
+          [name]="method === 'BALANCE' ? 'scale' : 'sliders-horizontal'"
+          [size]="14"
+          [strokeWidth]="2.8"
+        ></lucide-icon>
+      </span>
+      <div>
+        <h3>Configuration</h3>
+        <p *ngIf="method === 'BALANCE'">
+          Construisez la liste des ajustements de balance. Le serveur verifie l'equilibre apres expansion des filtres.
+        </p>
+        <p *ngIf="method === 'PARAMETER'">Definissez vos overrides de parametres : scalaires ou formules de remplacement.</p>
+      </div>
+    </header>
+
+    <div class="zone-card-body method-body" [@fadeIn]="method">
+      <ng-container *ngIf="method === 'BALANCE'">
+        <app-balance-adjustments
+          [supportedFields]="supportedFields"
+          [supportedFieldsByTable]="supportedFieldsByTable"
+          (rowsChange)="onBalanceRowsChange($event)"
+          (validatorStateChange)="onValidatorStateChange($event)"
+        ></app-balance-adjustments>
+      </ng-container>
+
+      <ng-container *ngIf="method === 'PARAMETER'">
+        <app-parameter-adjustments
+          [parameterOptions]="parameterOptions"
+          (rowsChange)="onParameterRowsChange($event)"
+          (validityChange)="onParameterValidityChange($event)"
+        ></app-parameter-adjustments>
+      </ng-container>
+    </div>
+  </section>
+
+  <!-- ===================== ZONE 2 - RUN ACTION BAR ===================== -->
+  <section class="run-bar">
+    <div class="run-bar-summary">
+      <span class="run-bar-icon">
+        <lucide-icon name="flask-conical" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <div class="run-bar-text">
+        <p class="run-bar-title">
+          Methode <strong>{{ method }}</strong> · {{ referenceDate || '—' }} · {{ configuredCount }}
+          ajustement<span *ngIf="configuredCount !== 1">s</span>
+        </p>
+        <p class="run-bar-sub" *ngIf="!runDisabledReason">
+          Pret a lancer la simulation. Aucun changement ne sera persiste.
+        </p>
+        <p class="run-bar-sub warn" *ngIf="runDisabledReason">
+          <lucide-icon name="alert-triangle" [size]="11" [strokeWidth]="2.8"></lucide-icon>
+          {{ runDisabledReason }}
+        </p>
+      </div>
+    </div>
+
+    <div class="run-bar-actions">
+      <button
+        type="button"
+        class="ghost-btn"
+        *ngIf="response || error"
+        (click)="resetResults()"
+        [disabled]="running"
+      >
+        <lucide-icon name="refresh-ccw" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+        Reinitialiser
+      </button>
+      <button
+        type="button"
+        class="run-btn"
+        (click)="runSimulation()"
+        [disabled]="!canRun"
+      >
+        <lucide-icon *ngIf="!running" name="play" [size]="16" [strokeWidth]="3"></lucide-icon>
+        <lucide-icon *ngIf="running" name="loader-2" [size]="16" [strokeWidth]="3" class="spin"></lucide-icon>
+        {{ running ? 'Simulation en cours...' : 'Lancer la simulation' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================== ZONE 3 - RESULTS ===================== -->
+  <section class="zone-card results-zone" #resultsSection>
+    <header class="zone-card-header">
+      <span class="zone-icon" style="--icon-tint: 6, 182, 212">
+        <lucide-icon name="bar-chart3" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+      </span>
+      <div>
+        <h3>Resultats</h3>
+        <p *ngIf="!response && !error && !running">
+          Configurez votre simulation et lancez l'analyse pour voir les deltas et les ratios recalcules.
+        </p>
+        <p *ngIf="response && !error">
+          Termine en {{ lastRunDuration }} ms · {{ response.factRowsImpacted | number }} lignes impactees.
+        </p>
+        <p *ngIf="error && !running">
+          Simulation echouee en {{ lastRunDuration }} ms.
+        </p>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         BALANCE CARD: shown after any BALANCE run (success OR error)
+         ========================================================= -->
+    <ng-container *ngIf="lastRunMethod === 'BALANCE' && (response || error) && !running">
+
+      <!-- SUCCESS: server confirmed balance -->
+      <div *ngIf="balanceVerifiedByServer" class="balance-card balance-ok" [@fadeInUp]>
+        <div class="balance-card-icon ok">
+          <lucide-icon name="check-circle" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+        <div class="balance-card-body">
+          <h4>Ajustements equilibres <span class="bc-badge ok">Verifie par le serveur</span></h4>
+          <p>La somme ponderee des ajustements positifs est egale a la somme ponderee des ajustements negatifs apres expansion des filtres. La simulation a pu s'executer correctement.</p>
+          <div class="balance-totals">
+            <div class="bt-cell">
+              <span class="bt-label">Positif total</span>
+              <span class="bt-value ok">{{ validatorState.positive | number:'1.2-6' }}</span>
+            </div>
+            <div class="bt-sep">
+              <lucide-icon name="equal" [size]="14" [strokeWidth]="2.8"></lucide-icon>
+            </div>
+            <div class="bt-cell">
+              <span class="bt-label">Negatif total</span>
+              <span class="bt-value ok">{{ validatorState.negative | number:'1.2-6' }}</span>
+            </div>
+            <div class="bt-cell diff-zero">
+              <span class="bt-label">Difference</span>
+              <span class="bt-value ok">0.000000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ERROR: UNBALANCED_SIMULATION with smart correction guide -->
+      <div *ngIf="isUnbalancedError && unbalancedDetails" class="balance-card balance-err" [@fadeInUp]>
+        <div class="balance-card-icon err">
+          <lucide-icon name="alert-triangle" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+        <div class="balance-card-body">
+          <h4>
+            Ajustements non equilibres
+            <span class="bc-badge err">UNBALANCED_SIMULATION</span>
+          </h4>
+          <p>{{ error!.message }}</p>
+
+          <!-- Totals row -->
+          <div class="balance-totals">
+            <div class="bt-cell">
+              <span class="bt-label">Positif total (serveur)</span>
+              <span class="bt-value pos">{{ unbalancedDetails.positive | number:'1.2-6' }}</span>
+            </div>
+            <div class="bt-sep err-sep">
+              <lucide-icon name="minus" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            </div>
+            <div class="bt-cell">
+              <span class="bt-label">Negatif total (serveur)</span>
+              <span class="bt-value neg">{{ unbalancedDetails.negative | number:'1.2-6' }}</span>
+            </div>
+            <div class="bt-cell diff-nonzero">
+              <span class="bt-label">Difference</span>
+              <span class="bt-value err">{{ unbalancedDetails.difference | number:'1.2-6' }}</span>
+            </div>
+          </div>
+
+          <!-- Explanation -->
+          <div class="correction-intro">
+            <lucide-icon name="lightbulb" [size]="13" [strokeWidth]="2.8"></lucide-icon>
+            <span>
+              Le moteur multiplie chaque valeur saisie par le nombre de lignes correspondant aux filtres.
+              Choisissez le cote que vous souhaitez corriger et copiez la valeur suggeree.
+            </span>
+          </div>
+
+          <!-- ADD side suggestions -->
+          <div class="suggestion-group" *ngIf="unbalancedDetails.addSuggestions.length">
+            <div class="sg-header">
+              <span class="sg-side-badge add">ADD</span>
+              <span class="sg-side-label">Corriger le cote positif pour egaler le negatif</span>
+            </div>
+            <div class="sg-rows">
+              <div class="sg-row" *ngFor="let s of unbalancedDetails.addSuggestions">
+                <div class="sg-row-meta">
+                  <span class="sg-field">{{ s.row.field }}</span>
+                  <span class="sg-filter">{{ describeRowFilters(s.row) }}</span>
+                </div>
+                <div class="sg-row-values">
+                  <div class="sg-val-col">
+                    <span class="sg-val-label">Valeur actuelle</span>
+                    <span class="sg-val current">{{ s.row.value | number:'1.2-9' }}</span>
+                  </div>
+                  <lucide-icon name="arrow-right" [size]="14" [strokeWidth]="2.5" class="sg-arrow"></lucide-icon>
+                  <div class="sg-val-col">
+                    <span class="sg-val-label">Valeur suggeree</span>
+                    <span class="sg-val suggested">{{ s.suggestedValue | number:'1.2-9' }}</span>
+                  </div>
+                  <button type="button" class="copy-btn" (click)="copyToClipboard(s.suggestedValue)" title="Copier">
+                    <lucide-icon name="copy" [size]="12" [strokeWidth]="2.8"></lucide-icon>
+                    Copier
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTRACT side suggestions -->
+          <div class="suggestion-group" *ngIf="unbalancedDetails.subtractSuggestions.length">
+            <div class="sg-header">
+              <span class="sg-side-badge sub">SUBTRACT</span>
+              <span class="sg-side-label">Corriger le cote negatif pour egaler le positif</span>
+            </div>
+            <div class="sg-rows">
+              <div class="sg-row" *ngFor="let s of unbalancedDetails.subtractSuggestions">
+                <div class="sg-row-meta">
+                  <span class="sg-field">{{ s.row.field }}</span>
+                  <span class="sg-filter">{{ describeRowFilters(s.row) }}</span>
+                </div>
+                <div class="sg-row-values">
+                  <div class="sg-val-col">
+                    <span class="sg-val-label">Valeur actuelle</span>
+                    <span class="sg-val current">{{ s.row.value | number:'1.2-9' }}</span>
+                  </div>
+                  <lucide-icon name="arrow-right" [size]="14" [strokeWidth]="2.5" class="sg-arrow"></lucide-icon>
+                  <div class="sg-val-col">
+                    <span class="sg-val-label">Valeur suggeree</span>
+                    <span class="sg-val suggested">{{ s.suggestedValue | number:'1.2-9' }}</span>
+                  </div>
+                  <button type="button" class="copy-btn" (click)="copyToClipboard(s.suggestedValue)" title="Copier">
+                    <lucide-icon name="copy" [size]="12" [strokeWidth]="2.8"></lucide-icon>
+                    Copier
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Algorithm note -->
+          <div class="algo-note">
+            <lucide-icon name="info" [size]="12" [strokeWidth]="2.8"></lucide-icon>
+            <span>
+              Formule : <code>valeur_suggeree = valeur_actuelle × (total_opposite / total_side)</code>.
+              Corrige proportionnellement toutes les lignes du cote choisi.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generic error (not UNBALANCED_SIMULATION) -->
+      <div *ngIf="error && !isUnbalancedError" class="error-banner" [@fadeInUp]>
+        <div class="error-banner-head">
+          <span class="error-banner-icon">
+            <lucide-icon name="alert-circle" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+          </span>
+          <div>
+            <h4>
+              <span class="error-code">{{ error.error }}</span>
+              <span class="error-status">HTTP {{ error.status }}</span>
+            </h4>
+            <p>{{ error.message }}</p>
+          </div>
+        </div>
+        <ul class="error-details" *ngIf="error.details?.length">
+          <li *ngFor="let detail of error.details">{{ detail }}</li>
+        </ul>
+      </div>
+
+    </ng-container>
+
+    <!-- PARAMETER method error or non-balance errors displayed here -->
+    <div *ngIf="error && lastRunMethod !== 'BALANCE'" class="error-banner" [@fadeInUp]>
+      <div class="error-banner-head">
+        <span class="error-banner-icon">
+          <lucide-icon name="alert-circle" [size]="18" [strokeWidth]="2.8"></lucide-icon>
+        </span>
+        <div>
+          <h4>
+            <span class="error-code">{{ error.error }}</span>
+            <span class="error-status">HTTP {{ error.status }}</span>
+          </h4>
+          <p>{{ error.message }}</p>
+        </div>
+      </div>
+      <ul class="error-details" *ngIf="error.details?.length">
+        <li *ngFor="let detail of error.details">{{ detail }}</li>
+      </ul>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div *ngIf="running && !response" class="skeleton-zone" [@fadeIn]>
+      <div class="skeleton-row" *ngFor="let _ of [0,1,2,3]"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!response && !error && !running" class="empty-state" [@fadeIn]>
+      <div class="empty-illu" aria-hidden="true">
+        <span class="orbit"></span>
+        <span class="orbit slow"></span>
+        <span class="empty-icon">
+          <lucide-icon name="flask-conical" [size]="28" [strokeWidth]="2.4"></lucide-icon>
+        </span>
+      </div>
+      <h4>Pret a stresser le portefeuille</h4>
+      <p>
+        Configurez votre simulation et lancez l'analyse pour voir les resultats ici.
+        Les deltas, les ratios et les parametres impactes s'afficheront automatiquement.
+      </p>
+    </div>
+
+    <!-- Results -->
+    <app-stress-test-results *ngIf="response && !error" [response]="response"></app-stress-test-results>
+  </section>
+</div>
