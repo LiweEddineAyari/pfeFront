@@ -28,6 +28,12 @@
   color: var(--dash-text);
 }
 
+.view-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
 .hero-grid {
   display: grid;
   grid-template-columns: 1.1fr 1.4fr;

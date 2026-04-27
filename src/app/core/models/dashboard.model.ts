@@ -20,3 +20,11 @@ export interface DashboardRowResponseDTO {
   value: number;
   date: string;
 }
+
+/**
+ * Response shape of GET /api/dashboard/grouped-by-ratio.
+ * Outer key  = ratio code (e.g. "RCET1").
+ * Inner key  = ISO date string (yyyy-mm-dd).
+ * Inner val  = ratio numeric value at that date.
+ */
+export type DashboardGroupedByRatioResponse = Record<string, Record<string, number>>;

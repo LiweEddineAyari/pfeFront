@@ -153,17 +153,32 @@
     <p>{{ message }}</p>
   </section>
 
-  <section class="dashboard-loading" *ngIf="loading" @fadeInUp>
+  <section class="dashboard-loading" *ngIf="loading || (isAllDatesMode && seriesLoading)" @fadeInUp>
     <div class="loading-dot"></div>
     <p>Chargement des ratios dashboard...</p>
   </section>
 
-  <section class="dashboard-empty" *ngIf="!loading && !errorMessage && groupedRows.length === 0" @fadeInUp>
+  <!-- Empty states differ by mode -->
+  <section
+    class="dashboard-empty"
+    *ngIf="!loading && !errorMessage && !isAllDatesMode && groupedRows.length === 0"
+    @fadeInUp
+  >
     <lucide-icon name="info" [size]="18" [strokeWidth]="2.5"></lucide-icon>
     <p>Aucun ratio ne correspond au filtre actuel.</p>
   </section>
 
-  <ng-container *ngIf="!loading && !errorMessage && groupedRows.length > 0">
+  <section
+    class="dashboard-empty"
+    *ngIf="!loading && !errorMessage && isAllDatesMode && !seriesLoading && seriesFetched && groupedSeries.length === 0"
+    @fadeInUp
+  >
+    <lucide-icon name="info" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+    <p>Aucune serie temporelle ne correspond au filtre actuel.</p>
+  </section>
+
+  <!-- Gauge view: a specific date is selected -->
+  <div *ngIf="!loading && !errorMessage && !isAllDatesMode && groupedRows.length > 0" @fadeIn class="view-shell">
     <section class="family-section" *ngFor="let familyGroup of groupedRows; trackBy: trackByFamily" @fadeInUp>
       <header class="family-header">
         <div>
@@ -220,43 +235,43 @@
                 class="gauge-segment"
                 *ngFor="let segment of ratioRow.gauge.segments; let segmentIndex = index"
                 [attr.d]="segmentPath(segment, segmentIndex)"
-                [attr.stroke]="gaugeSegmentStroke(segmentIndex)"
+                [attr.stroke]="gaugeSegmentStroke(segmentIndex, ratioRow.gauge)"
               ></path>
 
               <!-- Dashed drops for markers -->
               <line class="threshold-dash"
-                    [attr.x1]="phaseMarkerX('tol', 92)"
-                    [attr.y1]="phaseMarkerY('tol', 92)"
-                    [attr.x2]="phaseMarkerX('tol', 56)"
-                    [attr.y2]="phaseMarkerY('tol', 56)"></line>
+                    [attr.x1]="phaseMarkerXForGauge(ratioRow.gauge, 'tol', 92)"
+                    [attr.y1]="phaseMarkerYForGauge(ratioRow.gauge, 'tol', 92)"
+                    [attr.x2]="phaseMarkerXForGauge(ratioRow.gauge, 'tol', 56)"
+                    [attr.y2]="phaseMarkerYForGauge(ratioRow.gauge, 'tol', 56)"></line>
               <line class="threshold-dash"
-                    [attr.x1]="phaseMarkerX('ale', 92)"
-                    [attr.y1]="phaseMarkerY('ale', 92)"
-                    [attr.x2]="phaseMarkerX('ale', 56)"
-                    [attr.y2]="phaseMarkerY('ale', 56)"></line>
+                    [attr.x1]="phaseMarkerXForGauge(ratioRow.gauge, 'ale', 92)"
+                    [attr.y1]="phaseMarkerYForGauge(ratioRow.gauge, 'ale', 92)"
+                    [attr.x2]="phaseMarkerXForGauge(ratioRow.gauge, 'ale', 56)"
+                    [attr.y2]="phaseMarkerYForGauge(ratioRow.gauge, 'ale', 56)"></line>
               <line class="threshold-dash"
-                    [attr.x1]="phaseMarkerX('app', 92)"
-                    [attr.y1]="phaseMarkerY('app', 92)"
-                    [attr.x2]="phaseMarkerX('app', 56)"
-                    [attr.y2]="phaseMarkerY('app', 56)"></line>
+                    [attr.x1]="phaseMarkerXForGauge(ratioRow.gauge, 'app', 92)"
+                    [attr.y1]="phaseMarkerYForGauge(ratioRow.gauge, 'app', 92)"
+                    [attr.x2]="phaseMarkerXForGauge(ratioRow.gauge, 'app', 56)"
+                    [attr.y2]="phaseMarkerYForGauge(ratioRow.gauge, 'app', 56)"></line>
 
               <!-- Threshold Dots -->
               <circle
                 class="threshold-dot threshold-tol"
-                [attr.cx]="phaseMarkerX('tol', 92)"
-                [attr.cy]="phaseMarkerY('tol', 92)"
+                [attr.cx]="phaseMarkerXForGauge(ratioRow.gauge, 'tol', 92)"
+                [attr.cy]="phaseMarkerYForGauge(ratioRow.gauge, 'tol', 92)"
                 r="4"
               ></circle>
               <circle
                 class="threshold-dot threshold-alert"
-                [attr.cx]="phaseMarkerX('ale', 92)"
-                [attr.cy]="phaseMarkerY('ale', 92)"
+                [attr.cx]="phaseMarkerXForGauge(ratioRow.gauge, 'ale', 92)"
+                [attr.cy]="phaseMarkerYForGauge(ratioRow.gauge, 'ale', 92)"
                 r="4"
               ></circle>
               <circle
                 class="threshold-dot threshold-appetite"
-                [attr.cx]="phaseMarkerX('app', 92)"
-                [attr.cy]="phaseMarkerY('app', 92)"
+                [attr.cx]="phaseMarkerXForGauge(ratioRow.gauge, 'app', 92)"
+                [attr.cy]="phaseMarkerYForGauge(ratioRow.gauge, 'app', 92)"
                 r="4"
               ></circle>
 
@@ -268,22 +283,22 @@
               <!-- Threshold Labels -->
               <text
                 class="threshold-label"
-                [attr.x]="phaseMarkerX('tol', 110)"
-                [attr.y]="phaseMarkerY('tol', 110)"
+                [attr.x]="phaseMarkerXForGauge(ratioRow.gauge, 'tol', 110)"
+                [attr.y]="phaseMarkerYForGauge(ratioRow.gauge, 'tol', 110)"
               >
                 Tol
               </text>
               <text
                 class="threshold-label"
-                [attr.x]="phaseMarkerX('ale', 110)"
-                [attr.y]="phaseMarkerY('ale', 110)"
+                [attr.x]="phaseMarkerXForGauge(ratioRow.gauge, 'ale', 110)"
+                [attr.y]="phaseMarkerYForGauge(ratioRow.gauge, 'ale', 110)"
               >
                 Ale
               </text>
               <text
                 class="threshold-label"
-                [attr.x]="phaseMarkerX('app', 110)"
-                [attr.y]="phaseMarkerY('app', 110)"
+                [attr.x]="phaseMarkerXForGauge(ratioRow.gauge, 'app', 110)"
+                [attr.y]="phaseMarkerYForGauge(ratioRow.gauge, 'app', 110)"
               >
                 App
               </text>
@@ -303,6 +318,38 @@
         </article>
       </div>
     </section>
-  </ng-container>
+  </div>
+
+  <!-- Time-series view: "Toutes les dates" -->
+  <div
+    *ngIf="!loading && !errorMessage && isAllDatesMode && !seriesLoading && groupedSeries.length > 0"
+    @fadeIn
+    class="view-shell"
+  >
+    <section
+      class="family-section"
+      *ngFor="let seriesGroup of groupedSeries; trackBy: trackBySeriesFamily"
+      @fadeInUp
+    >
+      <header class="family-header">
+        <div>
+          <p class="family-kicker">Famille</p>
+          <h2>{{ seriesGroup.familyName }}</h2>
+        </div>
+        <span class="family-count">{{ seriesGroup.cards.length }} ratio(s)</span>
+      </header>
+
+      <div class="ratio-grid">
+        <app-ratio-line-chart-card
+          *ngFor="let card of seriesGroup.cards; let cardIndex = index; trackBy: trackBySeriesCard"
+          [code]="card.code"
+          [label]="card.label"
+          [category]="card.categoryName"
+          [data]="card.data"
+          [index]="cardIndex"
+        ></app-ratio-line-chart-card>
+      </div>
+    </section>
+  </div>
 </div>
 

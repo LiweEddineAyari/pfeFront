@@ -1,6 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { DashboardRowResponseDTO } from '../models/dashboard.model';
+import {
+  DashboardGroupedByRatioResponse,
+  DashboardRowResponseDTO,
+} from '../models/dashboard.model';
 import { ApiErrorResponse, RatioLookupItem } from '../models/ratio.model';
 
 export class DashboardApiHttpError extends Error {
@@ -43,6 +46,72 @@ export class DashboardService {
       const payload = await this.fetchJson<unknown>(datePath, { method: 'GET' });
       return this.normalizeRowsPayload(payload, datePath);
     }
+  }
+
+  /**
+   * Time-series view used by the dashboard line chart cards.
+   * Returns a map of `code -> { isoDate -> value }`.
+   */
+  async groupedByRatio(): Promise<DashboardGroupedByRatioResponse> {
+    const path = `${this.dashboardBase}/grouped-by-ratio`;
+    const payload = await this.fetchJson<unknown>(path, { method: 'GET' });
+    return this.normalizeGroupedByRatioPayload(payload, path);
+  }
+
+  private normalizeGroupedByRatioPayload(
+    payload: unknown,
+    path: string
+  ): DashboardGroupedByRatioResponse {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      throw new DashboardApiHttpError(
+        502,
+        this.buildApiError(
+          502,
+          payload,
+          path,
+          'Reponse invalide. Map<code, Map<date, value>> attendue.'
+        )
+      );
+    }
+
+    const result: DashboardGroupedByRatioResponse = {};
+    // Unwrap envelope keys like { "ratios": {...} } or { "data": {...} }.
+    const top = payload as Record<string, unknown>;
+    const envelopeKeys = ['ratios', 'data', 'items', 'content', 'results'];
+    let unwrapped: unknown = payload;
+    for (const key of envelopeKeys) {
+      const candidate = top[key];
+      if (
+        candidate &&
+        typeof candidate === 'object' &&
+        !Array.isArray(candidate)
+      ) {
+        unwrapped = candidate;
+        break;
+      }
+    }
+
+    const source = unwrapped as Record<string, unknown>;
+
+    for (const [code, series] of Object.entries(source)) {
+      if (!series || typeof series !== 'object' || Array.isArray(series)) {
+        continue;
+      }
+
+      const normalizedSeries: Record<string, number> = {};
+      for (const [date, raw] of Object.entries(series as Record<string, unknown>)) {
+        const value = this.toNullableNumber(raw);
+        if (date.trim() && value !== null) {
+          normalizedSeries[date.trim()] = value;
+        }
+      }
+
+      if (Object.keys(normalizedSeries).length > 0) {
+        result[code.trim()] = normalizedSeries;
+      }
+    }
+
+    return result;
   }
 
   async listFamilies(): Promise<RatioLookupItem[]> {

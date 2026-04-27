@@ -3,10 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
-import { DashboardRowResponseDTO } from '../../core/models/dashboard.model';
+import {
+  DashboardGroupedByRatioResponse,
+  DashboardRowResponseDTO,
+} from '../../core/models/dashboard.model';
 import { RatioLookupItem } from '../../core/models/ratio.model';
 import { DashboardApiHttpError, DashboardService } from '../../core/services/dashboard.service';
-import { fadeInUp, staggerList } from '../../core/animations';
+import { fadeInUp, fadeIn, staggerList } from '../../core/animations';
+import { RatioLineChartCardComponent } from './components/ratio-line-chart-card.component';
 
 type GaugeTone = 'critical' | 'warning' | 'elevated' | 'watch' | 'good' | 'excellent';
 
@@ -25,6 +29,9 @@ interface GaugeModel {
   needlePercent: number;
   needleAngle: number;
   tone: GaugeTone;
+  /** True when the original thresholds are descending (Tol > Ale > App),
+   *  meaning low values are good and high values are critical. */
+  isInverted: boolean;
 }
 
 interface DashboardRatioCard extends DashboardRowResponseDTO {
@@ -42,12 +49,29 @@ interface DashboardFamilyGroup {
   rows: DashboardRatioCard[];
 }
 
+/** A single time-series card data shape for the "Toutes les dates" view. */
+export interface RatioSeriesCard {
+  code: string;
+  label: string;
+  categoryName: string;
+  familyId: number;
+  familyName: string;
+  data: Record<string, number>;
+}
+
+/** Grouped time-series view. */
+export interface RatioSeriesFamilyGroup {
+  familyId: number;
+  familyName: string;
+  cards: RatioSeriesCard[];
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, RatioLineChartCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeInUp, staggerList],
+  animations: [fadeInUp, fadeIn, staggerList],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -72,6 +96,23 @@ export class DashboardComponent implements OnInit {
   private allRows: DashboardRatioCard[] = [];
   groupedRows: DashboardFamilyGroup[] = [];
   visibleRatios = 0;
+
+  /** Time-series data, only populated when "Toutes les dates" is active. */
+  private groupedByRatio: DashboardGroupedByRatioResponse = {};
+  /** Time-series cards, grouped by family, ready to render. */
+  groupedSeries: RatioSeriesFamilyGroup[] = [];
+  /** Number of distinct ratios in the time-series view. */
+  visibleSeriesRatios = 0;
+  /** True while we're fetching the grouped-by-ratio payload. */
+  seriesLoading = false;
+
+  /** True once `groupedByRatio` has been loaded at least once. */
+  seriesFetched = false;
+
+  /** Whether the dashboard is in the time-series view ("Toutes les dates" mode). */
+  get isAllDatesMode(): boolean {
+    return !this.selectedDate.trim();
+  }
 
   readonly gaugeCenterX = 120;
   readonly gaugeCenterY = 130;
@@ -115,6 +156,9 @@ export class DashboardComponent implements OnInit {
   onDateChange(nextDate: string): void {
     this.selectedDate = nextDate;
     this.applyFilters();
+    if (this.isAllDatesMode) {
+      void this.loadGroupedSeries();
+    }
   }
 
   onCodeFilterChange(nextCode: string): void {
@@ -185,7 +229,7 @@ export class DashboardComponent implements OnInit {
     return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${this.gaugeRadius} ${this.gaugeRadius} 0 0 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
   }
 
-  gaugeSegmentStroke(index: number): string {
+  gaugeSegmentStroke(index: number, _gauge?: GaugeModel): string {
     return this.gaugeStrokePalette[index] ?? this.gaugeStrokePalette[this.gaugeStrokePalette.length - 1];
   }
 
@@ -311,7 +355,12 @@ export class DashboardComponent implements OnInit {
         .sort((a, b) => a.code.localeCompare(b.code));
 
       this.applyFilters();
-      
+
+      // Kick off the time-series fetch in parallel if "Toutes les dates" is active.
+      if (this.isAllDatesMode) {
+        void this.loadGroupedSeries();
+      }
+
       setTimeout(() => {
         this.animateCards();
       }, 50);
@@ -369,16 +418,124 @@ export class DashboardComponent implements OnInit {
     const date = this.selectedDate.trim();
     const codeFilter = this.ratioCodeFilter.trim().toLowerCase();
 
-    const filtered = this.allRows.filter((row) => {
-      const matchesDate = !date || row.date === date;
-      const matchesCategory = this.selectedCategoryId === 'all' || row.categorieId === this.selectedCategoryId;
-      const matchesCode = !codeFilter || row.code.toLowerCase().includes(codeFilter);
-      return matchesDate && matchesCategory && matchesCode;
-    });
+    if (date) {
+      // Specific date selected → render gauge cards (existing behaviour).
+      const filtered = this.allRows.filter((row) => {
+        const matchesDate = row.date === date;
+        const matchesCategory =
+          this.selectedCategoryId === 'all' || row.categorieId === this.selectedCategoryId;
+        const matchesCode = !codeFilter || row.code.toLowerCase().includes(codeFilter);
+        return matchesDate && matchesCategory && matchesCode;
+      });
 
-    this.visibleRatios = filtered.length;
-    this.groupedRows = this.groupByFamily(filtered);
+      this.visibleRatios = filtered.length;
+      this.groupedRows = this.groupByFamily(filtered);
+    } else {
+      this.visibleRatios = 0;
+      this.groupedRows = [];
+    }
+
+    // Always rebuild the time-series view so it reflects current category/code filters.
+    this.rebuildSeriesView();
     this.cdr.markForCheck();
+  }
+
+  /* ============================== Time-series view ============================== */
+
+  /** Fetches the grouped-by-ratio payload and refreshes the time-series view. */
+  private async loadGroupedSeries(): Promise<void> {
+    this.seriesLoading = true;
+    this.cdr.markForCheck();
+
+    try {
+      this.groupedByRatio = await this.dashboardService.groupedByRatio();
+    } catch (error) {
+      this.groupedByRatio = {};
+      this.errorMessage = this.extractErrorMessage(error);
+    } finally {
+      this.seriesLoading = false;
+      this.seriesFetched = true;
+      this.rebuildSeriesView();
+      this.cdr.markForCheck();
+    }
+  }
+
+  /**
+   * Rebuilds `groupedSeries` from the cached `groupedByRatio` payload, applying
+   * the current category and code filters. Metadata (label, category, family)
+   * is taken from `allRows` — we always have a row per ratio because listRows()
+   * runs first.
+   */
+  private rebuildSeriesView(): void {
+    if (!this.isAllDatesMode) {
+      this.groupedSeries = [];
+      this.visibleSeriesRatios = 0;
+      return;
+    }
+
+    const codeFilter = this.ratioCodeFilter.trim().toLowerCase();
+    const metaByCode = new Map<string, DashboardRatioCard>();
+    for (const row of this.allRows) {
+      if (!metaByCode.has(row.code)) {
+        metaByCode.set(row.code, row);
+      }
+    }
+
+    const cards: RatioSeriesCard[] = [];
+    for (const [code, series] of Object.entries(this.groupedByRatio)) {
+      const meta = metaByCode.get(code);
+      if (!meta) continue;
+      if (
+        this.selectedCategoryId !== 'all' &&
+        meta.categorieId !== this.selectedCategoryId
+      ) continue;
+      if (codeFilter && !code.toLowerCase().includes(codeFilter)) continue;
+
+      cards.push({
+        code,
+        label: meta.label || code,
+        categoryName: meta.categoryName,
+        familyId: meta.familleId,
+        familyName: meta.familyName,
+        data: series,
+      });
+    }
+
+    this.visibleSeriesRatios = cards.length;
+    this.groupedSeries = this.groupSeriesByFamily(cards);
+  }
+
+  private groupSeriesByFamily(cards: RatioSeriesCard[]): RatioSeriesFamilyGroup[] {
+    const map = new Map<number, RatioSeriesFamilyGroup>();
+
+    for (const card of cards) {
+      const existing = map.get(card.familyId);
+      if (!existing) {
+        map.set(card.familyId, {
+          familyId: card.familyId,
+          familyName: card.familyName,
+          cards: [card],
+        });
+        continue;
+      }
+
+      if (this.isGenericName(existing.familyName) && !this.isGenericName(card.familyName)) {
+        existing.familyName = card.familyName;
+      }
+      existing.cards.push(card);
+    }
+
+    const groups = Array.from(map.values());
+    groups.forEach((g) => g.cards.sort((a, b) => a.code.localeCompare(b.code)));
+    return groups.sort((a, b) => a.familyName.localeCompare(b.familyName));
+  }
+
+  trackBySeriesFamily(_: number, group: RatioSeriesFamilyGroup): string {
+    return `${group.familyId}-${group.familyName}`;
+  }
+
+  trackBySeriesCard(_: number, card: RatioSeriesCard): string {
+    return card.code;
   }
 
   private groupByFamily(rows: DashboardRatioCard[]): DashboardFamilyGroup[] {
@@ -548,6 +705,12 @@ export class DashboardComponent implements OnInit {
       ? (row.seuilAppetence as number)
       : value + baseline * 0.4;
 
+    // Detect descending thresholds (Tol > Ale > App): low values are good, high are critical.
+    const isInverted =
+      Number.isFinite(row.seuilTolerance as number) &&
+      Number.isFinite(row.seuilAppetence as number) &&
+      rawTolerance > rawAppetite;
+
     const orderedThresholds = [rawTolerance, rawAlert, rawAppetite].sort((a, b) => a - b);
     const tolerance = orderedThresholds[0];
     const alert = orderedThresholds[1];
@@ -575,18 +738,27 @@ export class DashboardComponent implements OnInit {
     }));
 
     const needlePercent = this.valueToPercent(stops[0], stops[6], value);
-    const tone = this.resolveTone(stops, value);
+    const tone = isInverted
+      ? this.resolveToneInverted(stops, value)
+      : this.resolveTone(stops, value);
+
+    // Normal gauge:   low value → left (critical), high value → right (excellent)
+    //   needleAngle = 180 − percent × 180
+    // Inverted gauge: low value → right (excellent), high value → left (critical)
+    //   needleAngle = percent × 180
+    const needleAngle = isInverted ? needlePercent * 180 : 180 - needlePercent * 180;
 
     return {
       min: stops[0],
       max: stops[6],
-      tolerance: tolerance,
-      alert: alert,
-      appetite: appetite,
+      tolerance,
+      alert,
+      appetite,
       segments,
       needlePercent,
-      needleAngle: 180 - needlePercent * 180,
+      needleAngle,
       tone,
+      isInverted,
     };
   }
 
@@ -622,6 +794,16 @@ export class DashboardComponent implements OnInit {
     return 'excellent';
   }
 
+  /** Tone for inverted gauges (Tol > Ale > App): high values are critical, low values are excellent. */
+  private resolveToneInverted(stops: number[], value: number): GaugeTone {
+    if (value >= stops[5]) return 'critical';
+    if (value >= stops[4]) return 'warning';
+    if (value >= stops[3]) return 'elevated';
+    if (value >= stops[2]) return 'watch';
+    if (value >= stops[1]) return 'good';
+    return 'excellent';
+  }
+
   private valueToAngle(gauge: GaugeModel, value: number): number {
     const percent = this.valueToPercent(gauge.min, gauge.max, value);
     return 180 - percent * 180;
@@ -641,6 +823,23 @@ export class DashboardComponent implements OnInit {
     }
 
     return 4 / 6;
+  }
+
+  /** Returns the arc position for a threshold marker.
+   *  The arc is always laid out worst→left, best→right, so positions are the
+   *  same for both normal and inverted gauges: Tol at left boundary, App at right. */
+  private phaseBoundaryPercentForGauge(_gauge: GaugeModel, phase: 'tol' | 'ale' | 'app'): number {
+    return this.phaseBoundaryPercent(phase);
+  }
+
+  phaseMarkerXForGauge(gauge: GaugeModel, phase: 'tol' | 'ale' | 'app', radius = this.gaugeRadius + 8): number {
+    const point = this.pointOnGauge(radius, this.percentToAngle(this.phaseBoundaryPercentForGauge(gauge, phase)));
+    return point.x;
+  }
+
+  phaseMarkerYForGauge(gauge: GaugeModel, phase: 'tol' | 'ale' | 'app', radius = this.gaugeRadius + 8): number {
+    const point = this.pointOnGauge(radius, this.percentToAngle(this.phaseBoundaryPercentForGauge(gauge, phase)));
+    return point.y;
   }
 
   private pointOnGauge(radius: number, angleDeg: number): { x: number; y: number } {
