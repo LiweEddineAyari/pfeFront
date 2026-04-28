@@ -29,8 +29,6 @@ interface GaugeModel {
   needlePercent: number;
   needleAngle: number;
   tone: GaugeTone;
-  /** True when the original thresholds are descending (Tol > Ale > App),
-   *  meaning low values are good and high values are critical. */
   isInverted: boolean;
 }
 
@@ -229,18 +227,9 @@ export class DashboardComponent implements OnInit {
     return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${this.gaugeRadius} ${this.gaugeRadius} 0 0 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
   }
 
-  gaugeSegmentStroke(index: number, _gauge?: GaugeModel): string {
-    return this.gaugeStrokePalette[index] ?? this.gaugeStrokePalette[this.gaugeStrokePalette.length - 1];
-  }
-
-  phaseMarkerX(phase: 'tol' | 'ale' | 'app', radius = this.gaugeRadius + 8): number {
-    const point = this.pointOnGauge(radius, this.percentToAngle(this.phaseBoundaryPercent(phase)));
-    return point.x;
-  }
-
-  phaseMarkerY(phase: 'tol' | 'ale' | 'app', radius = this.gaugeRadius + 8): number {
-    const point = this.pointOnGauge(radius, this.percentToAngle(this.phaseBoundaryPercent(phase)));
-    return point.y;
+  gaugeSegmentStroke(index: number, gauge?: GaugeModel): string {
+    const i = gauge?.isInverted ? (5 - index) : index;
+    return this.gaugeStrokePalette[i] ?? this.gaugeStrokePalette[this.gaugeStrokePalette.length - 1];
   }
 
   needlePath(): string {
@@ -705,28 +694,32 @@ export class DashboardComponent implements OnInit {
       ? (row.seuilAppetence as number)
       : value + baseline * 0.4;
 
-    // Detect descending thresholds (Tol > Ale > App): low values are good, high are critical.
+    // Invert the needle when the worst threshold is the highest value (App > Tol).
     const isInverted =
       Number.isFinite(row.seuilTolerance as number) &&
       Number.isFinite(row.seuilAppetence as number) &&
-      rawTolerance > rawAppetite;
+      rawAppetite > rawTolerance;
 
     const orderedThresholds = [rawTolerance, rawAlert, rawAppetite].sort((a, b) => a - b);
     const tolerance = orderedThresholds[0];
     const alert = orderedThresholds[1];
     const appetite = orderedThresholds[2];
 
-    const thresholdSpan = Math.max(appetite - tolerance, baseline * 0.4, 1);
-    const min = tolerance - thresholdSpan;
-    const max = appetite + thresholdSpan;
+    const thresholdMin = tolerance;
+    const thresholdMid = alert;
+    const thresholdMax = appetite;
+
+    const thresholdSpan = Math.max(thresholdMax - thresholdMin, baseline * 0.4, 1);
+    const min = thresholdMin - thresholdSpan;
+    const max = thresholdMax + thresholdSpan;
 
     const rawStops = [
       min,
-      tolerance - thresholdSpan * 0.5,
-      tolerance,
-      alert,
-      appetite,
-      appetite + thresholdSpan * 0.5,
+      thresholdMin - thresholdSpan * 0.5,
+      thresholdMin,
+      thresholdMid,
+      thresholdMax,
+      thresholdMax + thresholdSpan * 0.5,
       max,
     ];
 
@@ -742,11 +735,7 @@ export class DashboardComponent implements OnInit {
       ? this.resolveToneInverted(stops, value)
       : this.resolveTone(stops, value);
 
-    // Normal gauge:   low value → left (critical), high value → right (excellent)
-    //   needleAngle = 180 − percent × 180
-    // Inverted gauge: low value → right (excellent), high value → left (critical)
-    //   needleAngle = percent × 180
-    const needleAngle = isInverted ? needlePercent * 180 : 180 - needlePercent * 180;
+    const needleAngle = 180 - needlePercent * 180;
 
     return {
       min: stops[0],
@@ -794,7 +783,6 @@ export class DashboardComponent implements OnInit {
     return 'excellent';
   }
 
-  /** Tone for inverted gauges (Tol > Ale > App): high values are critical, low values are excellent. */
   private resolveToneInverted(stops: number[], value: number): GaugeTone {
     if (value >= stops[5]) return 'critical';
     if (value >= stops[4]) return 'warning';
@@ -814,7 +802,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private phaseBoundaryPercent(phase: 'tol' | 'ale' | 'app'): number {
-    if (phase === 'tol') {
+    if (phase === 'app') {
       return 2 / 6;
     }
 
@@ -825,10 +813,12 @@ export class DashboardComponent implements OnInit {
     return 4 / 6;
   }
 
-  /** Returns the arc position for a threshold marker.
-   *  The arc is always laid out worst→left, best→right, so positions are the
-   *  same for both normal and inverted gauges: Tol at left boundary, App at right. */
-  private phaseBoundaryPercentForGauge(_gauge: GaugeModel, phase: 'tol' | 'ale' | 'app'): number {
+  private phaseBoundaryPercentForGauge(gauge: GaugeModel, phase: 'tol' | 'ale' | 'app'): number {
+    if (gauge.isInverted) {
+      if (phase === 'tol') return 2 / 6;
+      if (phase === 'ale') return 3 / 6;
+      return 4 / 6;
+    }
     return this.phaseBoundaryPercent(phase);
   }
 

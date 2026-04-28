@@ -676,15 +676,15 @@
 }
 
 .threshold-tol {
-  fill: #e5354d;
+  fill: #31c67a;
 }
 
 .threshold-alert {
-  fill: #ff9a2f;
+  fill: #facc15;
 }
 
 .threshold-appetite {
-  fill: #31c67a;
+  fill: #e5354d;
 }
 
 .threshold-label {
