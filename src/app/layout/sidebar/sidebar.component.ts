@@ -320,6 +320,7 @@ export class SidebarComponent implements OnDestroy {
       ],
     },
     { label: 'Stress test', icon: 'flask-conical', active: false, path: '/stress-test' },
+    { label: 'Chatbot IA', icon: 'MessageSquare', active: false, path: '/chatbot' },
   ];
 
   constructor() {

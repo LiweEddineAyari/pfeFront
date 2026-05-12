@@ -119,6 +119,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'chatbot',
+        title: 'FinanceGPT — Analyse IA',
+        loadComponent: () =>
+          import('./pages/chatbot/chatbot-page.component').then(
+            (m) => m.ChatbotPageComponent
+          ),
+      },
+      {
         path: 'datamart/mapping-config',
         pathMatch: 'full',
         redirectTo: 'mapping/configurations',

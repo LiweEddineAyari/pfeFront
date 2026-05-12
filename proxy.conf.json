@@ -43,6 +43,17 @@
     }
   },
 
+  "/api/ai": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "timeout": 600000,
+    "pathRewrite": {
+      "^/api/ai": "/ai"
+    }
+  },
+
   "/api": {
     "target": "http://localhost:8081",
     "secure": false,
@@ -50,10 +61,7 @@
     "logLevel": "debug",
     "timeout": 600000,
     "pathRewrite": {
-      "^/api/dashboard": "/dashboard",
-      "^/api/ratios": "/ratios",
-      "^/api/parameters": "/parameters",
-      "^/api/stress-test": "/stress-test"
+      "^/api": ""
     }
   }
 }

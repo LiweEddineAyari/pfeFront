@@ -19,7 +19,7 @@ import {
   ArrowDown, TrendingDown, Filter, Hash, Zap, BarChart3, Target, SlidersHorizontal,
   ListChecks, Activity, Eye, Equal, Pencil, Wand2, Scale, Minus, ArrowUpRight, ArrowDownRight,
   Beaker, Atom, GitCompareArrows, Loader2,
-  Lightbulb, Copy
+  Lightbulb, Copy, MessageSquare, Bot, Send, Square, BookOpen, Wrench, Droplet, Shield
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -39,7 +39,7 @@ const icons = {
   ArrowDown, TrendingDown, Filter, Hash, Zap, BarChart3, Target, SlidersHorizontal,
   ListChecks, Activity, Eye, Equal, Pencil, Wand2, Scale, Minus, ArrowUpRight, ArrowDownRight,
   Beaker, Atom, GitCompareArrows, Loader2,
-  Lightbulb, Copy
+  Lightbulb, Copy, MessageSquare, Bot, Send, Square, BookOpen, Wrench, Droplet, Shield
 };
 
 export const appConfig: ApplicationConfig = {
