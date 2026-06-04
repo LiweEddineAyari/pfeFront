@@ -233,8 +233,8 @@ export interface SuggestionPrompt {
 export const DEFAULT_SUGGESTIONS: SuggestionPrompt[] = [
   {
     icon: 'bar-chart-3',
-    label: 'RS au 31/12/2024',
-    prompt: "Quel est le ratio de solvabilite (RS) au 31 decembre 2024 ?",
+    label: 'RS au 31/12/2026',
+    prompt: "Quel est le ratio de solvabilite (RS) au 31 decembre 2026 ?",
     accent: 'green',
   },
   {
@@ -245,20 +245,20 @@ export const DEFAULT_SUGGESTIONS: SuggestionPrompt[] = [
   },
   {
     icon: 'trending-up',
-    label: 'Tendance RS 2024',
-    prompt: "Montre-moi l'evolution du ratio RS sur l'annee 2024.",
+    label: 'Tendance RS 2026',
+    prompt: "Montre-moi l'evolution du ratio RS sur l'annee 2026.",
     accent: 'purple',
   },
   {
     icon: 'alert-triangle',
     label: 'Ratios en breach',
-    prompt: 'Quels ratios sont en breach au 31 decembre 2024 ?',
+    prompt: 'Quels ratios sont en breach au 31 decembre 2026 ?',
     accent: 'amber',
   },
   {
     icon: 'flask-conical',
     label: 'Stress test -15% FPE',
-    prompt: 'Simule un stress test avec une baisse de 15% des fonds propres en 2024.',
+    prompt: 'Simule un stress test avec une baisse de 15% des fonds propres en 2026.',
     accent: 'purple',
   },
   {

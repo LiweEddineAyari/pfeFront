@@ -54,6 +54,22 @@
     }
   },
 
+  "/api/mapping-configs": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "timeout": 600000
+  },
+
+  "/api/etl": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "timeout": 600000
+  },
+
   "/api": {
     "target": "http://localhost:8081",
     "secure": false,

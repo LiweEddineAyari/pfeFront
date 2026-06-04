@@ -20,11 +20,7 @@ interface QuickChip {
 }
 
 const QUICK_CHIPS: QuickChip[] = [
-  { icon: 'bar-chart-3', label: 'RS', prompt: 'Quel est le RS au 31/12/2024 ?' },
-  { icon: 'shield', label: 'RCET1', prompt: 'Quel est le RCET1 au 31/12/2024 ?' },
-  { icon: 'alert-triangle', label: 'Seuils', prompt: 'Quels ratios sont en breach actuellement ?' },
-  { icon: 'trending-up', label: 'Tendance', prompt: 'Montre la tendance du RS sur 2024.' },
-  { icon: 'flask-conical', label: 'Stress', prompt: 'Simule un stress test -10% FPE en 2024.' },
+  { icon: 'flask-conical', label: 'Stress', prompt: '/stress-test ' },
 ];
 
 @Component({
@@ -44,17 +40,33 @@ const QUICK_CHIPS: QuickChip[] = [
         class="input-shell"
         [class.is-focused]="focused() && !isStreaming"
         [class.is-streaming]="isStreaming"
+        (click)="focusTextarea()"
       >
+        <!-- Stress-test prefix badge -->
+        <span *ngIf="hasStressPrefix()" class="stress-badge">
+          <lucide-icon name="flask-conical" [size]="11" [strokeWidth]="2.5"></lucide-icon>
+          <span class="stress-badge-text">/stress-test</span>
+          <button
+            type="button"
+            class="stress-badge-remove"
+            (click)="removeStressPrefix($event)"
+            tabindex="-1"
+            aria-label="Retirer /stress-test"
+          >
+            <lucide-icon name="x" [size]="9" [strokeWidth]="3"></lucide-icon>
+          </button>
+        </span>
+
         <textarea
           #ta
-          [ngModel]="value()"
-          (ngModelChange)="onModelChange($event)"
+          [ngModel]="displayValue()"
+          (ngModelChange)="onDisplayChange($event)"
           (focus)="focused.set(true)"
           (blur)="focused.set(false)"
           (keydown)="onKeydown($event)"
           [disabled]="disabled || isStreaming"
           rows="1"
-          placeholder="Posez votre question sur les ratios, les seuils ou un stress test..."
+          [placeholder]="hasStressPrefix() ? 'Décrivez votre scénario de stress...' : 'Posez votre question sur les ratios, les seuils ou un stress test...'"
           class="input-textarea"
         ></textarea>
 
@@ -95,7 +107,7 @@ const QUICK_CHIPS: QuickChip[] = [
       </div>
 
       <!-- Quick chips row -->
-      <div *ngIf="showQuickChips" class="quick-chips">
+      <div *ngIf="showQuickChips" class="quick-chips mt-5">
         <button
           *ngFor="let chip of quickChips; trackBy: trackByChip"
           type="button"
@@ -159,7 +171,7 @@ const QUICK_CHIPS: QuickChip[] = [
     .input-shell {
       position: relative;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 8px;
       padding: 8px 8px 8px 16px;
       border-radius: 18px;
@@ -288,6 +300,69 @@ const QUICK_CHIPS: QuickChip[] = [
       color: rgba(148, 163, 184, 0.6);
     }
 
+    /* ── Stress badge (inside input) ── */
+    .stress-badge {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 6px 4px 9px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(1, 181, 116, 0.15), rgba(1, 181, 116, 0.07));
+      border: 1.5px solid rgba(1, 181, 116, 0.45);
+      box-shadow:
+        0 0 0 3px rgba(1, 181, 116, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      animation: badgePop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    :host-context(html.dark) .stress-badge {
+      background: linear-gradient(135deg, rgba(1, 181, 116, 0.22), rgba(1, 181, 116, 0.1));
+      border-color: rgba(1, 181, 116, 0.55);
+      box-shadow:
+        0 0 0 3px rgba(1, 181, 116, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    @keyframes badgePop {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .stress-badge lucide-icon {
+      color: #01915d;
+      flex-shrink: 0;
+    }
+    :host-context(html.dark) .stress-badge lucide-icon { color: #2edd9a; }
+
+    .stress-badge-text {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #01b574 0%, #0a8f63 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+    :host-context(html.dark) .stress-badge-text {
+      background: linear-gradient(135deg, #2edd9a 0%, #01b574 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .stress-badge-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      color: #01915d;
+      opacity: 0.6;
+      transition: all 130ms ease;
+    }
+    :host-context(html.dark) .stress-badge-remove { color: #2edd9a; }
+    .stress-badge-remove:hover { opacity: 1; background: rgba(1, 181, 116, 0.2); }
+
     /* ── Quick chips ── */
     .quick-chips {
       display: flex;
@@ -308,26 +383,38 @@ const QUICK_CHIPS: QuickChip[] = [
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 6px 11px;
-      border-radius: 10px;
-      border: 1px solid rgba(1, 181, 116, 0.22);
-      background: rgba(1, 181, 116, 0.06);
-      color: var(--color-primary);
-      font-size: 11.5px;
-      font-weight: 600;
-      letter-spacing: 0.005em;
-      transition: all 160ms ease;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid #01b574;
+      background: linear-gradient(135deg, rgba(1, 181, 116, 0.12), rgba(1, 181, 116, 0.06));
+      color: #01915d;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      transition: all 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 0 0 0 rgba(1, 181, 116, 0);
+    }
+    :host-context(html.dark) .quick-chip {
+      border-color: #01b574;
+      background: linear-gradient(135deg, rgba(1, 181, 116, 0.18), rgba(1, 181, 116, 0.08));
+      color: #2edd9a;
     }
     .quick-chip:hover:not(:disabled) {
-      background: var(--color-primary);
+      background: linear-gradient(135deg, #01b574, #0a8f63);
       color: white;
-      border-color: var(--color-primary);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(1, 181, 116, 0.3);
+      border-color: transparent;
+      transform: translateY(-1px) scale(1.03);
+      box-shadow:
+        0 4px 14px rgba(1, 181, 116, 0.45),
+        0 0 0 3px rgba(1, 181, 116, 0.18);
     }
-    .quick-chip:active:not(:disabled) { transform: scale(0.96); }
-    .quick-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+    .quick-chip:active:not(:disabled) {
+      transform: scale(0.96);
+      box-shadow: 0 2px 8px rgba(1, 181, 116, 0.3);
+    }
+    .quick-chip:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .disclaimer {
       margin-left: auto;
@@ -350,10 +437,46 @@ export class ChatInputComponent {
 
   @ViewChild('ta') textarea?: ElementRef<HTMLTextAreaElement>;
 
+  private static readonly STRESS_PREFIX = '/stress-test ';
+
   value = signal('');
   focused = signal(false);
 
   quickChips = QUICK_CHIPS;
+
+  hasStressPrefix(): boolean {
+    return this.value().startsWith(ChatInputComponent.STRESS_PREFIX);
+  }
+
+  displayValue(): string {
+    if (this.hasStressPrefix()) {
+      return this.value().slice(ChatInputComponent.STRESS_PREFIX.length);
+    }
+    return this.value();
+  }
+
+  onDisplayChange(v: string): void {
+    const full = this.hasStressPrefix()
+      ? ChatInputComponent.STRESS_PREFIX + v
+      : v;
+    this.value.set(full);
+    this.resizeTextarea();
+  }
+
+  removeStressPrefix(event: Event): void {
+    event.stopPropagation();
+    const rest = this.value().slice(ChatInputComponent.STRESS_PREFIX.length);
+    this.value.set(rest);
+    this.resizeTextarea();
+    queueMicrotask(() => {
+      const el = this.textarea?.nativeElement;
+      if (el) { el.focus(); el.setSelectionRange(rest.length, rest.length); }
+    });
+  }
+
+  focusTextarea(): void {
+    this.textarea?.nativeElement.focus();
+  }
 
   get canSubmit(): boolean {
     return !this.disabled && this.value().trim().length > 0;
@@ -366,12 +489,12 @@ export class ChatInputComponent {
   prefill(text: string): void {
     this.value.set(text);
     this.resizeTextarea();
-    // Move caret to end on next tick
     queueMicrotask(() => {
       const el = this.textarea?.nativeElement;
       if (el) {
+        const pos = this.displayValue().length;
         el.focus();
-        el.setSelectionRange(text.length, text.length);
+        el.setSelectionRange(pos, pos);
       }
     });
   }
@@ -400,10 +523,20 @@ export class ChatInputComponent {
   }
 
   applyChip(chip: QuickChip): void {
-    this.value.set(chip.prompt);
-    this.resizeTextarea();
-    // Submit immediately for snappy UX
-    queueMicrotask(() => this.submit());
+    const alreadyPrefixed = this.value().startsWith(chip.prompt.trim());
+    if (!alreadyPrefixed) {
+      const userText = this.value().trimStart();
+      this.value.set(chip.prompt + userText);
+      this.resizeTextarea();
+    }
+    queueMicrotask(() => {
+      const el = this.textarea?.nativeElement;
+      if (el) {
+        const pos = this.displayValue().length;
+        el.focus();
+        el.setSelectionRange(pos, pos);
+      }
+    });
   }
 
   submit(): void {

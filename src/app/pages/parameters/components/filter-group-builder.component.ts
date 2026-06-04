@@ -225,25 +225,12 @@ export class FilterGroupBuilderComponent {
   }
 
   private parseScalar(rawValue: string): unknown {
-    const value = rawValue.trim();
-
-    if (value.length === 0) {
-      return '';
-    }
-
-    if (/^-?\d+(\.\d+)?$/.test(value)) {
-      return Number(value);
-    }
-
-    if (/^(true|false)$/i.test(value)) {
-      return value.toLowerCase() === 'true';
-    }
-
-    if (value.toLowerCase() === 'null') {
-      return null;
-    }
-
-    return value;
+    // Keep the user's input as a string. Field types are not known on the
+    // client (the supportedFields API returns names only), so we must not
+    // guess: coercing "123" to a number breaks string columns (idtiers,
+    // compte, ...) which the backend rejects with "string field expects
+    // string value". The backend casts strings for numeric columns itself.
+    return rawValue.trim();
   }
 
   private cloneGroup(group: FilterGroup): FilterGroup {

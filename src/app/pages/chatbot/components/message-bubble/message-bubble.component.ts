@@ -5,10 +5,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { ChatMessage } from '../../models/chat.models';
+import { ChatMessage, ToolCardState } from '../../models/chat.models';
 import { StreamingTextComponent } from '../streaming-text/streaming-text.component';
 import { RagSourcesPanelComponent } from '../rag-sources-panel/rag-sources-panel.component';
 import { ToolStatusComponent } from '../tool-status/tool-status.component';
+import {
+  StressUnbalancedCardComponent,
+  UnbalancedSimulationResult,
+} from '../stress-unbalanced-card/stress-unbalanced-card.component';
 
 @Component({
   selector: 'app-message-bubble',
@@ -19,6 +23,7 @@ import { ToolStatusComponent } from '../tool-status/tool-status.component';
     StreamingTextComponent,
     RagSourcesPanelComponent,
     ToolStatusComponent,
+    StressUnbalancedCardComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -63,6 +68,14 @@ import { ToolStatusComponent } from '../tool-status/tool-status.component';
             <span class="t-dot td2"></span>
             <span class="t-dot td3"></span>
             <span class="thinking-text">Réflexion en cours</span>
+          </div>
+
+          <!-- Unbalanced stress-test result(s) -->
+          <div *ngIf="unbalancedStressResults.length > 0" class="usc-stack">
+            <app-stress-unbalanced-card
+              *ngFor="let r of unbalancedStressResults; trackBy: trackByIdx"
+              [data]="r"
+            ></app-stress-unbalanced-card>
           </div>
 
           <!-- Streamed text -->
@@ -263,6 +276,13 @@ import { ToolStatusComponent } from '../tool-status/tool-status.component';
       gap: 6px;
     }
     :host-context(html.dark) .err { color: #fca5a5; }
+
+    .usc-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 4px 0 10px;
+    }
   `],
 })
 export class MessageBubbleComponent {
@@ -279,4 +299,19 @@ export class MessageBubbleComponent {
     }
     return this.message.content;
   }
+
+  get unbalancedStressResults(): UnbalancedSimulationResult[] {
+    const cards = this.message.toolCards ?? [];
+    return cards
+      .filter((c: ToolCardState) => c.name === 'run_stress_test' && this.isUnbalancedResult(c.result))
+      .map((c: ToolCardState) => c.result as UnbalancedSimulationResult);
+  }
+
+  private isUnbalancedResult(value: unknown): value is UnbalancedSimulationResult {
+    if (!value || typeof value !== 'object') return false;
+    const v = value as Record<string, unknown>;
+    return v['code'] === 'UNBALANCED_SIMULATION' && Array.isArray(v['actions']);
+  }
+
+  trackByIdx = (i: number) => i;
 }
