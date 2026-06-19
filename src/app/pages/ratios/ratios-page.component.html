@@ -8,7 +8,7 @@
       </p>
     </div>
 
-    <button type="button" class="primary-btn" (click)="openCreateDialog()">
+    <button *ngIf="canManage" type="button" class="primary-btn" (click)="openCreateDialog()">
       <lucide-icon name="plus" [size]="16" [strokeWidth]="3"></lucide-icon>
       Nouveau ratio
     </button>
@@ -56,7 +56,7 @@
         </div>
 
         <div class="lookup-actions">
-          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="addLookupItem('category')">
+          <button *ngIf="canManage" type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="addLookupItem('category')">
             <lucide-icon name="plus" [size]="13" [strokeWidth]="2.8"></lucide-icon>
             Ajouter
           </button>
@@ -86,7 +86,7 @@
               <td>#{{ row.id }}</td>
               <td>{{ row.name }}</td>
               <td>
-                <div class="row-actions table-compact-actions">
+                <div *ngIf="canManage" class="row-actions table-compact-actions">
                   <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="lookupMutationInProgress" (click)="editLookupItem('category', row)">
                     <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                     Modifier
@@ -123,7 +123,7 @@
         </div>
 
         <div class="lookup-actions">
-          <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="addLookupItem('family')">
+          <button *ngIf="canManage" type="button" class="ghost-btn ghost-btn-compact" [disabled]="loadingLookups || lookupMutationInProgress" (click)="addLookupItem('family')">
             <lucide-icon name="plus" [size]="13" [strokeWidth]="2.8"></lucide-icon>
             Ajouter
           </button>
@@ -153,7 +153,7 @@
               <td>#{{ row.id }}</td>
               <td>{{ row.name }}</td>
               <td>
-                <div class="row-actions table-compact-actions">
+                <div *ngIf="canManage" class="row-actions table-compact-actions">
                   <button type="button" class="ghost-btn ghost-btn-compact" [disabled]="lookupMutationInProgress" (click)="editLookupItem('family', row)">
                     <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                     Modifier
@@ -242,11 +242,11 @@
                     <lucide-icon name="file-text" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                     Voir
                   </button>
-                  <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); openEditDialog(row)">
+                  <button *ngIf="canManage" type="button" class="ghost-btn" (click)="$event.stopPropagation(); openEditDialog(row)">
                     <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                     Modifier
                   </button>
-                  <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); deleteFromList(row)">
+                  <button *ngIf="canManage" type="button" class="ghost-btn" (click)="$event.stopPropagation(); deleteFromList(row)">
                     <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                     Supprimer
                   </button>
@@ -499,6 +499,7 @@
     *ngIf="detailsDialogOpen"
     [ratioCode]="detailsDialogCode"
     [initialRatio]="detailsDialogInitial"
+    [canManage]="canManage"
     (closed)="closeDetailsDialog()"
     (editRequested)="onEditRequested($event)"
     (deleteRequested)="onDeleteRequested($event)"

@@ -345,7 +345,7 @@ export class RatioLineChartCardComponent
 
   get lastValueLabel(): string {
     if (!this.hasData) return '\u2014';
-    return this.formatValue(this.points[this.points.length - 1].value);
+    return this.formatValue(this.points[this.points.length - 1].value * 100);
   }
 
   get delta(): number {
@@ -461,7 +461,7 @@ export class RatioLineChartCardComponent
       : 'rgba(15,23,42,0.06)';
 
     const labels = this.points.map((p) => this.formatDateLabel(p.date));
-    const values = this.points.map((p) => p.value);
+    const values = this.points.map((p) => p.value * 100);
 
     // Compute explicit y-axis bounds so Chart.js never collapses the scale
     // to zero range (which kills both the fill gradient and visual clarity).

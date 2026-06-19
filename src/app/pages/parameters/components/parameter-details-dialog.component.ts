@@ -32,6 +32,8 @@ import { ApiHttpError, ParametersApiService } from '../../../core/services/param
 export class ParameterDetailsDialogComponent implements OnInit, OnChanges {
   @Input() parameterCode: string | null = null;
   @Input() initialParameter: ParameterConfigResponseDTO | null = null;
+  /** When false (FINANCE), edit/delete actions are hidden — view & execute only. */
+  @Input() canManage = true;
 
   @Output() closed = new EventEmitter<void>();
   @Output() editRequested = new EventEmitter<ParameterConfigResponseDTO>();

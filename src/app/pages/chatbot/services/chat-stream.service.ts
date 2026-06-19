@@ -11,6 +11,7 @@ import {
   DoneEventData,
 } from '../models/chat.models';
 import { STATIC_USER_ID } from '../constants/chat.constants';
+import { AuthService } from '../../../core/auth/auth.service';
 
 /**
  * Streams a chat turn from the backend `/api/ai/chat` SSE endpoint.
@@ -27,6 +28,7 @@ import { STATIC_USER_ID } from '../constants/chat.constants';
 export class ChatStreamService {
   private readonly endpoint = '/api/ai/chat';
   private zone = inject(NgZone);
+  private auth = inject(AuthService);
 
   streamChat(message: string, sessionId?: string | null): Observable<ChatEvent> {
     return new Observable<ChatEvent>((subscriber) => {
@@ -218,7 +220,7 @@ export class ChatStreamService {
   // ── helpers ─────────────────────────────────────────────────────────────────
 
   private resolveUserId(): string {
-    return STATIC_USER_ID;
+    return this.auth.currentUser()?.sub ?? STATIC_USER_ID;
   }
 
   private isAbortError(err: unknown): boolean {

@@ -7,7 +7,7 @@
 Création, compilation et exécution de paramètres via un moteur de formules et un builder SQL natif.      </p>
     </div>
 
-    <button type="button" class="primary-btn" (click)="openCreateDialog()">
+    <button *ngIf="canManage" type="button" class="primary-btn" (click)="openCreateDialog()">
       <lucide-icon name="plus" [size]="16" [strokeWidth]="3"></lucide-icon>
       Nouveau parametre
     </button>
@@ -90,11 +90,11 @@ Création, compilation et exécution de paramètres via un moteur de formules et
                       <lucide-icon name="file-text" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                       Voir
                     </button>
-                    <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); openEditDialog(row)">
+                    <button *ngIf="canManage" type="button" class="ghost-btn" (click)="$event.stopPropagation(); openEditDialog(row)">
                       <lucide-icon name="settings" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                       Modifier
                     </button>
-                    <button type="button" class="ghost-btn" (click)="$event.stopPropagation(); deleteFromList(row)">
+                    <button *ngIf="canManage" type="button" class="ghost-btn" (click)="$event.stopPropagation(); deleteFromList(row)">
                       <lucide-icon name="trash-2" [size]="13" [strokeWidth]="2.8"></lucide-icon>
                       Supprimer
                     </button>
@@ -277,6 +277,7 @@ Création, compilation et exécution de paramètres via un moteur de formules et
     *ngIf="detailsDialogOpen"
     [parameterCode]="detailsDialogCode"
     [initialParameter]="detailsDialogInitial"
+    [canManage]="canManage"
     (closed)="closeDetailsDialog()"
     (editRequested)="onEditRequested($event)"
     (deleteRequested)="onDeleteRequested($event)"

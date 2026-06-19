@@ -1,15 +1,18 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, inject, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { filter } from 'rxjs';
 import { LayoutService } from '../../core/services/layout.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { Role, roleLabel } from '../../core/auth/models/auth.model';
 
 interface NavItem {
   label: string;
   icon: string;
   active: boolean;
   path: string;
+  roles?: Role[];
   expanded?: boolean;
   children?: NavSubItem[];
 }
@@ -19,6 +22,7 @@ interface NavSubItem {
   icon: string;
   path: string;
   active: boolean;
+  roles?: Role[];
 }
 
 @Component({
@@ -33,7 +37,7 @@ interface NavSubItem {
       <!-- Logo & Toggle (Header Panel) -->
       <div class="h-[var(--topbar-h)] flex items-center shrink-0 px-6 group relative transition-all duration-300 border-b border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01] rounded-tr-[24px]"
            [ngClass]="state.collapsed ? 'justify-center px-0' : 'justify-between'">
-        
+
         <!-- Logo Text -->
         <div class="flex items-center gap-2.5 transition-all duration-300"
              [class.opacity-0]="state.collapsed"
@@ -47,7 +51,7 @@ interface NavSubItem {
             <span class="text-[9px] font-bold text-brand-primary bg-brand-primary/10 dark:bg-brand-primary/20 px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest leading-none">PRO</span>
           </h1>
         </div>
-        
+
         <!-- Mobile Close Button -->
         <button
           class="w-8 h-8 rounded-[10px] flex items-center justify-center text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-all shrink-0 lg:hidden"
@@ -58,7 +62,7 @@ interface NavSubItem {
         </button>
 
         <!-- Desktop Toggle Anchor -->
-        <button 
+        <button
           class="w-[30px] h-[30px] rounded-[10px] flex items-center justify-center text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-300 shrink-0 absolute hidden lg:flex"
           [class.right-4]="!state.collapsed"
           [class.relative]="state.collapsed"
@@ -70,8 +74,6 @@ interface NavSubItem {
       </div>
 
       <!-- Nav Items -->
-      <!-- overflow-y-auto is applied only when expanded: floating cards appear only when
-           collapsed and collapsed icons are few enough to never need scrolling. -->
       <nav class="flex-1 min-h-0 py-5 px-3
                   [&::-webkit-scrollbar]:w-[3px]
                   [&::-webkit-scrollbar-track]:bg-transparent
@@ -85,7 +87,7 @@ interface NavSubItem {
                 (mouseenter)="onNavItemHover(item, !!state.collapsed)"
                 (mouseleave)="onNavItemLeave()">
 
-              <!-- Gap bridge: covers the 14px between sidebar edge and floating card -->
+              <!-- Gap bridge -->
               <div *ngIf="state.collapsed && isFloatingSubmenuOpen(item)"
                    class="absolute top-0 bottom-0 w-[14px] z-[519]"
                    [style.left]="'100%'"></div>
@@ -104,11 +106,8 @@ interface NavSubItem {
                  [attr.aria-haspopup]="item.children?.length ? 'menu' : null"
                  (click)="onNavItemClick(item, !!state.collapsed, $event)">
 
-                 <!-- Active Indicator Pill for Expanded State -->
                  <div *ngIf="item.active && !state.collapsed"
                       class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[18px] bg-brand-primary rounded-r-full shadow-[0_0_8px_rgba(1,181,116,0.6)]"></div>
-
-                 <!-- Active Indicator Pill for Collapsed State -->
                  <div *ngIf="item.active && state.collapsed"
                       class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[20px] bg-brand-primary rounded-r-full shadow-[0_0_8px_rgba(1,181,116,0.6)]"></div>
 
@@ -161,7 +160,6 @@ interface NavSubItem {
                        'font-medium text-[#64748b] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10': !child.active
                      }"
                      (click)="handleChildNavClick()">
-                    <!-- Child Icon Badge -->
                     <span class="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center transition-all duration-300"
                           [ngClass]="child.active ? 'bg-brand-primary/20 text-brand-primary shadow-[0_0_10px_rgba(1,181,116,0.2)]' : 'bg-transparent text-current group-hover/child:scale-110'">
                       <lucide-icon [name]="child.icon" [size]="12" [strokeWidth]="child.active ? 3 : 2.5"></lucide-icon>
@@ -172,26 +170,20 @@ interface NavSubItem {
               </div>
             </div>
 
-            <!-- Collapsed Sidebar: Floating Dropdown (Children) -->
+            <!-- Collapsed Sidebar: Floating Dropdown -->
             <div *ngIf="item.children?.length && state.collapsed && isFloatingSubmenuOpen(item)"
                  role="menu"
                  class="absolute left-[calc(100%+14px)] top-0 w-[240px] rounded-[16px] border border-white/40 dark:border-white/5 bg-white/80 dark:bg-[#0f172a]/90 backdrop-blur-2xl shadow-[0_12px_36px_-6px_rgba(17,28,68,0.12),0_0_0_1px_rgba(255,255,255,0.6)_inset] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)_inset] p-2.5 z-[520] opacity-100 transition-opacity">
-
-              <!-- Small caret pointing left -->
               <div class="absolute -left-[5px] top-[18px] w-[10px] h-[10px] border-l border-b border-white/40 dark:border-white/5 bg-white/90 dark:bg-[#0f172a] rotate-45 shadow-[-2px_2px_4px_rgba(0,0,0,0.02)] pointer-events-none"></div>
-
               <div class="px-3 pt-2 pb-3 mb-1 flex items-center gap-3 border-b border-black/5 dark:border-white/5">
                 <span class="w-8 h-8 rounded-[10px] flex items-center justify-center bg-brand-primary/10 dark:bg-brand-primary/20 text-brand-primary shadow-[inset_0_0_0_1px_rgba(1,181,116,0.1)]">
                   <lucide-icon [name]="item.icon" [size]="16" [strokeWidth]="2.5"></lucide-icon>
                 </span>
                 <div class="min-w-0">
-                  <p class="text-[13px] font-bold text-[#0f172a] dark:text-[#f1f5f9] leading-tight">
-                    {{ item.label }}
-                  </p>
+                  <p class="text-[13px] font-bold text-[#0f172a] dark:text-[#f1f5f9] leading-tight">{{ item.label }}</p>
                   <p class="text-[11px] font-medium text-[#64748b] dark:text-[#94a3b8] mt-0.5 leading-none">Navigation rapide</p>
                 </div>
               </div>
-
               <a *ngFor="let child of item.children; trackBy: trackByPath"
                  [routerLink]="child.path"
                  class="group mt-0.5 flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-[13px] font-semibold transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
@@ -205,20 +197,13 @@ interface NavSubItem {
                   <lucide-icon [name]="child.icon" [size]="12" [strokeWidth]="child.active ? 3 : 2.5"></lucide-icon>
                 </span>
                 <span class="truncate">{{ child.label }}</span>
-                <span class="ml-auto opacity-0 translate-x-[-4px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
-                      [ngClass]="child.active ? 'text-brand-primary opacity-100 translate-x-0' : 'text-brand-primary/60'">
-                  <lucide-icon name="chevron-right" [size]="14" [strokeWidth]="2.5"></lucide-icon>
-                </span>
               </a>
             </div>
 
             <!-- Collapsed Sidebar: Tooltip (No Children) -->
             <div *ngIf="!item.children?.length && state.collapsed && isFloatingSubmenuOpen(item)"
                  class="absolute left-[calc(100%+14px)] top-1/2 -translate-y-1/2 rounded-[16px] border border-white/40 dark:border-white/5 bg-white/80 dark:bg-[#0f172a]/90 backdrop-blur-2xl shadow-[0_12px_36px_-6px_rgba(17,28,68,0.12),0_0_0_1px_rgba(255,255,255,0.6)_inset] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)_inset] p-3 z-[520] flex flex-col items-center justify-center min-w-[110px] opacity-100 transition-opacity">
-
-              <!-- Small caret pointing left -->
               <div class="absolute -left-[5px] top-1/2 -translate-y-1/2 w-[10px] h-[10px] border-l border-b border-white/40 dark:border-white/5 bg-white/90 dark:bg-[#0f172a] rotate-45 shadow-[-2px_2px_4px_rgba(0,0,0,0.02)] pointer-events-none"></div>
-              
               <span class="w-8 h-8 rounded-[10px] flex items-center justify-center bg-brand-primary/10 dark:bg-brand-primary/20 text-brand-primary mb-2 shadow-[inset_0_0_0_1px_rgba(1,181,116,0.1)]">
                 <lucide-icon [name]="item.icon" [size]="16" [strokeWidth]="2.5"></lucide-icon>
               </span>
@@ -232,30 +217,29 @@ interface NavSubItem {
       <!-- Footer Panel -->
       <div class="pt-4 pb-5 mt-auto flex flex-col transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] w-full border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.01] rounded-br-[24px]"
            [ngClass]="state.collapsed ? 'px-3 items-center gap-4' : 'px-4 gap-4'">
-        
+
         <!-- Profile Banner / Icon -->
-        <div class="flex items-center gap-3 transition-all duration-300 group/profile cursor-pointer"
-             [ngClass]="state.collapsed ? 'p-0 bg-transparent justify-center' : 'p-2.5 bg-white dark:bg-[#1e293b]/50 hover:bg-white/80 dark:hover:bg-[#1e293b]/80 rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.02),0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_1px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] w-full'">
+        <a routerLink="/profile" (click)="handleChildNavClick()"
+           class="flex items-center gap-3 transition-all duration-300 group/profile cursor-pointer"
+           [ngClass]="state.collapsed ? 'p-0 bg-transparent justify-center' : 'p-2.5 bg-white dark:bg-[#1e293b]/50 hover:bg-white/80 dark:hover:bg-[#1e293b]/80 rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.02),0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_1px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] w-full'">
           <div class="relative">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 text-white font-bold tracking-wider text-[13px] shadow-sm transition-all duration-300 group-hover/profile:shadow-[0_0_0_3px_rgba(99,102,241,0.2)]">
-              AP
+              {{ initials() }}
             </div>
-            <!-- Online dot -->
             <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#fcfcfd] dark:border-[#1e293b] transition-all duration-300"></div>
           </div>
           <div class="flex-1 min-w-0 overflow-hidden" *ngIf="!state.collapsed">
-            <p class="text-[14px] font-bold text-[#0f172a] dark:text-white truncate leading-tight">Adela Parkson</p>
-            <p class="text-[12px] text-[#64748b] dark:text-[#94a3b8] font-medium truncate mt-0.5">Designer produit</p>
+            <p class="text-[14px] font-bold text-[#0f172a] dark:text-white truncate leading-tight">{{ displayName() }}</p>
+            <p class="text-[12px] text-[#64748b] dark:text-[#94a3b8] font-medium truncate mt-0.5">{{ roleText() }}</p>
           </div>
-          
-          <!-- Hover Settings Icon -->
           <div class="ml-auto opacity-0 group-hover/profile:opacity-100 transition-opacity duration-300 text-[#94a3b8] dark:text-[#64748b]" *ngIf="!state.collapsed">
             <lucide-icon name="settings" [size]="16" [strokeWidth]="2.5"></lucide-icon>
           </div>
-        </div>
+        </a>
 
         <!-- Logout Button -->
-        <button class="flex items-center rounded-[12px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] cursor-pointer shrink-0 group/logout"
+        <button (click)="logout()"
+                class="flex items-center rounded-[12px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] cursor-pointer shrink-0 group/logout"
                 [ngClass]="{
                   'w-10 h-10 justify-center text-[#94a3b8] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 mt-1': state.collapsed,
                   'w-full p-2.5 gap-3 justify-start px-4 text-[#64748b] dark:text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 mt-1': !state.collapsed
@@ -272,63 +256,109 @@ interface NavSubItem {
 })
 export class SidebarComponent implements OnDestroy {
   layoutService = inject(LayoutService);
+  auth = inject(AuthService);
   router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private floatingSubmenuLabel: string | null = null;
 
-  navItems: NavItem[] = [
-    { label: 'Tableau de bord', icon: 'layout-dashboard', active: false, path: '/' },
-    { label: 'ETL Pipeline', icon: 'server', active: false, path: '/etl-pipeline' },
+  /** Master navigation with per-item role visibility. */
+  private readonly allNavItems: NavItem[] = [
+    { label: 'Tableau de bord', icon: 'layout-dashboard', active: false, path: '/dashboard', roles: ['ROLE_FINANCE'] },
+    { label: 'ETL Pipeline', icon: 'server', active: false, path: '/etl-pipeline', roles: ['ROLE_TECH'] },
     {
-      label: 'Datamart',
-      icon: 'database',
-      active: false,
-      path: '/datamart',
+      label: 'Datamart', icon: 'database', active: false, path: '/datamart', roles: ['ROLE_TECH', 'ROLE_FINANCE'],
       expanded: false,
       children: [
-        { label: 'Clients', icon: 'users', path: '/datamart/client', active: false },
-        { label: 'Contrats', icon: 'file-text', path: '/datamart/contrat', active: false },
-        { label: 'Balance', icon: 'dollar-sign', path: '/datamart/balance', active: false },
+        { label: 'Clients', icon: 'users', path: '/datamart/client', active: false, roles: ['ROLE_TECH', 'ROLE_FINANCE'] },
+        { label: 'Contrats', icon: 'file-text', path: '/datamart/contrat', active: false, roles: ['ROLE_TECH', 'ROLE_FINANCE'] },
+        { label: 'Balance', icon: 'dollar-sign', path: '/datamart/balance', active: false, roles: ['ROLE_TECH', 'ROLE_FINANCE'] },
       ],
     },
     {
-      label: 'Mapping',
-      icon: 'settings',
-      active: false,
-      path: '/mapping',
+      label: 'Mapping', icon: 'settings', active: false, path: '/mapping', roles: ['ROLE_TECH'],
       expanded: false,
       children: [
-        { label: 'Configuration mapping', icon: 'database', path: '/mapping/configurations', active: false },
-        { label: 'Ajouter configuration', icon: 'plus', path: '/mapping/nouvelle-configuration', active: false },
+        { label: 'Configuration mapping', icon: 'database', path: '/mapping/configurations', active: false, roles: ['ROLE_TECH'] },
+        { label: 'Ajouter configuration', icon: 'plus', path: '/mapping/nouvelle-configuration', active: false, roles: ['ROLE_TECH'] },
       ],
     },
     {
-      label: 'Parametres', icon: 'calculator', active: false, path: '/parameters',
+      label: 'Parametres', icon: 'calculator', active: false, path: '/parameters', roles: ['ROLE_TECH', 'ROLE_FINANCE'],
       expanded: false,
       children: [
-        { label: 'Liste des parametres', icon: 'list', path: '/parameters', active: false },
-        { label: 'Nouveau parametre', icon: 'plus', path: '/parameters/nouveau', active: false },
+        { label: 'Liste des parametres', icon: 'list', path: '/parameters', active: false, roles: ['ROLE_TECH', 'ROLE_FINANCE'] },
+        { label: 'Nouveau parametre', icon: 'plus', path: '/parameters/nouveau', active: false, roles: ['ROLE_TECH'] },
       ],
     },
     {
-      label: 'Ratios', icon: 'percent', active: false, path: '/ratios',
+      label: 'Ratios', icon: 'percent', active: false, path: '/ratios', roles: ['ROLE_TECH', 'ROLE_FINANCE'],
       expanded: false,
       children: [
-        { label: 'Liste des ratios', icon: 'list', path: '/ratios', active: false },
-
-        { label: 'Nouveau ratio', icon: 'plus', path: '/ratios/nouveau', active: false },
+        { label: 'Liste des ratios', icon: 'list', path: '/ratios', active: false, roles: ['ROLE_TECH', 'ROLE_FINANCE'] },
+        { label: 'Nouveau ratio', icon: 'plus', path: '/ratios/nouveau', active: false, roles: ['ROLE_TECH'] },
       ],
     },
-    { label: 'Stress test', icon: 'flask-conical', active: false, path: '/stress-test' },
-    { label: 'Chatbot IA', icon: 'MessageSquare', active: false, path: '/chatbot' },
+    { label: 'Chatbot IA', icon: 'MessageSquare', active: false, path: '/chatbot', roles: ['ROLE_FINANCE'] },
+    { label: 'Utilisateurs', icon: 'users', active: false, path: '/admin/users', roles: ['ROLE_ADMIN'] },
+    { label: 'Rôles & permissions', icon: 'shield-check', active: false, path: '/admin/roles', roles: ['ROLE_ADMIN'] },
+    { label: "Demandes d'inscription", icon: 'user-plus', active: false, path: '/admin/signup-requests', roles: ['ROLE_ADMIN'] },
   ];
 
+  navItems: NavItem[] = [];
+
   constructor() {
-    this.updateActiveState(this.router.url);
+    // Rebuild the visible nav whenever the signed-in user's roles change.
+    effect(() => {
+      const roles = this.auth.roles();
+      this.navItems = this.buildNav(roles);
+      this.updateActiveState(this.router.url);
+      this.cdr.markForCheck();
+    });
 
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => this.updateActiveState(event.urlAfterRedirects));
+  }
+
+  // ── user identity ─────────────────────────────────────────────────────────────
+
+  displayName(): string {
+    const u = this.auth.currentUser();
+    return u?.fullName?.trim() || u?.username || 'Utilisateur';
+  }
+
+  roleText(): string {
+    const roles = this.auth.roles();
+    return roles.length ? roleLabel(roles[0]) : 'Membre';
+  }
+
+  initials(): string {
+    const u = this.auth.currentUser();
+    const source = (u?.fullName?.trim() || u?.username || '').trim();
+    if (!source) return 'U';
+    const parts = source.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return source.slice(0, 2).toUpperCase();
+  }
+
+  logout(): void {
+    void this.auth.logout();
+  }
+
+  // ── nav building ────────────────────────────────────────────────────────────────
+
+  private buildNav(myRoles: Role[]): NavItem[] {
+    const visible = (roles?: Role[]) =>
+      !roles || roles.length === 0 ? true : roles.some((r) => myRoles.includes(r));
+
+    return this.allNavItems
+      .filter((item) => visible(item.roles))
+      .map((item) => ({
+        ...item,
+        active: false,
+        expanded: false,
+        children: item.children?.filter((c) => visible(c.roles)).map((c) => ({ ...c, active: false })),
+      }));
   }
 
   handleNavClick(): void {
@@ -340,7 +370,6 @@ export class SidebarComponent implements OnDestroy {
     this.floatingSubmenuLabel = null;
     this.layoutService.closeMobileMenu();
   }
-
 
   onNavItemHover(item: NavItem, isCollapsed: boolean): void {
     if (isCollapsed) {
@@ -396,7 +425,6 @@ export class SidebarComponent implements OnDestroy {
           child.active = normalizedUrl === childPath;
         });
 
-        // If no exact child match, try startsWith for deeper paths
         if (!item.children.some((c) => c.active)) {
           item.children.forEach((child) => {
             const childPath = this.normalizeUrl(child.path);
@@ -425,7 +453,6 @@ export class SidebarComponent implements OnDestroy {
   private normalizeUrl(url: string): string {
     const [pathname] = url.split('?');
     const normalizedPath = pathname.replace(/\/+$/, '');
-
     return normalizedPath === '' ? '/' : normalizedPath;
   }
 

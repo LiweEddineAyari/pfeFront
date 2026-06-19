@@ -15,6 +15,7 @@ import {
 import { ApiHttpError, ParametersApiService } from '../../core/services/parameters-api.service';
 import { RatioFormDialogComponent } from './components/ratio-form-dialog.component';
 import { RatioDetailsDialogComponent } from './components/ratio-details-dialog.component';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-ratios-page',
@@ -87,8 +88,14 @@ export class RatiosPageComponent implements OnInit {
   constructor(
     private ratiosApi: RatiosApiService,
     private parametersApi: ParametersApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private auth: AuthService
   ) {}
+
+  /** TECH manages ratios & lookups; FINANCE views & simulates only. */
+  get canManage(): boolean {
+    return this.auth.isTech();
+  }
 
   ngOnInit(): void {
     void Promise.all([

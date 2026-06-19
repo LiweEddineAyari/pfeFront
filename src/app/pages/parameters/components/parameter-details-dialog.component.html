@@ -109,11 +109,11 @@
     </div>
 
     <footer class="dialog-footer">
-      <button type="button" class="ghost-btn" [disabled]="!parameter" (click)="requestEdit()">
+      <button *ngIf="canManage" type="button" class="ghost-btn" [disabled]="!parameter" (click)="requestEdit()">
         <lucide-icon name="settings" [size]="14" [strokeWidth]="2.8"></lucide-icon>
         Modifier le parametre
       </button>
-      <button type="button" class="ghost-btn" [disabled]="!parameter" (click)="requestDelete()">
+      <button *ngIf="canManage" type="button" class="ghost-btn" [disabled]="!parameter" (click)="requestDelete()">
         <lucide-icon name="trash-2" [size]="14" [strokeWidth]="2.8"></lucide-icon>
         Supprimer
       </button>

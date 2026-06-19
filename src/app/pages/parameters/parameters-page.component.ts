@@ -6,6 +6,7 @@ import { ApiErrorResponse, ParameterConfigResponseDTO } from '../../core/models/
 import { ApiHttpError, ParametersApiService } from '../../core/services/parameters-api.service';
 import { ParameterFormDialogComponent } from './components/parameter-form-dialog.component';
 import { ParameterDetailsDialogComponent } from './components/parameter-details-dialog.component';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface SupportedFieldGroupView {
   table: string;
@@ -68,8 +69,14 @@ export class ParametersPageComponent implements OnInit {
 
   constructor(
     private parametersApi: ParametersApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private auth: AuthService
   ) {}
+
+  /** TECH can create/edit/delete; FINANCE views & executes only. */
+  get canManage(): boolean {
+    return this.auth.isTech();
+  }
 
   ngOnInit(): void {
     void this.loadList();

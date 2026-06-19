@@ -32,6 +32,8 @@ import { RatioApiHttpError, RatiosApiService } from '../../../core/services/rati
 export class RatioDetailsDialogComponent implements OnInit, OnChanges {
   @Input() ratioCode: string | null = null;
   @Input() initialRatio: RatioConfigResponseDTO | null = null;
+  /** When false (FINANCE), edit/delete actions are hidden — view & simulate only. */
+  @Input() canManage = true;
 
   @Output() closed = new EventEmitter<void>();
   @Output() editRequested = new EventEmitter<RatioConfigResponseDTO>();

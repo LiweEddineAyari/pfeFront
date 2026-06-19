@@ -208,7 +208,7 @@ export class DashboardComponent implements OnInit {
       return '-';
     }
 
-    return this.numberFormatter.format(value);
+    return this.numberFormatter.format(value * 100);
   }
 
   segmentPath(segment: GaugeSegment, segmentIndex: number): string {
@@ -383,12 +383,12 @@ export class DashboardComponent implements OnInit {
         const targetValue = Number.isFinite(row.value) ? row.value : 0;
         if (row.currentValue !== targetValue) {
           row.currentValue = row.gauge.alert + (targetValue - row.gauge.alert) * easeOut;
-          row.currentValueLabel = this.formatValue(row.currentValue);
+          row.currentValueLabel = this.formatValue(row.currentValue * 100);
           if (progress < 1) {
             needsAnotherFrame = true;
           } else {
             row.currentValue = targetValue;
-            row.currentValueLabel = this.formatValue(targetValue);
+            row.currentValueLabel = this.formatValue(targetValue * 100);
           }
         }
       });
@@ -585,7 +585,7 @@ export class DashboardComponent implements OnInit {
       gauge,
       currentAngle: aleAngle,
       currentValue: gauge.alert,
-      currentValueLabel: this.formatValue(gauge.alert),
+      currentValueLabel: this.formatValue(gauge.alert * 100),
     };
   }
 

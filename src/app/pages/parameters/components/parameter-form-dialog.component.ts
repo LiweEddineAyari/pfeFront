@@ -25,11 +25,13 @@ import { ParameterFormMapperService } from '../../../core/services/parameter-for
 import { ParameterFormValidationService } from '../../../core/services/parameter-form-validation.service';
 import { FormulaBuilderComponent } from './formula-builder.component';
 import { SqlEditorComponent } from './sql-editor.component';
+import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { FieldPickerComponent } from './field-picker.component';
 
 @Component({
   selector: 'app-parameter-form-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, FormulaBuilderComponent, SqlEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, FormulaBuilderComponent, SqlEditorComponent, FieldPickerComponent],
   templateUrl: './parameter-form-dialog.component.html',
   styleUrl: './parameter-form-dialog.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,13 +65,33 @@ export class ParameterFormDialogComponent implements OnInit, OnChanges {
   validationErrors: string[] = [];
   apiError: ApiErrorResponse | null = null;
 
+  // ── FINANCE assignment (required by the backend on create) ──
+  assignedFinanceUserId = '';
+  financeUsers: { id: string; label: string }[] = [];
+  financeUsersAvailable = false;
+  loadingFinanceUsers = false;
+
+  get financeUserNames(): string[] {
+    return this.financeUsers.map((u) => u.label);
+  }
+
+  get selectedFinanceUserLabel(): string {
+    return this.financeUsers.find((u) => u.id === this.assignedFinanceUserId)?.label ?? '';
+  }
+
+  onFinanceUserChanged(label: string): void {
+    const match = this.financeUsers.find((u) => u.label === label);
+    this.assignedFinanceUserId = match ? match.id : '';
+  }
+
   private initialized = false;
 
   constructor(
     private parametersApi: ParametersApiService,
     private mapper: ParameterFormMapperService,
     private validator: ParameterFormValidationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authApi: AuthApiService
   ) {}
 
   ngOnInit(): void {
@@ -146,6 +168,14 @@ export class ParameterFormDialogComponent implements OnInit, OnChanges {
     });
 
     this.validationErrors = this.validator.validateRequest(payload);
+
+    if (this.mode === 'create' && !this.assignedFinanceUserId.trim()) {
+      this.validationErrors = [
+        ...this.validationErrors,
+        'Veuillez assigner ce parametre a un utilisateur Finance.',
+      ];
+    }
+
     return this.validationErrors.length === 0;
   }
 
@@ -170,6 +200,11 @@ export class ParameterFormDialogComponent implements OnInit, OnChanges {
       formulaDraft: this.formulaDraft,
       nativeSqlDraft: this.nativeSqlDraft,
     });
+
+    const assignedFinanceUserId = this.assignedFinanceUserId.trim();
+    if (assignedFinanceUserId) {
+      payload.assignedFinanceUserId = assignedFinanceUserId;
+    }
 
     try {
       let response: ParameterConfigResponseDTO;
@@ -235,11 +270,13 @@ export class ParameterFormDialogComponent implements OnInit, OnChanges {
       this.code = '';
       this.label = '';
       this.isActive = true;
+      this.assignedFinanceUserId = '';
       this.formulaDraft = this.createDefaultFormula();
       this.formulaBackup = this.mapper.cloneFormula(this.formulaDraft);
       this.nativeSqlDraft = '';
       this.loading = false;
       this.cdr.markForCheck();
+      void this.loadFinanceUsers();
       return;
     }
 
@@ -307,6 +344,26 @@ export class ParameterFormDialogComponent implements OnInit, OnChanges {
 
     if (node.right) {
       this.populateNodeDefaultFields(node.right, fallbackField);
+    }
+  }
+
+  private async loadFinanceUsers(): Promise<void> {
+    this.loadingFinanceUsers = true;
+    this.cdr.markForCheck();
+    try {
+      const users = await this.authApi.listFinanceUsers();
+      this.financeUsers = users.map((u) => ({
+        id: u.keycloakUserId,
+        label: `${u.fullName || u.email} (${u.email})`,
+      }));
+      this.financeUsersAvailable = this.financeUsers.length > 0;
+    } catch {
+      // No TECH-facing endpoint to list FINANCE users → degrade to manual entry.
+      this.financeUsers = [];
+      this.financeUsersAvailable = false;
+    } finally {
+      this.loadingFinanceUsers = false;
+      this.cdr.markForCheck();
     }
   }
 

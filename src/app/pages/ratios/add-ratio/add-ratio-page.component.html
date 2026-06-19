@@ -158,6 +158,18 @@
           placeholder="Description metier du ratio"
         ></textarea>
       </label>
+
+      <label>
+        <span class="field-label">Utilisateur Finance</span>
+        <app-field-picker
+          [value]="selectedFinanceUserLabel"
+          [options]="financeUserNames"
+          [groupedOptions]="{}"
+          [disabled]="saving || loadingFinanceUsers"
+          placeholder="Rechercher et selectionner un utilisateur Finance"
+          (valueChange)="onFinanceUserChanged($event)"
+        ></app-field-picker>
+      </label>
     </section>
 
     <!-- Formula Builder -->

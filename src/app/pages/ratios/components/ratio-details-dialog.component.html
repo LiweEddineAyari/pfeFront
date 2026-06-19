@@ -88,11 +88,11 @@
     </div>
 
     <footer class="dialog-footer">
-      <button type="button" class="ghost-btn" [disabled]="!ratio" (click)="requestEdit()">
+      <button *ngIf="canManage" type="button" class="ghost-btn" [disabled]="!ratio" (click)="requestEdit()">
         <lucide-icon name="settings" [size]="14" [strokeWidth]="2.8"></lucide-icon>
         Modifier le ratio
       </button>
-      <button type="button" class="ghost-btn" [disabled]="!ratio" (click)="requestDelete()">
+      <button *ngIf="canManage" type="button" class="ghost-btn" [disabled]="!ratio" (click)="requestDelete()">
         <lucide-icon name="trash-2" [size]="14" [strokeWidth]="2.8"></lucide-icon>
         Supprimer
       </button>

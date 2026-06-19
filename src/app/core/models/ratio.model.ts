@@ -25,6 +25,8 @@ export interface RatioRequestDTO {
   seuilAppetence?: number | null;
   description?: string;
   isActive?: boolean;
+  /** Keycloak sub of the FINANCE user this ratio is assigned to (required by the backend on create). */
+  assignedFinanceUserId?: string;
 }
 
 export interface RatioConfigResponseDTO {

@@ -117,6 +117,18 @@
         ></textarea>
       </label>
 
+      <label *ngIf="mode === 'create'">
+        Utilisateur Finance
+        <app-field-picker
+          [value]="selectedFinanceUserLabel"
+          [options]="financeUserNames"
+          [groupedOptions]="{}"
+          [disabled]="saving || loadingFinanceUsers"
+          placeholder="Rechercher et selectionner un utilisateur Finance"
+          (valueChange)="onFinanceUserChanged($event)"
+        ></app-field-picker>
+      </label>
+
       <app-ratio-formula-builder
         [model]="formulaDraft"
         [parameterCodes]="parameterCodes"

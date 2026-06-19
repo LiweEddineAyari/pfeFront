@@ -15,11 +15,13 @@ import { ParameterFormMapperService } from '../../../core/services/parameter-for
 import { ParameterFormValidationService } from '../../../core/services/parameter-form-validation.service';
 import { FormulaBuilderComponent } from '../components/formula-builder.component';
 import { SqlEditorComponent } from '../components/sql-editor.component';
+import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { FieldPickerComponent } from '../components/field-picker.component';
 
 @Component({
   selector: 'app-add-parameter-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, FormulaBuilderComponent, SqlEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, FormulaBuilderComponent, SqlEditorComponent, FieldPickerComponent],
   templateUrl: './add-parameter-page.component.html',
   styleUrl: './add-parameter-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,16 +50,56 @@ export class AddParameterPageComponent implements OnInit {
   apiError: ApiErrorResponse | null = null;
   successMessage: string | null = null;
 
+  // ── FINANCE assignment (required by the backend on create) ──
+  assignedFinanceUserId = '';
+  financeUsers: { id: string; label: string }[] = [];
+  financeUsersAvailable = false;
+  loadingFinanceUsers = false;
+
+  get financeUserNames(): string[] {
+    return this.financeUsers.map((u) => u.label);
+  }
+
+  get selectedFinanceUserLabel(): string {
+    return this.financeUsers.find((u) => u.id === this.assignedFinanceUserId)?.label ?? '';
+  }
+
+  onFinanceUserChanged(label: string): void {
+    const match = this.financeUsers.find((u) => u.label === label);
+    this.assignedFinanceUserId = match ? match.id : '';
+  }
+
   constructor(
     private parametersApi: ParametersApiService,
     private mapper: ParameterFormMapperService,
     private validator: ParameterFormValidationService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private authApi: AuthApiService
   ) {}
 
   ngOnInit(): void {
     void this.loadSupportedFields();
+    void this.loadFinanceUsers();
+  }
+
+  private async loadFinanceUsers(): Promise<void> {
+    this.loadingFinanceUsers = true;
+    this.cdr.markForCheck();
+    try {
+      const users = await this.authApi.listFinanceUsers();
+      this.financeUsers = users.map((u) => ({
+        id: u.keycloakUserId,
+        label: `${u.fullName || u.email} (${u.email})`,
+      }));
+      this.financeUsersAvailable = this.financeUsers.length > 0;
+    } catch {
+      this.financeUsers = [];
+      this.financeUsersAvailable = false;
+    } finally {
+      this.loadingFinanceUsers = false;
+      this.cdr.markForCheck();
+    }
   }
 
   toggleMode(): void {
@@ -96,6 +138,14 @@ export class AddParameterPageComponent implements OnInit {
     });
 
     this.validationErrors = this.validator.validateRequest(payload);
+
+    if (!this.assignedFinanceUserId.trim()) {
+      this.validationErrors = [
+        ...this.validationErrors,
+        'Veuillez assigner ce parametre a un utilisateur Finance.',
+      ];
+    }
+
     return this.validationErrors.length === 0;
   }
 
@@ -120,6 +170,11 @@ export class AddParameterPageComponent implements OnInit {
       formulaDraft: this.formulaDraft,
       nativeSqlDraft: this.nativeSqlDraft,
     });
+
+    const assignedFinanceUserId = this.assignedFinanceUserId.trim();
+    if (assignedFinanceUserId) {
+      payload.assignedFinanceUserId = assignedFinanceUserId;
+    }
 
     try {
       await this.parametersApi.create(payload);

@@ -2,6 +2,7 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
 import { ChatSession, ChatMessage, MessageRole, RagSource, ToolCardState, getToolIcon, getToolLabel } from '../models/chat.models';
 import { STATIC_USER_ID } from '../constants/chat.constants';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface RawSession {
   id: string;
@@ -46,6 +47,7 @@ interface RawMessage {
 export class SessionService {
   private readonly base = '/api/ai';
   private zone = inject(NgZone);
+  private auth = inject(AuthService);
 
   private sessionsSubject = new BehaviorSubject<ChatSession[]>([]);
   sessions$ = this.sessionsSubject.asObservable();
@@ -55,7 +57,7 @@ export class SessionService {
   async listSessions(): Promise<ChatSession[]> {
     try {
       const raw = await this.fetchJson<unknown>(
-        `${this.base}/sessions/user/${encodeURIComponent(STATIC_USER_ID)}`,
+        `${this.base}/sessions/user/${encodeURIComponent(this.resolveUserId())}`,
         { method: 'GET' }
       );
       const items = this.extractListItems(raw);
@@ -333,6 +335,8 @@ export class SessionService {
   }
 
   private resolveUserId(): string {
-    return STATIC_USER_ID;
+    // The authenticated Keycloak subject scopes chat sessions; the JWT (attached
+    // by the global fetch wrapper) is the real source of truth on the backend.
+    return this.auth.currentUser()?.sub ?? STATIC_USER_ID;
   }
 }

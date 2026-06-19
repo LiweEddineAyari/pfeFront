@@ -79,6 +79,8 @@ export interface FormulaRequestDTO {
   formula?: FormulaJson;
   nativeSql?: string;
   isActive?: boolean;
+  /** Keycloak sub of the FINANCE user this parameter is assigned to (required by the backend on create). */
+  assignedFinanceUserId?: string;
 }
 
 export interface ParameterConfigResponseDTO {

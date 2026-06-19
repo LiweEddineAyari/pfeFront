@@ -19,6 +19,7 @@ import { RatioApiHttpError, RatiosApiService } from '../../../core/services/rati
 import { ApiHttpError, ParametersApiService } from '../../../core/services/parameters-api.service';
 import { RatioFormulaBuilderComponent } from '../components/ratio-formula-builder.component';
 import { FieldPickerComponent } from '../../parameters/components/field-picker.component';
+import { AuthApiService } from '../../../core/auth/auth-api.service';
 
 @Component({
   selector: 'app-add-ratio-page',
@@ -57,16 +58,56 @@ export class AddRatioPageComponent implements OnInit {
   successMessage: string | null = null;
   simulationResult: RatioSimulationResponseDTO | null = null;
 
+  // ── FINANCE assignment (required by the backend on create) ──
+  assignedFinanceUserId = '';
+  financeUsers: { id: string; label: string }[] = [];
+  financeUsersAvailable = false;
+  loadingFinanceUsers = false;
+
+  get financeUserNames(): string[] {
+    return this.financeUsers.map((u) => u.label);
+  }
+
+  get selectedFinanceUserLabel(): string {
+    return this.financeUsers.find((u) => u.id === this.assignedFinanceUserId)?.label ?? '';
+  }
+
+  onFinanceUserChanged(label: string): void {
+    const match = this.financeUsers.find((u) => u.label === label);
+    this.assignedFinanceUserId = match ? match.id : '';
+  }
+
   constructor(
     private ratiosApi: RatiosApiService,
     private parametersApi: ParametersApiService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private authApi: AuthApiService
   ) {}
 
   ngOnInit(): void {
     this.loading = true;
     void this.loadDependencies();
+    void this.loadFinanceUsers();
+  }
+
+  private async loadFinanceUsers(): Promise<void> {
+    this.loadingFinanceUsers = true;
+    this.cdr.markForCheck();
+    try {
+      const users = await this.authApi.listFinanceUsers();
+      this.financeUsers = users.map((u) => ({
+        id: u.keycloakUserId,
+        label: `${u.fullName || u.email} (${u.email})`,
+      }));
+      this.financeUsersAvailable = this.financeUsers.length > 0;
+    } catch {
+      this.financeUsers = [];
+      this.financeUsersAvailable = false;
+    } finally {
+      this.loadingFinanceUsers = false;
+      this.cdr.markForCheck();
+    }
   }
 
   get familyNames(): string[] {
@@ -113,6 +154,10 @@ export class AddRatioPageComponent implements OnInit {
 
     this.validateTopLevel(this.validationErrors);
     this.validateFormula(this.formulaDraft, 'formula', 1, this.validationErrors);
+
+    if (!this.assignedFinanceUserId.trim()) {
+      this.validationErrors.push('Veuillez assigner ce ratio a un utilisateur Finance.');
+    }
 
     return this.validationErrors.length === 0;
   }
@@ -273,7 +318,7 @@ export class AddRatioPageComponent implements OnInit {
   private buildPayload(): RatioRequestDTO | null {
     if (!this.familleId || !this.categorieId) return null;
 
-    return {
+    const payload: RatioRequestDTO = {
       code: this.code.trim(),
       label: this.label.trim(),
       familleId: Number(this.familleId),
@@ -285,6 +330,13 @@ export class AddRatioPageComponent implements OnInit {
       description: this.description.trim(),
       isActive: this.isActive,
     };
+
+    const assignedFinanceUserId = this.assignedFinanceUserId.trim();
+    if (assignedFinanceUserId) {
+      payload.assignedFinanceUserId = assignedFinanceUserId;
+    }
+
+    return payload;
   }
 
   private toNullableNumber(value: number | null): number | null {
